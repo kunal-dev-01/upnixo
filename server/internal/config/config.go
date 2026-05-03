@@ -43,6 +43,10 @@ type AppConfig struct {
 	IdleTimeout       time.Duration
 	TrustedProxies    []string
 	AllowedOrigins    []string
+	AllowedMethods    []string
+	AllowedHeaders    []string
+	ExposedHeaders    []string
+	AllowCredentials  bool
 	ReadHeaderTimeout time.Duration
 	EnableMetrics     bool
 	EnableHealth      bool
@@ -250,13 +254,13 @@ func Load() (*Config, error) {
 			Secret:               getEnv("JWT_SECRET", ""),
 			AccessTokenDuration:  getEnvAsDuration("ACCESS_TOKEN_DURATION", 15*time.Minute),
 			RefreshTokenDuration: getEnvAsDuration("REFRESH_TOKEN_DURATION", 7*24*time.Hour),
-			Issuer:               getEnv("JWT_ISSUER", "upraizo.com"),
+			Issuer:               getEnv("JWT_ISSUER", "upnixo.com"),
 		},
 		AdminJWT: JWTConfig{
 			Secret:               getEnv("ADMIN_JWT_SECRET", ""),
 			AccessTokenDuration:  getEnvAsDuration("ADMIN_ACCESS_TOKEN_DURATION", 15*time.Minute),
 			RefreshTokenDuration: getEnvAsDuration("ADMIN_REFRESH_TOKEN_DURATION", 7*24*time.Hour),
-			Issuer:               getEnv("ADMIN_JWT_ISSUER", "admin.upraizo.com"),
+			Issuer:               getEnv("ADMIN_JWT_ISSUER", "admin.upnixo.com"),
 		},
 		Security: SecurityConfig{
 			MaxLoginAttempts: getEnvAsInt("MAX_LOGIN_ATTEMPTS", 5),
@@ -293,6 +297,10 @@ func Load() (*Config, error) {
 			IdleTimeout:       getEnvAsDuration("IDLE_TIMEOUT", 1*time.Minute),
 			TrustedProxies:    getEnvAsSlice("TRUSTED_PROXIES", []string{"localhost", "[IP_ADDRESS]"}),
 			AllowedOrigins:    getEnvAsSlice("ALLOWED_ORIGINS", []string{"*"}),
+			AllowedMethods:    getEnvAsSlice("ALLOWED_METHODS", []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+			AllowedHeaders:    getEnvAsSlice("ALLOWED_HEADERS", []string{"Authorization", "Content-Type"}),
+			ExposedHeaders:    getEnvAsSlice("EXPOSED_HEADERS", []string{"Authorization"}),
+			AllowCredentials:  getEnvAsBool("ALLOW_CREDENTIALS", true),
 			ReadHeaderTimeout: getEnvAsDuration("READ_HEADER_TIMEOUT", 10*time.Second),
 			EnableMetrics:     getEnvAsBool("ENABLE_METRICS", true),
 			EnableHealth:      getEnvAsBool("ENABLE_HEALTH", true),
