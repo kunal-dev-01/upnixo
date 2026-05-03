@@ -32,14 +32,14 @@ func GetValidator() *validator.Validate {
 // ─── Regex Patterns (Compiled Once) ──────────────────────────────────────────
 
 var (
-	nameRegex       = regexp.MustCompile(`^[a-zA-Z\s]{2,50}$`)
-	phoneRegex      = regexp.MustCompile(`^\+?[1-9]\d{1,14}$`)
-	slugRegex       = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
-	hasLower        = regexp.MustCompile(`[a-z]`)
-	hasUpper        = regexp.MustCompile(`[A-Z]`)
-	hasNumber       = regexp.MustCompile(`[0-9]`)
-	hasSpecial      = regexp.MustCompile(`[!@#$%^&*]`)
-	hasWhitespace   = regexp.MustCompile(`\s`)
+	nameRegex     = regexp.MustCompile(`^[a-zA-Z\s]{2,50}$`)
+	phoneRegex    = regexp.MustCompile(`^\+?[1-9]\d{1,14}$`)
+	slugRegex     = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
+	hasLower      = regexp.MustCompile(`[a-z]`)
+	hasUpper      = regexp.MustCompile(`[A-Z]`)
+	hasNumber     = regexp.MustCompile(`[0-9]`)
+	hasSpecial    = regexp.MustCompile(`[!@#$%^&*]`)
+	hasWhitespace = regexp.MustCompile(`\s`)
 )
 
 // ─── Custom Validators Registration ──────────────────────────────────────────
@@ -178,7 +178,7 @@ func ValidateStruct(s interface{}) *ValidationResult {
 	for _, err := range validationErrors {
 		field := strings.ToLower(err.Field())
 		msg := formatErrorMessage(err)
-		
+
 		result.Errors = append(result.Errors, ValidationError{
 			Field:   field,
 			Message: msg,
@@ -301,7 +301,6 @@ func getDecimalField(fl validator.FieldLevel, fieldName string) (decimal.Decimal
 }
 
 func formatErrorMessage(err validator.FieldError) string {
-	field := err.Field()
 	tag := err.Tag()
 	param := err.Param()
 
