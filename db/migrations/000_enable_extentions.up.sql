@@ -1,7 +1,6 @@
 -- ===================================================================
--- Description: 000_enable_extentions.up.sql
+-- Migration  : 000_enable_extentions.up.sql
 -- ===================================================================
--- This migration enables the required extensions for the database.
 
 CREATE EXTENSION IF NOT EXISTS "citext";
 
