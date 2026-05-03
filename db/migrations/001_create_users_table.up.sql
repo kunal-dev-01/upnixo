@@ -1,0 +1,4 @@
+-- ===================================================================
+-- Description: 001_create_users_table.up.sql
+-- ===================================================================
+-- This migration creates the users table with the required columns and constraints.

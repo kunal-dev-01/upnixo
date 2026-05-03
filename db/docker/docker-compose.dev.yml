@@ -29,6 +29,19 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  migrate:
+    image: migrate/migrate:v4.15.2
+    container_name: upnixo-migrate-dev
+    restart: "no"
+    env_file:
+      - .env.dev
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["-path", "/migrations", "-database", "postgres://$(POSTGRES_USER:-upnixo_admin):$(POSTGRES_PASSWORD:-upnixo_password)@db:5432/$(POSTGRES_DB:-upnixo_db)?sslmode=disable", "up"]
+    volumes:
+      - ../migrations:/migrations      
+
 volumes:
   upnixo_dev_data:
     name: upnixo_dev_data

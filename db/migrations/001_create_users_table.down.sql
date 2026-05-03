@@ -1,0 +1,4 @@
+-- ===================================================================
+-- Description: 001_create_users_table.down.sql
+-- ===================================================================
+-- This migration is irreversible, as it drops extensions that may be in use.
