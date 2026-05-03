@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"server/internal/db"
-	"server/internal/model"
+	"server/internal/models"
 	"server/internal/utils"
 
 	"github.com/google/uuid"
@@ -19,8 +19,8 @@ import (
 
 type AuthRepository interface {
 	// Email + Password
-	Register(ctx context.Context, params RegisterParams) (*model.User, error)
-	GetUserForLogin(ctx context.Context, email string) (*model.User, error)
+	Register(ctx context.Context, params RegisterParams) (*models.User, error)
+	GetUserForLogin(ctx context.Context, email string) (*models.User, error)
 	VerifyEmail(ctx context.Context, userID uuid.UUID) error
 
 	// Password reset
@@ -28,12 +28,12 @@ type AuthRepository interface {
 	ResetPassword(ctx context.Context, userID uuid.UUID, newHash string) error
 
 	// OAuth
-	FindOrCreateOAuthUser(ctx context.Context, params OAuthLoginParams) (*model.User, bool, error)
+	FindOrCreateOAuthUser(ctx context.Context, params OAuthLoginParams) (*models.User, bool, error)
 	LinkOAuthAccount(ctx context.Context, params LinkOAuthParams) error
 
 	// 2FA
 	Setup2FA(ctx context.Context, params Setup2FAParams) error
-	Verify2FA(ctx context.Context, userID uuid.UUID, method model.TwoFactorMethod) error
+	Verify2FA(ctx context.Context, userID uuid.UUID, method models.TwoFactorMethod) error
 	Disable2FA(ctx context.Context, userID uuid.UUID) error
 	ConsumeBackupCode(ctx context.Context, userID uuid.UUID, remainingCodes []string) error
 
@@ -53,7 +53,7 @@ type RegisterParams struct {
 }
 
 type OAuthLoginParams struct {
-	Provider          model.OAuthProvider
+	Provider          models.OAuthProvider
 	ProviderUserID    string
 	ProviderEmail     string
 	ProviderName      *string
@@ -64,7 +64,7 @@ type OAuthLoginParams struct {
 
 type LinkOAuthParams struct {
 	UserID            uuid.UUID
-	Provider          model.OAuthProvider
+	Provider          models.OAuthProvider
 	ProviderUserID    string
 	ProviderEmail     *string
 	ProviderName      *string
@@ -74,9 +74,9 @@ type LinkOAuthParams struct {
 }
 
 type Setup2FAParams struct {
-	UserID             uuid.UUID
-	EncryptedSecret    string   // AES-256 encrypted before passing in
-	HashedBackupCodes  []string // argon2id hashed before passing in
+	UserID            uuid.UUID
+	EncryptedSecret   string   // AES-256 encrypted before passing in
+	HashedBackupCodes []string // argon2id hashed before passing in
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -108,7 +108,7 @@ const registerSQL = `
 		two_factor_enabled, two_factor_enabled_at,
 		created_at, updated_at, deleted_at`
 
-func (r *authRepo) Register(ctx context.Context, params RegisterParams) (*model.User, error) {
+func (r *authRepo) Register(ctx context.Context, params RegisterParams) (*models.User, error) {
 	args := pgx.NamedArgs{
 		"email":         params.Email,
 		"password_hash": params.PasswordHash,
@@ -122,7 +122,7 @@ func (r *authRepo) Register(ctx context.Context, params RegisterParams) (*model.
 		return nil, utils.Internal(err)
 	}
 
-	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[model.User])
+	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
 	if err != nil {
 		if isPgConflict(err) {
 			return nil, utils.Conflict("email is already registered")
@@ -154,14 +154,14 @@ const getUserForLoginSQL = `
 	WHERE email = @email
 	  AND deleted_at IS NULL`
 
-func (r *authRepo) GetUserForLogin(ctx context.Context, email string) (*model.User, error) {
+func (r *authRepo) GetUserForLogin(ctx context.Context, email string) (*models.User, error) {
 	rows, err := db.Pool.Query(ctx, getUserForLoginSQL, pgx.NamedArgs{"email": email})
 	if err != nil {
 		r.log.Error("login: query failed", err, nil)
 		return nil, utils.Internal(err)
 	}
 
-	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[model.User])
+	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			// Generic message — do not reveal whether email exists
@@ -246,7 +246,7 @@ func (r *authRepo) ResetPassword(ctx context.Context, userID uuid.UUID, newHash 
 // FindOrCreateOAuthUser looks up an existing OAuth account.
 // If not found, creates a new user + oauth_account in a single transaction.
 // Returns (user, isNewUser, error).
-func (r *authRepo) FindOrCreateOAuthUser(ctx context.Context, params OAuthLoginParams) (*model.User, bool, error) {
+func (r *authRepo) FindOrCreateOAuthUser(ctx context.Context, params OAuthLoginParams) (*models.User, bool, error) {
 	// Fast path — existing OAuth account
 	existing, err := r.findOAuthUser(ctx, params.Provider, params.ProviderUserID)
 	if err == nil {
@@ -282,7 +282,7 @@ const findOAuthUserSQL = `
 
 var errOAuthNotFound = errors.New("oauth account not found")
 
-func (r *authRepo) findOAuthUser(ctx context.Context, provider model.OAuthProvider, providerUserID string) (*model.User, error) {
+func (r *authRepo) findOAuthUser(ctx context.Context, provider models.OAuthProvider, providerUserID string) (*models.User, error) {
 	rows, err := db.Pool.Query(ctx, findOAuthUserSQL, pgx.NamedArgs{
 		"provider":         provider,
 		"provider_user_id": providerUserID,
@@ -291,7 +291,7 @@ func (r *authRepo) findOAuthUser(ctx context.Context, provider model.OAuthProvid
 		return nil, utils.Internal(err)
 	}
 
-	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[model.User])
+	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errOAuthNotFound
@@ -302,8 +302,8 @@ func (r *authRepo) findOAuthUser(ctx context.Context, provider model.OAuthProvid
 	return &user, nil
 }
 
-func (r *authRepo) createOAuthUser(ctx context.Context, params OAuthLoginParams) (*model.User, error) {
-	var user model.User
+func (r *authRepo) createOAuthUser(ctx context.Context, params OAuthLoginParams) (*models.User, error) {
+	var user models.User
 
 	err := withTx(ctx, func(tx pgx.Tx) error {
 		// 1. Create user row — email comes from provider, no password
@@ -324,15 +324,15 @@ func (r *authRepo) createOAuthUser(ctx context.Context, params OAuthLoginParams)
 				created_at, updated_at, deleted_at`
 
 		rows, err := tx.Query(ctx, createSQL, pgx.NamedArgs{
-			"email":     params.ProviderEmail,
-			"full_name": params.ProviderName,
+			"email":      params.ProviderEmail,
+			"full_name":  params.ProviderName,
 			"avatar_url": params.ProviderAvatarURL,
 		})
 		if err != nil {
 			return utils.Internal(err)
 		}
 
-		u, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[model.User])
+		u, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
 		if err != nil {
 			return utils.Internal(err)
 		}
@@ -463,7 +463,7 @@ func (r *authRepo) Setup2FA(ctx context.Context, params Setup2FAParams) error {
 }
 
 // Verify2FA records a successful TOTP check and syncs the denormalised flag on users.
-func (r *authRepo) Verify2FA(ctx context.Context, userID uuid.UUID, method model.TwoFactorMethod) error {
+func (r *authRepo) Verify2FA(ctx context.Context, userID uuid.UUID, method models.TwoFactorMethod) error {
 	return withTx(ctx, func(tx pgx.Tx) error {
 		_, err := tx.Exec(ctx, `
 			UPDATE two_factor_auth

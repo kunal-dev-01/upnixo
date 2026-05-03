@@ -22,8 +22,8 @@ func Connect(cfg *config.Config) error {
 		return fmt.Errorf("parse dsn: %w", err)
 	}
 
-	poolConfig.MaxConns        = int32(cfg.Database.MaxConns)
-	poolConfig.MinConns        = int32(cfg.Database.MinConns)
+	poolConfig.MaxConns = int32(cfg.Database.MaxOpenConns)
+	poolConfig.MinConns = int32(cfg.Database.MaxIdleConns)
 	poolConfig.MaxConnLifetime = cfg.Database.ConnMaxLifetime
 	poolConfig.MaxConnIdleTime = cfg.Database.ConnMaxIdleTime
 	poolConfig.HealthCheckPeriod = 1 * time.Minute
@@ -40,8 +40,8 @@ func Connect(cfg *config.Config) error {
 		"host":      cfg.Database.Host,
 		"port":      cfg.Database.Port,
 		"db":        cfg.Database.DBName,
-		"max_conns": cfg.Database.MaxConns,
-		"min_conns": cfg.Database.MinConns,
+		"max_conns": cfg.Database.MaxOpenConns,
+		"min_conns": cfg.Database.MaxIdleConns,
 		"driver":    "pgx/v5",
 	})
 

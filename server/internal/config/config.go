@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -98,13 +97,13 @@ type RedisConfig struct {
 // RabbitMQ Config
 // ============================================================================
 type RabbitMQConfig struct {
-	Host          string
-	Port          int
-	User          string
-	Password      string
-	VHost         string
-	MaxRetries    int
-	RetryDelay    time.Duration
+	Host       string
+	Port       int
+	User       string
+	Password   string
+	VHost      string
+	MaxRetries int
+	RetryDelay time.Duration
 }
 
 // ============================================================================
@@ -242,13 +241,13 @@ func Load() (*Config, error) {
 			RetryDelay:         getEnvAsDuration("REDIS_RETRY_DELAY", 5*time.Second),
 		},
 		RabbitMQ: RabbitMQConfig{
-			Host:          getEnv("RABBITMQ_HOST", "localhost"),
-			Port:          getEnvAsInt("RABBITMQ_PORT", 5672),
-			User:          getEnv("RABBITMQ_USER", "guest"),
-			Password:      getEnv("RABBITMQ_PASSWORD", "guest"),
-			VHost:         getEnv("RABBITMQ_VHOST", ""),
-			MaxRetries:    getEnvAsInt("RABBITMQ_MAX_RETRIES", 5),
-			RetryDelay:    getEnvAsDuration("RABBITMQ_RETRY_DELAY", 5*time.Second),
+			Host:       getEnv("RABBITMQ_HOST", "localhost"),
+			Port:       getEnvAsInt("RABBITMQ_PORT", 5672),
+			User:       getEnv("RABBITMQ_USER", "guest"),
+			Password:   getEnv("RABBITMQ_PASSWORD", "guest"),
+			VHost:      getEnv("RABBITMQ_VHOST", ""),
+			MaxRetries: getEnvAsInt("RABBITMQ_MAX_RETRIES", 5),
+			RetryDelay: getEnvAsDuration("RABBITMQ_RETRY_DELAY", 5*time.Second),
 		},
 		JWT: JWTConfig{
 			Secret:               getEnv("JWT_SECRET", ""),
@@ -268,11 +267,11 @@ func Load() (*Config, error) {
 			RateLimitMax:     getEnvAsInt("RATE_LIMIT_MAX", 100),
 		},
 		Frontend: FrontendConfig{
-			FrontendUrl:     getEnv("FRONTEND_URL", "http://localhost:4321"),
-			VerificationUrl: getEnv("VERIFICATION_URL", "http://localhost:4321/auth/verify"),
-			ResetUrl:        getEnv("RESET_URL", "http://localhost:4321/auth/reset"),
+			FrontendUrl:           getEnv("FRONTEND_URL", "http://localhost:4321"),
+			VerificationUrl:       getEnv("VERIFICATION_URL", "http://localhost:4321/auth/verify"),
+			ResetUrl:              getEnv("RESET_URL", "http://localhost:4321/auth/reset"),
 			AdminResetPasswordUrl: getEnv("ADMIN_RESET_PASSWORD_URL", "http://localhost:4321/admin/reset-password"),
-			SecretResetUrl:  getEnv("SECRET_RESET_URL", "http://localhost:4321/auth/secret-reset"),
+			SecretResetUrl:        getEnv("SECRET_RESET_URL", "http://localhost:4321/auth/secret-reset"),
 		},
 		AWS: AWSConfig{
 			AWSAccessKey: getEnv("AWS_ACCESS_KEY_ID", ""),
