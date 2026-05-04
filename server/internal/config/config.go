@@ -125,6 +125,7 @@ type SecurityConfig struct {
 	MaxLoginAttempts int
 	LockoutDuration  time.Duration
 	RateLimitMax     int
+	MaxSessions      int
 }
 
 // ============================================================================
@@ -283,6 +284,7 @@ func Load() (*Config, error) {
 			MaxLoginAttempts: getEnvAsInt("MAX_LOGIN_ATTEMPTS", 5),
 			LockoutDuration:  getEnvAsDuration("LOCKOUT_DURATION", 30*time.Minute),
 			RateLimitMax:     getEnvAsInt("RATE_LIMIT_MAX", 100),
+			MaxSessions:      getEnvAsInt("MAX_SESSIONS", 5),
 		},
 		Frontend: FrontendConfig{
 			FrontendUrl:           getEnv("FRONTEND_URL", "http://localhost:3000"),

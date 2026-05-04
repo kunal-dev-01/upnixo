@@ -2,28 +2,27 @@ package dto
 
 import "time"
 
-// SessionMetadata stores rich info about the user's connection
+// SessionMetadata is stored in Redis against session:<session_id>
 type SessionMetadata struct {
-	ID           string `json:"id"` // Session ID (JWT JTI)
+	ID           string `json:"id"` // session ID = JWT JTI
 	UserID       string `json:"user_id"`
-	RefreshToken string `json:"refresh_token"` // The actual refresh token string
+	RefreshToken string `json:"refresh_token"` // stored for rotation validation
 
-	// Device & Browser Info
+	// Device info
 	IPAddress  string `json:"ip_address"`
-	Browser    string `json:"browser"`     // e.g., "Chrome", "Firefox"
-	OS         string `json:"os"`          // e.g., "Windows 11", "iOS"
-	DeviceName string `json:"device_name"` // e.g., "iPhone 15", "Desktop"
+	Browser    string `json:"browser"`
+	OS         string `json:"os"`
+	DeviceName string `json:"device_name"`
 
-	// Location Info (IP se resolve ki hui)
-	City    string `json:"city"`    // e.g., "Delhi"
-	Country string `json:"country"` // e.g., "India"
+	// Location
+	City    string `json:"city"`
+	Country string `json:"country"`
 
 	CreatedAt time.Time `json:"created_at"`
 	ExpiresAt time.Time `json:"expires_at"`
 }
 
-// SafeSession is the DTO sent to the frontend for security.
-// Refresh token is omitted, and 'is_current' is added to highlight the current device.
+// SafeSession is sent to the client — refresh token omitted.
 type SafeSession struct {
 	ID         string    `json:"id"`
 	IPAddress  string    `json:"ip_address"`
@@ -35,4 +34,19 @@ type SafeSession struct {
 	CreatedAt  time.Time `json:"created_at"`
 	ExpiresAt  time.Time `json:"expires_at"`
 	IsCurrent  bool      `json:"is_current"`
+}
+
+func (s *SessionMetadata) ToSafe(currentSessionID string) SafeSession {
+	return SafeSession{
+		ID:         s.ID,
+		IPAddress:  s.IPAddress,
+		Browser:    s.Browser,
+		OS:         s.OS,
+		DeviceName: s.DeviceName,
+		City:       s.City,
+		Country:    s.Country,
+		CreatedAt:  s.CreatedAt,
+		ExpiresAt:  s.ExpiresAt,
+		IsCurrent:  s.ID == currentSessionID,
+	}
 }
