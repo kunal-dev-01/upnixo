@@ -15,10 +15,12 @@ import (
 var Pool *pgxpool.Pool
 
 // Connect initializes the PostgreSQL connection pool with retries.
-func Connect(cfg *config.Config) error {
+// Accepts a context so startup can be cancelled (consistent with
+// broker.Connect and redis.Connect).
+func Connect(ctx context.Context, cfg *config.Config) error {
 	poolConfig, err := pgxpool.ParseConfig(cfg.Database.GetDSN())
 	if err != nil {
-		utils.Error("Failed to parse database DSN", err, nil)
+		utils.Error("failed to parse database DSN", err, nil)
 		return fmt.Errorf("parse dsn: %w", err)
 	}
 
@@ -28,15 +30,15 @@ func Connect(cfg *config.Config) error {
 	poolConfig.MaxConnIdleTime = cfg.Database.ConnMaxIdleTime
 	poolConfig.HealthCheckPeriod = 1 * time.Minute
 
-	pool, err := connectWithRetry(cfg, poolConfig)
+	pool, err := connectWithRetry(ctx, cfg, poolConfig)
 	if err != nil {
-		utils.Error("Failed to connect to database after maximum retries", err, nil)
+		utils.Error("failed to connect to database after maximum retries", err, nil)
 		return fmt.Errorf("database connection failed: %w", err)
 	}
 
 	Pool = pool
 
-	utils.Info("PostgreSQL connected successfully", map[string]any{
+	utils.Info("postgresql connected", map[string]any{
 		"host":      cfg.Database.Host,
 		"port":      cfg.Database.Port,
 		"db":        cfg.Database.DBName,
@@ -54,47 +56,51 @@ func Close() {
 		return
 	}
 	Pool.Close()
-	utils.Info("Database connection pool closed", nil)
+	utils.Info("database connection pool closed", nil)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INTERNAL
 // ─────────────────────────────────────────────────────────────────────────────
 
-func connectWithRetry(cfg *config.Config, poolConfig *pgxpool.Config) (*pgxpool.Pool, error) {
+func connectWithRetry(ctx context.Context, cfg *config.Config, poolConfig *pgxpool.Config) (*pgxpool.Pool, error) {
 	var (
 		pool *pgxpool.Pool
 		err  error
 	)
 
 	for attempt := 1; attempt <= cfg.Database.RetryAttempts; attempt++ {
-		pool, err = tryConnect(cfg, poolConfig)
+		pool, err = tryConnect(ctx, cfg, poolConfig)
 		if err == nil {
 			return pool, nil
 		}
 
-		utils.Warn(fmt.Sprintf("Database connection attempt %d/%d failed", attempt, cfg.Database.RetryAttempts), map[string]any{
+		utils.Warn(fmt.Sprintf("database connection attempt %d/%d failed", attempt, cfg.Database.RetryAttempts), map[string]any{
 			"error": err.Error(),
 		})
 
 		if attempt < cfg.Database.RetryAttempts {
-			time.Sleep(cfg.Database.RetryDelay)
+			select {
+			case <-ctx.Done():
+				return nil, fmt.Errorf("database: connect cancelled: %w", ctx.Err())
+			case <-time.After(cfg.Database.RetryDelay):
+			}
 		}
 	}
 
 	return nil, err
 }
 
-func tryConnect(cfg *config.Config, poolConfig *pgxpool.Config) (*pgxpool.Pool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.Database.ConnectTimeout)
+func tryConnect(ctx context.Context, cfg *config.Config, poolConfig *pgxpool.Config) (*pgxpool.Pool, error) {
+	connectCtx, cancel := context.WithTimeout(ctx, cfg.Database.ConnectTimeout)
 	defer cancel()
 
-	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
+	pool, err := pgxpool.NewWithConfig(connectCtx, poolConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = pool.Ping(ctx); err != nil {
+	if err = pool.Ping(connectCtx); err != nil {
 		pool.Close()
 		return nil, err
 	}
