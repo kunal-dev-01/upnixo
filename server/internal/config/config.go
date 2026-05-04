@@ -104,6 +104,7 @@ type RabbitMQConfig struct {
 	VHost      string
 	MaxRetries int
 	RetryDelay time.Duration
+	EmailQueue string
 }
 
 // ============================================================================
@@ -248,6 +249,7 @@ func Load() (*Config, error) {
 			VHost:      getEnv("RABBITMQ_VHOST", ""),
 			MaxRetries: getEnvAsInt("RABBITMQ_MAX_RETRIES", 5),
 			RetryDelay: getEnvAsDuration("RABBITMQ_RETRY_DELAY", 5*time.Second),
+			EmailQueue: getEnv("RABBITMQ_EMAIL_QUEUE", "email_queue"),
 		},
 		JWT: JWTConfig{
 			Secret:               getEnv("JWT_SECRET", ""),
