@@ -28,7 +28,7 @@ type Config struct {
 	App      AppConfig
 	R2       R2Config
 	Logger   LoggerConfig
-	Razorpay RazorpayConfig
+	Paddle   PaddleConfig
 }
 
 // ============================================================================
@@ -169,11 +169,13 @@ type GitHubConfig struct {
 }
 
 // ============================================================================
-// Razorpay Config
+// Paddle Config
 // ============================================================================
-type RazorpayConfig struct {
-	KeyID         string
-	KeySecret     string
+type PaddleConfig struct {
+	Environment   string
+	SellerID      string
+	APIKey        string
+	ClientToken   string
 	WebhookSecret string
 }
 
@@ -307,10 +309,12 @@ func Load() (*Config, error) {
 			ClientSecret: getEnv("GITHUB_CLIENT_SECRET", ""),
 			RedirectURL:  getEnv("GITHUB_REDIRECT_URL", "http://localhost:8080/auth/github/callback"),
 		},
-		Razorpay: RazorpayConfig{
-			KeyID:         getEnv("RAZORPAY_KEY_ID", ""),
-			KeySecret:     getEnv("RAZORPAY_KEY_SECRET", ""),
-			WebhookSecret: getEnv("RAZORPAY_WEBHOOK_SECRET", ""),
+		Paddle: PaddleConfig{
+			Environment:   getEnv("PADDLE_ENVIRONMENT", "sandbox"),
+			SellerID:      getEnv("PADDLE_SELLER_ID", ""),
+			APIKey:        getEnv("PADDLE_API_KEY", ""),
+			ClientToken:   getEnv("PADDLE_CLIENT_TOKEN", ""),
+			WebhookSecret: getEnv("PADDLE_WEBHOOK_SECRET", ""),
 		},
 		App: AppConfig{
 			Env:               getEnv("ENV", "development"),
@@ -391,16 +395,16 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("GOOGLE_CLIENT_ID is required")
 	}
 
-	if cfg.Razorpay.KeyID == "" {
-		return nil, fmt.Errorf("RAZORPAY_KEY_ID is required")
+	if cfg.Paddle.APIKey == "" {
+		return nil, fmt.Errorf("PADDLE_API_KEY is required")
 	}
 
-	if cfg.Razorpay.KeySecret == "" {
-		return nil, fmt.Errorf("RAZORPAY_KEY_SECRET is required")
+	if cfg.Paddle.WebhookSecret == "" {
+		return nil, fmt.Errorf("PADDLE_WEBHOOK_SECRET is required")
 	}
 
-	if cfg.App.IsProduction() && cfg.Razorpay.WebhookSecret == "" {
-		return nil, fmt.Errorf("RAZORPAY_WEBHOOK_SECRET is required in production")
+	if cfg.App.IsProduction() && cfg.Paddle.WebhookSecret == "" {
+		return nil, fmt.Errorf("PADDLE_WEBHOOK_SECRET is required in production")
 	}
 
 	// Validate log level
