@@ -24,6 +24,7 @@ type Config struct {
 	Frontend FrontendConfig
 	AWS      AWSConfig
 	Google   GoogleConfig
+	Github   GitHubConfig
 	App      AppConfig
 	R2       R2Config
 	Logger   LoggerConfig
@@ -131,6 +132,8 @@ type SecurityConfig struct {
 // ============================================================================
 type FrontendConfig struct {
 	FrontendUrl           string
+	OAuthSuccessURL       string
+	OAuthErrorURL         string
 	VerificationUrl       string
 	ResetUrl              string
 	AdminResetPasswordUrl string
@@ -151,7 +154,18 @@ type AWSConfig struct {
 // Google OAuth Config
 // ============================================================================
 type GoogleConfig struct {
-	ClientID string
+	ClientID     string
+	ClientSecret string
+	RedirectURL  string
+}
+
+// ============================================================================
+// GitHub OAuth Config
+// ============================================================================
+type GitHubConfig struct {
+	ClientID     string
+	ClientSecret string
+	RedirectURL  string
 }
 
 // ============================================================================
@@ -269,11 +283,13 @@ func Load() (*Config, error) {
 			RateLimitMax:     getEnvAsInt("RATE_LIMIT_MAX", 100),
 		},
 		Frontend: FrontendConfig{
-			FrontendUrl:           getEnv("FRONTEND_URL", "http://localhost:4321"),
-			VerificationUrl:       getEnv("VERIFICATION_URL", "http://localhost:4321/auth/verify"),
-			ResetUrl:              getEnv("RESET_URL", "http://localhost:4321/auth/reset"),
-			AdminResetPasswordUrl: getEnv("ADMIN_RESET_PASSWORD_URL", "http://localhost:4321/admin/reset-password"),
-			SecretResetUrl:        getEnv("SECRET_RESET_URL", "http://localhost:4321/auth/secret-reset"),
+			FrontendUrl:           getEnv("FRONTEND_URL", "http://localhost:3000"),
+			OAuthSuccessURL:       getEnv("OAUTH_SUCCESS_URL", "http://localhost:3000/auth/success"),
+			OAuthErrorURL:         getEnv("OAUTH_ERROR_URL", "http://localhost:3000/auth/error"),
+			VerificationUrl:       getEnv("VERIFICATION_URL", "http://localhost:3000/auth/verify"),
+			ResetUrl:              getEnv("RESET_URL", "http://localhost:3000/auth/reset"),
+			AdminResetPasswordUrl: getEnv("ADMIN_RESET_PASSWORD_URL", "http://localhost:3000/admin/reset-password"),
+			SecretResetUrl:        getEnv("SECRET_RESET_URL", "http://localhost:3000/auth/secret-reset"),
 		},
 		AWS: AWSConfig{
 			AWSAccessKey: getEnv("AWS_ACCESS_KEY_ID", ""),
@@ -282,7 +298,14 @@ func Load() (*Config, error) {
 			AWSFromEmail: getEnv("AWS_FROM_EMAIL", ""),
 		},
 		Google: GoogleConfig{
-			ClientID: getEnv("GOOGLE_CLIENT_ID", ""),
+			ClientID:     getEnv("GOOGLE_CLIENT_ID", ""),
+			ClientSecret: getEnv("GOOGLE_CLIENT_SECRET", ""),
+			RedirectURL:  getEnv("GOOGLE_REDIRECT_URL", "http://localhost:8080/auth/google/callback"),
+		},
+		Github: GitHubConfig{
+			ClientID:     getEnv("GITHUB_CLIENT_ID", ""),
+			ClientSecret: getEnv("GITHUB_CLIENT_SECRET", ""),
+			RedirectURL:  getEnv("GITHUB_REDIRECT_URL", "http://localhost:8080/auth/github/callback"),
 		},
 		Razorpay: RazorpayConfig{
 			KeyID:         getEnv("RAZORPAY_KEY_ID", ""),
