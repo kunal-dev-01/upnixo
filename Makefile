@@ -1,36 +1,83 @@
-COMPOSE = docker compose -f db/docker/docker-compose.dev.yml
+# ==============================================================================
+# Docker Compose Files
+# ==============================================================================
 
-# Start only DB
+DB_COMPOSE     = docker compose -f db/docker/docker-compose.dev.yml
+SERVER_COMPOSE = docker compose -f server/docker-compose.dev.yml
+
+# ==============================================================================
+# PHONY Targets
+# ==============================================================================
+.PHONY: db db-down migrate reset \
+        redis redis-down rabbitmq rabbitmq-down \
+        server-up server-down \
+        dev full-up full-down logs
+
+# ==============================================================================
+# 🗄️ DATABASE (DB COMPOSE)
+# ==============================================================================
 
 db:
-$(COMPOSE) up -d db
+	$(DB_COMPOSE) up -d db
 
-# Run migrations
+db-down:
+	$(DB_COMPOSE) down
 
 migrate:
-$(COMPOSE) --profile migrate up migrate
-
-# Stop all containers
-
-down:
-$(COMPOSE) down
-
-# View logs
-
-logs:
-$(COMPOSE) logs -f
-
-# Full dev setup (DB + migrate)
-
-dev:
-$(COMPOSE) up -d db
-sleep 3
-$(COMPOSE) --profile migrate up migrate
-
-# Reset DB (⚠️ deletes all data)
+	$(DB_COMPOSE) --profile migrate up migrate
 
 reset:
-$(COMPOSE) down -v
-$(COMPOSE) up -d db
-sleep 3
-$(COMPOSE) --profile migrate up migrate
+	$(DB_COMPOSE) down -v
+	$(DB_COMPOSE) up -d db
+	sleep 3
+	$(DB_COMPOSE) --profile migrate up migrate
+
+# ==============================================================================
+# ⚡ REDIS + 🐰 RABBITMQ (SERVER COMPOSE)
+# ==============================================================================
+
+redis:
+	$(SERVER_COMPOSE) up -d redis
+
+redis-down:
+	$(SERVER_COMPOSE) stop redis
+
+rabbitmq:
+	$(SERVER_COMPOSE) up -d rabbitmq
+
+rabbitmq-down:
+	$(SERVER_COMPOSE) stop rabbitmq
+
+# Start both (Redis + RabbitMQ)
+server-up:
+	$(SERVER_COMPOSE) up -d redis rabbitmq
+
+# Stop both
+server-down:
+	$(SERVER_COMPOSE) down
+
+# ==============================================================================
+# 🚀 FULL DEV SETUP
+# ==============================================================================
+
+dev:
+	$(DB_COMPOSE) up -d db
+	$(SERVER_COMPOSE) up -d redis rabbitmq
+	sleep 3
+	$(DB_COMPOSE) --profile migrate up migrate
+
+full-up:
+	$(DB_COMPOSE) up -d db
+	$(SERVER_COMPOSE) up -d redis rabbitmq
+
+full-down:
+	$(DB_COMPOSE) down
+	$(SERVER_COMPOSE) down
+
+# ==============================================================================
+# 📜 LOGS
+# ==============================================================================
+
+logs:
+	$(DB_COMPOSE) logs -f
+	$(SERVER_COMPOSE) logs -f
