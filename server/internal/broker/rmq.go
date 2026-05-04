@@ -12,30 +12,31 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+// ─────────────────────────────────────────────────────────────────────────────
+// BROKER
+// ─────────────────────────────────────────────────────────────────────────────
+
 // RabbitBroker manages a single RabbitMQ connection with auto-reconnect.
-// It is safe for concurrent use.
+// Safe for concurrent use.
 type RabbitBroker struct {
-	mu       sync.RWMutex
-	conn     *amqp.Connection
-	cfg      *config.Config
-	closed   bool          // true when Close() is called intentionally
-	ctx      context.Context
-	cancel   context.CancelFunc
+	mu     sync.RWMutex
+	conn   *amqp.Connection
+	cfg    *config.Config
+	closed bool
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 // New creates a broker instance. Call Connect() before use.
 func New(cfg *config.Config) *RabbitBroker {
 	ctx, cancel := context.WithCancel(context.Background())
-	return &RabbitBroker{
-		cfg:    cfg,
-		ctx:    ctx,
-		cancel: cancel,
-	}
+	return &RabbitBroker{cfg: cfg, ctx: ctx, cancel: cancel}
 }
 
-// Connect establishes connection with retry and starts the watcher.
-func (b *RabbitBroker) Connect() error {
-	if err := b.connectWithRetry(); err != nil {
+// Connect establishes connection with retry and starts the reconnect watcher.
+// Accepts a context so startup can be cancelled (consistent with Redis.Connect).
+func (b *RabbitBroker) Connect(ctx context.Context) error {
+	if err := b.connectWithRetry(ctx); err != nil {
 		return err
 	}
 	go b.watchConnection()
@@ -49,9 +50,8 @@ func (b *RabbitBroker) IsConnected() bool {
 	return b.conn != nil && !b.conn.IsClosed()
 }
 
-// Channel creates a new channel from the current connection.
-// Callers must close the channel when done.
-// Returns error if not connected.
+// Channel opens a new channel from the current connection.
+// Caller must close the channel when done.
 func (b *RabbitBroker) Channel() (*amqp.Channel, error) {
 	b.mu.RLock()
 	conn := b.conn
@@ -71,7 +71,7 @@ func (b *RabbitBroker) Close() error {
 	b.conn = nil
 	b.mu.Unlock()
 
-	b.cancel() // stop watcher goroutine
+	b.cancel()
 
 	if conn != nil && !conn.IsClosed() {
 		return conn.Close()
@@ -79,9 +79,11 @@ func (b *RabbitBroker) Close() error {
 	return nil
 }
 
-// ─── Internal ───────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// INTERNAL
+// ─────────────────────────────────────────────────────────────────────────────
 
-func (b *RabbitBroker) connectWithRetry() error {
+func (b *RabbitBroker) connectWithRetry(ctx context.Context) error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -90,31 +92,35 @@ func (b *RabbitBroker) connectWithRetry() error {
 	}
 
 	url := b.cfg.RabbitMQ.GetURL()
-	var err error
+	var lastErr error
 
 	for i := 1; i <= b.cfg.RabbitMQ.MaxRetries; i++ {
-		b.conn, err = amqp.Dial(url)
-		if err == nil {
+		b.conn, lastErr = amqp.Dial(url)
+		if lastErr == nil {
 			break
 		}
 
-		utils.Warn("RabbitMQ connection failed", map[string]any{
+		utils.Warn("rabbitmq connection attempt failed", map[string]any{
 			"attempt": i,
 			"max":     b.cfg.RabbitMQ.MaxRetries,
-			"error":   err.Error(),
+			"error":   lastErr.Error(),
 		})
 
 		if i < b.cfg.RabbitMQ.MaxRetries {
-			time.Sleep(b.cfg.RabbitMQ.RetryDelay)
+			select {
+			case <-ctx.Done():
+				return fmt.Errorf("rabbitmq: connect cancelled: %w", ctx.Err())
+			case <-time.After(b.cfg.RabbitMQ.RetryDelay):
+			}
 		}
 	}
 
-	if err != nil {
+	if lastErr != nil {
 		return fmt.Errorf("rabbitmq: connection failed after %d attempts: %w",
-			b.cfg.RabbitMQ.MaxRetries, err)
+			b.cfg.RabbitMQ.MaxRetries, lastErr)
 	}
 
-	utils.Info("RabbitMQ connected", map[string]any{
+	utils.Info("rabbitmq connected", map[string]any{
 		"host":  b.cfg.RabbitMQ.Host,
 		"vhost": b.cfg.RabbitMQ.VHost,
 	})
@@ -133,21 +139,21 @@ func (b *RabbitBroker) watchConnection() {
 			return
 		}
 
-		// Block until connection closes or context is cancelled
 		closeCh := conn.NotifyClose(make(chan *amqp.Error, 1))
+
 		select {
 		case <-b.ctx.Done():
 			return
-		case err, ok := <-closeCh:
+		case amqpErr, ok := <-closeCh:
 			if !ok {
 				return
 			}
-			if err != nil {
-				utils.Error("RabbitMQ connection dropped", err, nil)
+			if amqpErr != nil {
+				utils.Error("rabbitmq connection dropped", amqpErr, nil)
 			}
 		}
 
-		// Reconnect loop
+		// Reconnect loop — uses background context since startup ctx may be done
 		for {
 			b.mu.RLock()
 			isClosed := b.closed
@@ -157,12 +163,13 @@ func (b *RabbitBroker) watchConnection() {
 				return
 			}
 
-			if err := b.connectWithRetry(); err == nil {
-				utils.Info("RabbitMQ reconnected", nil)
+			if err := b.connectWithRetry(context.Background()); err == nil {
+				utils.Info("rabbitmq reconnected", nil)
 				break
 			}
 
-			utils.Warn("RabbitMQ reconnection failed, retrying...", nil)
+			utils.Warn("rabbitmq reconnect failed, retrying in 5s", nil)
+
 			select {
 			case <-time.After(5 * time.Second):
 			case <-b.ctx.Done():
