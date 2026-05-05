@@ -11,7 +11,8 @@ SERVER_COMPOSE = docker compose -f server/docker-compose.dev.yml
 .PHONY: db db-down migrate reset \
         redis redis-down rabbitmq rabbitmq-down \
         server-up server-down \
-        dev full-up full-down logs
+        dev full-up full-down logs \
+		app-up
 
 # ==============================================================================
 # 🗄️ DATABASE (DB COMPOSE)
@@ -73,6 +74,13 @@ full-up:
 full-down:
 	$(DB_COMPOSE) down
 	$(SERVER_COMPOSE) down
+
+# ==============================================================================
+# App
+# ==============================================================================
+app-up:
+	go run server/cmd/main.go
+
 
 # ==============================================================================
 # 📜 LOGS
