@@ -7,22 +7,30 @@ services:
     image: postgres:16
     container_name: upnixo-db-dev
     restart: unless-stopped
-    env_file: .env.dev
+
+    env_file:
+      - .env.dev
+
     environment:
-      - POSTGRES_DB: ${POSTGRES_DB:-upnixo_db}
-      - POSTGRES_USER: ${POSTGRES_USER:-upnixo_admin}
-      - POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-upnixo_password}
+      POSTGRES_DB: ${POSTGRES_DB:-upnixo_db}
+      POSTGRES_USER: ${POSTGRES_USER:-upnixo_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-upnixo_password}
+
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+
     volumes:
       - upnixo_dev_data:/var/lib/postgresql/data
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-upnixo_admin} -d ${POSTGRES_DB:-upnixo_db}"]
       interval: 1m30s
       timeout: 30s
       retries: 5
       start_period: 30s
+
     shm_size: 256mb
+
     logging:
       driver: "json-file"
       options:
@@ -33,14 +41,23 @@ services:
     image: migrate/migrate:v4.15.2
     container_name: upnixo-migrate-dev
     restart: "no"
+
     env_file:
       - .env.dev
+
     depends_on:
       db:
         condition: service_healthy
-    command: ["-path", "/migrations", "-database", "postgres://$(POSTGRES_USER:-upnixo_admin):$(POSTGRES_PASSWORD:-upnixo_password)@db:5432/$(POSTGRES_DB:-upnixo_db)?sslmode=disable", "up"]
+
+    command:
+      [
+        "-path", "/migrations",
+        "-database", "postgres://${POSTGRES_USER:-upnixo_admin}:${POSTGRES_PASSWORD:-upnixo_password}@db:5432/${POSTGRES_DB:-upnixo_db}?sslmode=disable",
+        "up"
+      ]
+
     volumes:
-      - ../migrations:/migrations      
+      - ../migrations:/migrations
 
 volumes:
   upnixo_dev_data:

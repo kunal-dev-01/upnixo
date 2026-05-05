@@ -3,7 +3,7 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: upnixo_rabbitmq_dev
     env_file:
-      - .env.dev
+      - .env
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
@@ -26,7 +26,7 @@ services:
     container_name: upnixo_redis_dev
     restart: unless-stopped
     env_file:
-      - .env.dev
+      - .env
     command:
       [
       "redis-server",
