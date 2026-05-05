@@ -31,11 +31,13 @@ type Dependencies struct {
 	TokenRepo   *repo.TokenRepository
 
 	// Services
-	EmailSvc   *email.EmailService
-	AccountSvc *service.AccountService
+	EmailSvc    *email.EmailService
+	AccountSvc  *service.AccountService
+	PasswordSvc *service.PasswordService
 
 	// Handlers
-	AccountHandler *handler.AccountHandler
+	AccountHandler  *handler.AccountHandler
+	PasswordHandler *handler.PasswordHandler
 
 	// Middleware
 	LoggerMW *middleware.Logger
@@ -55,27 +57,29 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	// ── Services ──────────────────────────────────────────────────────────────
 	emailSvc := email.NewEmailService(cfg, brk)
 	accountSvc := service.NewAccountService(cfg, authRepo, tokenRepo, sessionRepo, emailSvc)
-
+	passwordSvc := service.NewPasswordService(cfg, authRepo, tokenRepo, emailSvc)
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	accountHandler := handler.NewAccountHandler(accountSvc, cfg)
-
+	passwordHandler := handler.NewPasswordHandler(passwordSvc)
 	// ── Middleware ─────────────────────────────────────────────────────────────
 	loggerMW := middleware.NewLogger(log, cfg)
 	limiters := middleware.NewLimiters(redisClient)
 
 	return &Dependencies{
-		Config:         cfg,
-		Logger:         log,
-		Redis:          redisClient,
-		Broker:         brk,
-		JWT:            jwt,
-		AuthRepo:       authRepo,
-		SessionRepo:    sessionRepo,
-		TokenRepo:      tokenRepo,
-		EmailSvc:       emailSvc,
-		AccountSvc:     accountSvc,
-		AccountHandler: accountHandler,
-		LoggerMW:       loggerMW,
-		Limiters:       limiters,
+		Config:          cfg,
+		Logger:          log,
+		Redis:           redisClient,
+		Broker:          brk,
+		JWT:             jwt,
+		AuthRepo:        authRepo,
+		SessionRepo:     sessionRepo,
+		TokenRepo:       tokenRepo,
+		EmailSvc:        emailSvc,
+		AccountSvc:      accountSvc,
+		PasswordSvc:     passwordSvc,
+		AccountHandler:  accountHandler,
+		PasswordHandler: passwordHandler,
+		LoggerMW:        loggerMW,
+		Limiters:        limiters,
 	}
 }
