@@ -1,4 +1,4 @@
-package service
+package email
 
 import (
 	"context"
@@ -20,8 +20,10 @@ import (
 const (
 	EmailQueue = "email_queue"
 
-	TemplateVerifyEmail   = "VerifyEmail"
-	TemplateResetPassword = "ResetPassword"
+	TemplateVerifyEmail        = "VerifyEmail"
+	TemplateResetPassword      = "ResetPassword"
+	TemplateAdminResetPassword = "ResetAdminPassword"
+	TemplateSecretReset        = "ResetAdminSecret"
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -95,10 +97,11 @@ func (s *EmailService) SendPasswordResetEmail(name, email, token string) error {
 	})
 }
 
+// Admin and secret password resets use the same template but different URLs
 func (s *EmailService) SendAdminPasswordResetEmail(name, email, token string) error {
 	return s.publish(EmailMessage{
 		To:           email,
-		TemplateName: TemplateResetPassword,
+		TemplateName: TemplateAdminResetPassword,
 		TemplateData: map[string]string{
 			"user_name": name,
 			"reset_url": fmt.Sprintf("%s?token=%s", s.cfg.Frontend.AdminResetPasswordUrl, token),
@@ -109,7 +112,7 @@ func (s *EmailService) SendAdminPasswordResetEmail(name, email, token string) er
 func (s *EmailService) SendSecretResetEmail(name, email, token string) error {
 	return s.publish(EmailMessage{
 		To:           email,
-		TemplateName: TemplateResetPassword,
+		TemplateName: TemplateSecretReset,
 		TemplateData: map[string]string{
 			"user_name": name,
 			"reset_url": fmt.Sprintf("%s?token=%s", s.cfg.Frontend.SecretResetUrl, token),

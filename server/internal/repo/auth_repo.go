@@ -18,6 +18,7 @@ import (
 // ─────────────────────────────────────────────────────────────────────────────
 
 type AuthRepository interface {
+	GetByID(ctx context.Context, id uuid.UUID) (*models.User, error)
 	// Email + Password
 	Register(ctx context.Context, params RegisterParams) (*models.User, error)
 	GetUserForLogin(ctx context.Context, email string) (*models.User, error)
@@ -128,6 +129,47 @@ func (r *authRepo) Register(ctx context.Context, params RegisterParams) (*models
 			return nil, utils.Conflict("email is already registered")
 		}
 		r.log.Error("register: scan failed", err, nil)
+		return nil, utils.Internal(err)
+	}
+
+	return &user, nil
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SHARED SELECT COLUMNS
+// ─────────────────────────────────────────────────────────────────────────────
+
+const userColumns = `
+	id, email, email_verified, email_verified_at,
+	phone, phone_verified, phone_verified_at,
+	password_hash, password_changed_at, password_reset_requested_at,
+	full_name, avatar_url, timezone, locale,
+	is_active, is_blocked, blocked_at, blocked_reason,
+	last_login_at, last_login_ip,
+	two_factor_enabled, two_factor_enabled_at,
+	created_at, updated_at, deleted_at`
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET BY ID
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (r *authRepo) GetByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
+	sql := `SELECT ` + userColumns + `
+		FROM users
+		WHERE id = @id AND deleted_at IS NULL`
+
+	rows, err := db.Pool.Query(ctx, sql, pgx.NamedArgs{"id": id})
+	if err != nil {
+		r.log.Error("get by id: query failed", err, map[string]any{"user_id": id})
+		return nil, utils.Internal(err)
+	}
+
+	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, utils.NotFound("user not found")
+		}
+		r.log.Error("get by id: scan failed", err, map[string]any{"user_id": id})
 		return nil, utils.Internal(err)
 	}
 
