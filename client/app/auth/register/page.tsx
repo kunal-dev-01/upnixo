@@ -1,6 +1,6 @@
 function Register() {
   return (
-    <h1 className="font-bold text-[40vh]">
+    <h1 className="">
       Register
     </h1>
   )

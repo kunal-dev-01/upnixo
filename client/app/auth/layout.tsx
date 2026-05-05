@@ -6,6 +6,7 @@ interface AuthLayoutProps {
 function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="w-full min-h-screen">
+      
       {children}
     </div>
   )
