@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-// @ts-ignore: side-effect CSS import handled by Next.js
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Upnixo | High-Performance Engineering",
-  description: "Scalable Infrastructure, Custom Webhooks, and Real-time Architectures.",
+  description:
+    "Scalable Infrastructure, Custom Webhooks, and Real-time Architectures.",
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: 'any' }, 
-      { url: '/favicon.svg', type: 'image/svg+xml' }, 
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "32x32" }, 
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
   },
 };
@@ -19,10 +22,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className="h-full antialiased"
-    >
+    <html lang="en" className="h-full antialiased">
+      <head>
+        <link
+          rel="preload"
+          href="/fonts/Inter-Regular.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/Satoshi-Bold.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {children}
       </body>

@@ -1,26 +1,187 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ===============================
+   Fonts (Inter + Satoshi)
+   =============================== */
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* Satoshi */
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-display: swap;
+}
+
+@theme {
+  /* Tailwind 4 mein custom fonts yahan register hote hain */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Satoshi", sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  line-height: 1.5;
+  color-scheme: light dark;
+
+  --font-sans: "Inter", sans-serif;
+  --font-heading: "Satoshi", sans-serif;
+
+  /* Default (Dark) */
+  --bg-primary: #000000;
+  --text-primary: #ffffff;
+
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.light {
+  --bg-primary: #ffffff;
+  --text-primary: #09090B;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --bg-primary: #000000;
+  --text-primary: #ffffff;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* ===============================
+   Sonner Toast Theme (Auto Mode)
+   =============================== */
+
+/* Default (Dark Mode) */
+[data-sonner-toast] {
+  border-radius: 18px !important;
+
+  background: #1a1a1a !important;
+  color: #f1f1f1 !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+
+  box-shadow: none !important;
+}
+
+/* Light Mode */
+@media (prefers-color-scheme: light) {
+  [data-sonner-toast] {
+    background: #ffffff !important;
+    color: #111111 !important;
+
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+
+    box-shadow: none !important;
+  }
+}
+
+/* Success */
+[data-sonner-toast][data-type="success"] svg {
+  color: #22c55e !important; /* Tailwind green-500 */
+}
+
+/* Error */
+[data-sonner-toast][data-type="error"] svg {
+  color: #ef4444 !important; /* Tailwind red-500 */
+}
+
+/* Warning */
+[data-sonner-toast][data-type="warning"] svg {
+  color: #eab308 !important;
+}
+
+/* Info */
+[data-sonner-toast][data-type="info"] svg {
+  color: #3b82f6 !important;
+}
+
+/* Inner Elements */
+[data-sonner-toast] * {
+  border-radius: inherit;
 }
