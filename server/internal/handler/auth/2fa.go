@@ -147,7 +147,7 @@ func (h *TwoFAHandler) Disable(c *fiber.Ctx) error {
 	}
 
 	// Clear refresh cookie — all sessions revoked
-	clearRefreshCookie(c)
+	clearRefreshCookie(c, h.cfg)
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
@@ -202,16 +202,4 @@ func parseClientInfoDTO(c *fiber.Ctx) dto.ClientInfo {
 		City:       parsed.City,
 		Country:    parsed.Country,
 	}
-}
-
-func clearRefreshCookie(c *fiber.Ctx) {
-	c.Cookie(&fiber.Cookie{
-		Name:     "refresh_token",
-		Value:    "",
-		Path:     "/api/v1/auth",
-		MaxAge:   -1,
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "Lax",
-	})
 }

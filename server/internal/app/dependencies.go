@@ -37,6 +37,7 @@ type Dependencies struct {
 	TwoFASvc    *service.TwoFAService
 	OAuthSvc    *service.OAuthService
 	LoginSvc    *service.LoginService
+	SessionSvc  *service.SessionService
 
 	// Handlers
 	AccountHandler  *handler.AccountHandler
@@ -44,6 +45,7 @@ type Dependencies struct {
 	TwoFAHandler    *handler.TwoFAHandler
 	OAuthHandler    *handler.OAuthHandler
 	LoginHandler    *handler.LoginHandler
+	SessionHandler  *handler.SessionHandler
 
 	// Middleware
 	LoggerMW *middleware.Logger
@@ -66,6 +68,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	twoFASvc := service.NewTwoFAService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
 	oAuthSvc := service.NewOAuthService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
 	loginSvc := service.NewLoginService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
+	sessionSvc := service.NewSessionService(sessionRepo)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	accountHandler := handler.NewAccountHandler(accountSvc, cfg)
@@ -73,6 +76,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	twoFAHandler := handler.NewTwoFAHandler(twoFASvc, cfg)
 	oAuthHandler := handler.NewOAuthHandler(oAuthSvc, cfg)
 	loginHandler := handler.NewLoginHandler(loginSvc, cfg)
+	sessionHandler := handler.NewSessionHandler(sessionSvc, cfg)
 
 	// ── Middleware ─────────────────────────────────────────────────────────────
 	loggerMW := middleware.NewLogger(log, cfg)
@@ -93,11 +97,13 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 		TwoFASvc:        twoFASvc,
 		OAuthSvc:        oAuthSvc,
 		LoginSvc:        loginSvc,
+		SessionSvc:      sessionSvc,
 		AccountHandler:  accountHandler,
 		PasswordHandler: passwordHandler,
 		TwoFAHandler:    twoFAHandler,
 		OAuthHandler:    oAuthHandler,
 		LoginHandler:    loginHandler,
+		SessionHandler:  sessionHandler,
 		LoggerMW:        loggerMW,
 		Limiters:        limiters,
 	}

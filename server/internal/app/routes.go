@@ -69,4 +69,19 @@ func registerAuthRoutes(r fiber.Router, d *Dependencies) {
 	protected.Post("/2fa/confirm", d.TwoFAHandler.ConfirmEnable)
 	protected.Post("/2fa/disable", d.TwoFAHandler.Disable)
 	protected.Post("/2fa/backup/regenerate", d.TwoFAHandler.RegenerateBackupCodes)
+
+	// ── Sessions ───────────────────────────────────────────────────────────────
+	protected.Get("/sessions", d.SessionHandler.GetSessions)
+
+	protected.Post("/logout",
+		d.SessionHandler.Logout,
+	)
+
+	protected.Post("/logout-all",
+		d.SessionHandler.RevokeAllSessions,
+	)
+
+	protected.Delete("/sessions/:id",
+		d.SessionHandler.RevokeSession,
+	)
 }
