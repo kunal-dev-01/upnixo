@@ -34,10 +34,14 @@ type Dependencies struct {
 	EmailSvc    *email.EmailService
 	AccountSvc  *service.AccountService
 	PasswordSvc *service.PasswordService
+	TwoFASvc    *service.TwoFAService
+	OAuthSvc    *service.OAuthService
 
 	// Handlers
 	AccountHandler  *handler.AccountHandler
 	PasswordHandler *handler.PasswordHandler
+	TwoFAHandler    *handler.TwoFAHandler
+	OAuthHandler    *handler.OAuthHandler
 
 	// Middleware
 	LoggerMW *middleware.Logger
@@ -57,10 +61,14 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	// ── Services ──────────────────────────────────────────────────────────────
 	accountSvc := service.NewAccountService(cfg, authRepo, tokenRepo, sessionRepo, emailSvc)
 	passwordSvc := service.NewPasswordService(cfg, authRepo, tokenRepo, emailSvc)
+	twoFASvc := service.NewTwoFAService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
+	oAuthSvc := service.NewOAuthService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	accountHandler := handler.NewAccountHandler(accountSvc, cfg)
 	passwordHandler := handler.NewPasswordHandler(passwordSvc)
+	twoFAHandler := handler.NewTwoFAHandler(twoFASvc, cfg)
+	oAuthHandler := handler.NewOAuthHandler(oAuthSvc, cfg)
 
 	// ── Middleware ─────────────────────────────────────────────────────────────
 	loggerMW := middleware.NewLogger(log, cfg)
@@ -78,8 +86,12 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 		EmailSvc:        emailSvc,
 		AccountSvc:      accountSvc,
 		PasswordSvc:     passwordSvc,
+		TwoFASvc:        twoFASvc,
+		OAuthSvc:        oAuthSvc,
 		AccountHandler:  accountHandler,
 		PasswordHandler: passwordHandler,
+		TwoFAHandler:    twoFAHandler,
+		OAuthHandler:    oAuthHandler,
 		LoggerMW:        loggerMW,
 		Limiters:        limiters,
 	}

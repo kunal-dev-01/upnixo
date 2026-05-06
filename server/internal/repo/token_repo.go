@@ -19,6 +19,7 @@ const (
 	prefixTwoFAPending  = "token:2fa_pending:"      // token:2fa_pending:<token>   → user_id
 	prefixLoginAttempt  = "security:login_attempt:" // security:login_attempt:<email> → count
 	prefixAccountLock   = "security:lock:"          // security:lock:<email>       → "1"
+	prefixOAuthState    = "oauth:state:"            // oauth:state:<state>        → user_id (optional, for linking)
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -175,4 +176,62 @@ func (t *TokenRepository) consumeToken(ctx context.Context, key, label string) (
 	}
 
 	return userID, nil
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OAUTH STATE (CSRF protection)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// StoreOAuthState stores oauth state token in redis.
+// Key format:
+// oauth:state:<provider>:<state> -> "1"
+func (t *TokenRepository) StoreOAuthState(
+	ctx context.Context,
+	state string,
+	provider string,
+	ttl time.Duration,
+) error {
+	key := prefixOAuthState + provider + ":" + state
+
+	ok, err := t.r.SetNX(ctx, key, "1", ttl)
+	if err != nil {
+		utils.Error("store oauth state failed", err, map[string]any{
+			"provider": provider,
+		})
+		return utils.Internal(err)
+	}
+
+	if !ok {
+		return utils.Conflict("oauth state already exists")
+	}
+
+	return nil
+}
+
+// ConsumeOAuthState validates and deletes oauth state.
+// Single-use token protection.
+func (t *TokenRepository) ConsumeOAuthState(
+	ctx context.Context,
+	state string,
+	provider string,
+) error {
+	key := prefixOAuthState + provider + ":" + state
+
+	val, err := t.r.Get(ctx, key)
+	if err != nil {
+		return utils.Internal(err)
+	}
+
+	if val == "" {
+		return utils.BadRequest("invalid or expired oauth state")
+	}
+
+	// delete after consume
+	if err = t.r.Del(ctx, key); err != nil {
+		utils.Error("delete oauth state failed", err, map[string]any{
+			"provider": provider,
+		})
+	}
+
+	return nil
 }

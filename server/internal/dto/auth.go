@@ -52,6 +52,12 @@ type VerifyEmailResult struct {
 	SessionID   string           `json:"session_id"`
 }
 
+type AuthResult struct {
+	User        *models.SafeUser `json:"user"`
+	AccessToken string           `json:"access_token"`
+	SessionID   string           `json:"session_id"`
+}
+
 type NotificationSettings struct {
 	Email struct {
 		OrderUpdates    bool `json:"order_updates"`

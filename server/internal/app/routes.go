@@ -40,6 +40,21 @@ func registerAuthRoutes(r fiber.Router, d *Dependencies) {
 	auth.Post("/forgot-password", d.Limiters.Auth, d.PasswordHandler.ForgotPassword)
 	auth.Post("/reset-password", d.Limiters.Auth, d.PasswordHandler.ResetPassword)
 
+	// ── OAuth ──────────────────────────────────────────────────────────────────
+	auth.Get("/oauth/google", d.Limiters.Auth, d.OAuthHandler.GoogleRedirect)
+
+	auth.Get("/oauth/google/callback",
+		d.Limiters.Auth,
+		d.OAuthHandler.GoogleCallback,
+	)
+
+	auth.Get("/oauth/github", d.Limiters.Auth, d.OAuthHandler.GithubRedirect)
+
+	auth.Get("/oauth/github/callback",
+		d.Limiters.Auth,
+		d.OAuthHandler.GithubCallback,
+	)
+
 	// ── Protected ─────────────────────────────────────────────────────────────
 	protected := auth.Group("",
 		middleware.AuthRequired(d.JWT, d.SessionRepo),
@@ -47,4 +62,10 @@ func registerAuthRoutes(r fiber.Router, d *Dependencies) {
 	)
 
 	protected.Post("/change-password", d.PasswordHandler.ChangePassword)
+
+	// 2FA management (requires auth)
+	protected.Post("/2fa/setup", d.TwoFAHandler.Setup)
+	protected.Post("/2fa/confirm", d.TwoFAHandler.ConfirmEnable)
+	protected.Post("/2fa/disable", d.TwoFAHandler.Disable)
+	protected.Post("/2fa/backup/regenerate", d.TwoFAHandler.RegenerateBackupCodes)
 }
