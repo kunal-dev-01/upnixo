@@ -52,19 +52,43 @@ type VerifyEmailResult struct {
 	SessionID   string           `json:"session_id"`
 }
 
+type NotificationSettings struct {
+	Email struct {
+		OrderUpdates    bool `json:"order_updates"`
+		ChatMessages    bool `json:"chat_messages"`
+		BillingInvoices bool `json:"billing_invoices"`
+		Marketing       bool `json:"marketing"`
+	} `json:"email"`
+	Push struct {
+		Mentions       bool `json:"mentions"`
+		DirectMessages bool `json:"direct_messages"`
+		SecurityAlerts bool `json:"security_alerts"`
+	} `json:"push"`
+}
+
+type SafePreferences struct {
+	Theme            string               `json:"theme"`
+	SidebarCollapsed bool                 `json:"sidebar_collapsed"`
+	CompactView      bool                 `json:"compact_view"`
+	Notifications    NotificationSettings `json:"notifications"`
+	DefaultCurrency  string               `json:"default_currency"`
+	Language         string               `json:"language"`
+}
+
 type SafeUser struct {
-	ID               uuid.UUID  `json:"id"`
-	Email            string     `json:"email"`
-	EmailVerified    bool       `json:"email_verified"`
-	FullName         string     `json:"full_name"`
-	AvatarURL        *string    `json:"avatar_url,omitempty"`
-	Phone            *string    `json:"phone,omitempty"`
-	PhoneVerified    bool       `json:"phone_verified"`
-	Timezone         string     `json:"timezone"`
-	Locale           string     `json:"locale"`
-	TwoFactorEnabled bool       `json:"two_factor_enabled"`
-	LastLoginAt      *time.Time `json:"last_login_at,omitempty"`
-	CreatedAt        time.Time  `json:"created_at"`
+	ID               uuid.UUID        `json:"id"`
+	Email            string           `json:"email"`
+	EmailVerified    bool             `json:"email_verified"`
+	FullName         string           `json:"full_name"`
+	AvatarURL        *string          `json:"avatar_url,omitempty"`
+	Phone            *string          `json:"phone,omitempty"`
+	PhoneVerified    bool             `json:"phone_verified"`
+	Timezone         string           `json:"timezone"`
+	Locale           string           `json:"locale"`
+	TwoFactorEnabled bool             `json:"two_factor_enabled"`
+	Preferences      *SafePreferences `json:"preferences,omitempty"`
+	LastLoginAt      *time.Time       `json:"last_login_at,omitempty"`
+	CreatedAt        time.Time        `json:"created_at"`
 }
 
 type MessageResponse struct {
