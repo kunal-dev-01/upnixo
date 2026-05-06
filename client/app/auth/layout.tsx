@@ -103,7 +103,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         </motion.div>
 
         {/* Bottom Fade aur Text Container */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end bg-linear-to-t from-zinc-50 dark:from-zinc-950/90 via-transparent to-transparent pointer-events-none">
+        <div className="absolute inset-0 flex flex-col items-center justify-end bg-linear-to-t from-zinc-50 dark:from-zinc-950/50 via-transparent to-transparent pointer-events-none">
           <h1 className="text-[10vh] lg:text-[20vh] font-black tracking-tighter bg-clip-text text-transparent bg-linear-to-b from-zinc-200/60 to-zinc-100 dark:from-zinc-950/50 dark:to-zinc-900/50 opacity-75">
             Upnixo.
           </h1>
