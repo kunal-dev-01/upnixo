@@ -277,8 +277,6 @@ CREATE TABLE user_preferences (
     compact_view        BOOLEAN NOT NULL DEFAULT FALSE,
 
     -- ── Notification Settings (Granular Control) ─────────────────────
-    -- JSONB best hai flexibility ke liye, indexing ki tension nahi kyunki ye 'hot path' query nahi hai
-    -- Isme hum alag alag events track karenge
     notifications       JSONB NOT NULL DEFAULT '{
         "email": {
             "order_updates": true,      -- Naya project start hona ya milestone complete hona
@@ -294,7 +292,7 @@ CREATE TABLE user_preferences (
     }'::jsonb,
 
     -- ── Freelance/Business Specific ─────────────────────────────────
-    default_currency    CHAR(3) NOT NULL DEFAULT 'INR', -- Aap India se ho toh default INR rakh sakte ho
+    default_currency    CHAR(3) NOT NULL DEFAULT 'USD',
     language            VARCHAR(10) NOT NULL DEFAULT 'en',
 
     -- ── Timestamps ──────────────────────────────────────────────────
