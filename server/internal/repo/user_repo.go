@@ -19,6 +19,8 @@ import (
 
 type AuthRepository interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*models.User, error)
+	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+
 	// Email + Password
 	Register(ctx context.Context, params RegisterParams) (*models.User, error)
 	GetUserForLogin(ctx context.Context, email string) (*models.User, error)
@@ -41,6 +43,9 @@ type AuthRepository interface {
 	// Session audit (background-safe)
 	RecordLogin(ctx context.Context, userID uuid.UUID, ip string)
 	GetTwoFactor(ctx context.Context, userID uuid.UUID) (*models.TwoFactorAuth, error)
+
+	UpdateUser(ctx context.Context, id uuid.UUID, params UpdateUserParams) error
+	UpdatePreferences(ctx context.Context, userID uuid.UUID, params UpdatePreferencesParams) error
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -79,6 +84,22 @@ type Setup2FAParams struct {
 	UserID            uuid.UUID
 	EncryptedSecret   string   // AES-256 encrypted before passing in
 	HashedBackupCodes []string // argon2id hashed before passing in
+}
+
+type UpdateUserParams struct {
+	FullName  *string
+	AvatarURL *string
+	Timezone  *string
+	Locale    *string
+}
+
+type UpdatePreferencesParams struct {
+	Theme            *string
+	SidebarCollapsed *bool
+	CompactView      *bool
+	Notifications    []byte
+	DefaultCurrency  *string
+	Language         *string
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -613,6 +634,108 @@ func (r *authRepo) GetTwoFactor(ctx context.Context, userID uuid.UUID) (*models.
 	}
 
 	return &tf, nil
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UPDATE USER PROFILE
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (r *authRepo) UpdateUser(ctx context.Context, id uuid.UUID, params UpdateUserParams) error {
+	// COALESCE checks if the provided argument is NULL.
+	// If NULL, it keeps the existing column value.
+	sql := `
+		UPDATE users
+		SET full_name  = COALESCE(@full_name, full_name),
+			avatar_url = COALESCE(@avatar_url, avatar_url),
+			timezone   = COALESCE(@timezone, timezone),
+			locale     = COALESCE(@locale, locale)
+		WHERE id = @id AND deleted_at IS NULL`
+
+	tag, err := db.Pool.Exec(ctx, sql, pgx.NamedArgs{
+		"id":         id,
+		"full_name":  params.FullName,
+		"avatar_url": params.AvatarURL,
+		"timezone":   params.Timezone,
+		"locale":     params.Locale,
+	})
+	if err != nil {
+		r.log.Error("update user: exec failed", err, map[string]any{"user_id": id})
+		return utils.Internal(err)
+	}
+	if tag.RowsAffected() == 0 {
+		return utils.NotFound("user not found")
+	}
+
+	return nil
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UPDATE PREFERENCES
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (r *authRepo) UpdatePreferences(ctx context.Context, userID uuid.UUID, params UpdatePreferencesParams) error {
+	sql := `
+		UPDATE user_preferences
+		SET theme             = COALESCE(@theme, theme),
+			sidebar_collapsed = COALESCE(@sidebar_collapsed, sidebar_collapsed),
+			compact_view      = COALESCE(@compact_view, compact_view),
+			notifications     = COALESCE(@notifications, notifications),
+			default_currency  = COALESCE(@default_currency, default_currency),
+			language          = COALESCE(@language, language),
+			updated_at        = NOW()
+		WHERE user_id = @user_id`
+
+	// Agar JSON bytes empty hain, toh usko dynamically nil (NULL) map karenge
+	// taaki purani settings delete na ho jayein.
+	var notifArg any = nil
+	if len(params.Notifications) > 0 {
+		notifArg = params.Notifications
+	}
+
+	tag, err := db.Pool.Exec(ctx, sql, pgx.NamedArgs{
+		"user_id":           userID,
+		"theme":             params.Theme,
+		"sidebar_collapsed": params.SidebarCollapsed,
+		"compact_view":      params.CompactView,
+		"notifications":     notifArg,
+		"default_currency":  params.DefaultCurrency,
+		"language":          params.Language,
+	})
+	if err != nil {
+		r.log.Error("update preferences: exec failed", err, map[string]any{"user_id": userID})
+		return utils.Internal(err)
+	}
+	if tag.RowsAffected() == 0 {
+		return utils.NotFound("preferences not found for user")
+	}
+
+	return nil
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET USER BY EMAIL
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (r *authRepo) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+	// Wahi same join query use kar rahe hain taaki preferences bhi sath mein aayein
+	sql := `SELECT ` + userWithPrefsColumns + userJoinPrefs + ` WHERE u.email = @email AND u.deleted_at IS NULL`
+
+	rows, err := db.Pool.Query(ctx, sql, pgx.NamedArgs{"email": email})
+	if err != nil {
+		r.log.Error("get user by email: query failed", err, map[string]any{"email": email})
+		return nil, utils.Internal(err)
+	}
+
+	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, utils.NotFound("user not found")
+		}
+		r.log.Error("get user by email: scan failed", err, map[string]any{"email": email})
+		return nil, utils.Internal(err)
+	}
+
+	return &user, nil
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
