@@ -39,6 +39,15 @@ type ResendVerifyEmailRequest struct {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// LOGIN
+// ─────────────────────────────────────────────────────────────────────────────
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RESPONSE DTOs
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -56,6 +65,12 @@ type AuthResult struct {
 	User        *models.SafeUser `json:"user"`
 	AccessToken string           `json:"access_token"`
 	SessionID   string           `json:"session_id"`
+}
+
+type LoginResult struct {
+	AuthResult        AuthResult
+	TwoFAPending      bool
+	TwoFAPendingToken string
 }
 
 type NotificationSettings struct {

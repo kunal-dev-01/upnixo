@@ -33,6 +33,7 @@ func registerAuthRoutes(r fiber.Router, d *Dependencies) {
 
 	// ── Account ───────────────────────────────────────────────────────────────
 	auth.Post("/register", d.Limiters.Auth, d.AccountHandler.Register)
+	auth.Post("/login", d.Limiters.Auth, d.LoginHandler.Login)
 	auth.Get("/verify-email", d.Limiters.OTP, d.AccountHandler.VerifyEmail)
 	auth.Post("/resend-verify", d.Limiters.OTP, d.AccountHandler.ResendVerifyEmail)
 
