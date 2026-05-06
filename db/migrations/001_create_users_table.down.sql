@@ -14,3 +14,6 @@ DROP FUNCTION IF EXISTS trigger_set_updated_at()  CASCADE;
 
 DROP TYPE IF EXISTS two_factor_method CASCADE;
 DROP TYPE IF EXISTS oauth_provider    CASCADE;
+
+-- ── User Preferences ─────────────────────────────────────────────────
+DROP TABLE IF EXISTS user_preferences CASCADE;

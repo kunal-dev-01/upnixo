@@ -266,10 +266,51 @@ CREATE TRIGGER trg_2fa_updated_at
     BEFORE UPDATE ON two_factor_auth
     FOR EACH ROW EXECUTE FUNCTION fn_set_updated_at();
 
+
+-- ── User Preferences ─────────────────────────────────────────────────
+CREATE TABLE user_preferences (
+    user_id             UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    
+    -- ── Appearance ──────────────────────────────────────────────────
+    theme               VARCHAR(20) NOT NULL DEFAULT 'system', -- 'light', 'dark', 'system'
+    sidebar_collapsed   BOOLEAN NOT NULL DEFAULT FALSE,
+    compact_view        BOOLEAN NOT NULL DEFAULT FALSE,
+
+    -- ── Notification Settings (Granular Control) ─────────────────────
+    -- JSONB best hai flexibility ke liye, indexing ki tension nahi kyunki ye 'hot path' query nahi hai
+    -- Isme hum alag alag events track karenge
+    notifications       JSONB NOT NULL DEFAULT '{
+        "email": {
+            "order_updates": true,      -- Naya project start hona ya milestone complete hona
+            "chat_messages": true,      -- Aapka bheja hua message
+            "billing_invoices": true,   -- Invoice generate hone par
+            "marketing": false          -- Promotion/Offers
+        },
+        "push": {
+            "mentions": true,
+            "direct_messages": true,
+            "security_alerts": true
+        }
+    }'::jsonb,
+
+    -- ── Freelance/Business Specific ─────────────────────────────────
+    default_currency    CHAR(3) NOT NULL DEFAULT 'INR', -- Aap India se ho toh default INR rakh sakte ho
+    language            VARCHAR(10) NOT NULL DEFAULT 'en',
+
+    -- ── Timestamps ──────────────────────────────────────────────────
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);    
+
+-- ── Trigger for updated_at ──────────────────────────────────────────
+CREATE TRIGGER trg_user_preferences_updated_at
+    BEFORE UPDATE ON user_preferences
+    FOR EACH ROW EXECUTE FUNCTION fn_set_updated_at();
+
 -- ── Comments ─────────────────────────────────────────────────────────
 COMMENT ON TABLE  two_factor_auth               IS 'TOTP-based 2FA config. Secret encrypted server-side before INSERT.';
 COMMENT ON COLUMN two_factor_auth.totp_secret   IS 'AES-256 encrypted TOTP base32 secret. Decrypt only on verify.';
 COMMENT ON COLUMN two_factor_auth.backup_codes  IS 'Server-hashed recovery codes. App removes consumed codes atomically.';
+COMMENT ON COLUMN user_preferences.notifications IS 'Granular notification settings for Email and Push in JSONB format.';
 
 -- ===================================================================
 -- END OF MIGRATION
