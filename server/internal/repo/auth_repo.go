@@ -40,6 +40,7 @@ type AuthRepository interface {
 
 	// Session audit (background-safe)
 	RecordLogin(ctx context.Context, userID uuid.UUID, ip string)
+	GetTwoFactor(ctx context.Context, userID uuid.UUID) (*models.TwoFactorAuth, error)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -608,6 +609,38 @@ func (r *authRepo) RecordLogin(ctx context.Context, userID uuid.UUID, ip string)
 			})
 		}
 	}()
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET TWO FACTOR
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (r *authRepo) GetTwoFactor(ctx context.Context, userID uuid.UUID) (*models.TwoFactorAuth, error) {
+	sql := `
+		SELECT
+			id, user_id, totp_secret, totp_algorithm, totp_digits, totp_period,
+			backup_codes, backup_codes_generated_at,
+			is_enabled, enabled_at, last_verified_at, last_method_used,
+			created_at, updated_at
+		FROM two_factor_auth
+		WHERE user_id = @user_id`
+
+	rows, err := db.Pool.Query(ctx, sql, pgx.NamedArgs{"user_id": userID})
+	if err != nil {
+		r.log.Error("get two factor: query failed", err, map[string]any{"user_id": userID})
+		return nil, utils.Internal(err)
+	}
+
+	tf, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.TwoFactorAuth])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, utils.NotFound("2FA not configured for this account")
+		}
+		r.log.Error("get two factor: scan failed", err, map[string]any{"user_id": userID})
+		return nil, utils.Internal(err)
+	}
+
+	return &tf, nil
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

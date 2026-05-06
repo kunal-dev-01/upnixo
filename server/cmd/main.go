@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -36,7 +35,7 @@ func main() {
 	utils.Init(cfg)
 	log := utils.Get()
 
-	// ── Startup Context (30s timeout for all connections) ─────────────────────
+	// ── Startup Context ───────────────────────────────────────────────────────
 	startCtx, startCancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer startCancel()
 
@@ -60,7 +59,7 @@ func main() {
 	}
 	defer rabbitBroker.Close()
 
-	// ── Email Queue ───────────────────────────────────────────────────────────
+	// ── Email ─────────────────────────────────────────────────────────────────
 	emailSvc := email.NewEmailService(cfg, rabbitBroker)
 	if err = emailSvc.DeclareQueue(); err != nil {
 		log.Fatal("email queue declare failed", err, nil)
@@ -70,9 +69,9 @@ func main() {
 	}
 
 	// ── Wire Dependencies ─────────────────────────────────────────────────────
-	deps := app.Wire(cfg, log, redisClient, rabbitBroker)
+	deps := app.Wire(cfg, log, redisClient, rabbitBroker, emailSvc)
 
-	// ── Fiber App ─────────────────────────────────────────────────────────────
+	// ── Fiber ─────────────────────────────────────────────────────────────────
 	fiberApp := fiber.New(fiber.Config{
 		AppName:           "Upnixo API",
 		ErrorHandler:      middleware.FiberErrorHandler,
@@ -83,7 +82,6 @@ func main() {
 		EnablePrintRoutes: cfg.App.IsDevelopment(),
 	})
 
-	// ── Global Middleware ─────────────────────────────────────────────────────
 	fiberApp.Use(requestid.New())
 	fiberApp.Use(compress.New())
 	fiberApp.Use(cors.New(cors.Config{
@@ -94,23 +92,17 @@ func main() {
 		AllowCredentials: cfg.App.AllowCredentials,
 	}))
 
-	// ── Routes ────────────────────────────────────────────────────────────────
 	app.RegisterRoutes(fiberApp, deps)
 
-	// ── Start Server ──────────────────────────────────────────────────────────
+	// ── Start + Graceful Shutdown ─────────────────────────────────────────────
 	addr := fmt.Sprintf(":%d", cfg.App.Port)
 
-	// Run in goroutine so we can listen for shutdown signal
 	serverErr := make(chan error, 1)
 	go func() {
-		log.Info("server starting", map[string]any{
-			"addr": addr,
-			"env":  cfg.App.Env,
-		})
+		log.Info("server starting", map[string]any{"addr": addr, "env": cfg.App.Env})
 		serverErr <- fiberApp.Listen(addr)
 	}()
 
-	// ── Graceful Shutdown ─────────────────────────────────────────────────────
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
@@ -131,14 +123,13 @@ func main() {
 	log.Info("server stopped", nil)
 }
 
-// joinStrings joins a slice with comma for Fiber CORS config.
 func joinStrings(s []string) string {
-	var result strings.Builder
+	result := ""
 	for i, v := range s {
 		if i > 0 {
-			result.WriteString(",")
+			result += ","
 		}
-		result.WriteString(v)
+		result += v
 	}
-	return result.String()
+	return result
 }

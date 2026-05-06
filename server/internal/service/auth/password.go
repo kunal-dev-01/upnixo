@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"server/internal/config"
+	"server/internal/dto"
 	"server/internal/email"
 	"server/internal/models"
 	"server/internal/repo"
@@ -41,30 +42,12 @@ func NewPasswordService(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// INPUT DTOs
-// ─────────────────────────────────────────────────────────────────────────────
-
-type ForgotPasswordInput struct {
-	Email string `json:"email" validate:"required,email"`
-}
-
-type ResetPasswordInput struct {
-	Token    string `json:"token"    validate:"required"`
-	Password string `json:"password" validate:"required,secure_password"`
-}
-
-type ChangePasswordInput struct {
-	CurrentPassword string `json:"current_password" validate:"required"`
-	NewPassword     string `json:"new_password"     validate:"required,secure_password"`
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // FORGOT PASSWORD
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ForgotPassword generates a reset token and queues the email.
 // Always returns success — never reveals whether the email exists.
-func (s *PasswordService) ForgotPassword(ctx context.Context, input ForgotPasswordInput) error {
+func (s *PasswordService) ForgotPassword(ctx context.Context, input dto.ForgotPasswordInput) error {
 	if err := utils.ValidateStructToAppError(input); err != nil {
 		return err
 	}
@@ -90,7 +73,7 @@ func (s *PasswordService) ForgotPassword(ctx context.Context, input ForgotPasswo
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ResetPassword validates the token and sets a new password.
-func (s *PasswordService) ResetPassword(ctx context.Context, input ResetPasswordInput) error {
+func (s *PasswordService) ResetPassword(ctx context.Context, input dto.ResetPasswordInput) error {
 	if err := utils.ValidateStructToAppError(input); err != nil {
 		return err
 	}
@@ -126,7 +109,7 @@ func (s *PasswordService) ResetPassword(ctx context.Context, input ResetPassword
 
 // ChangePassword verifies the current password before setting a new one.
 // userID comes from JWT claims — never trust client input for this.
-func (s *PasswordService) ChangePassword(ctx context.Context, userID uuid.UUID, input ChangePasswordInput) error {
+func (s *PasswordService) ChangePassword(ctx context.Context, userID uuid.UUID, input dto.ChangePasswordInput) error {
 	if err := utils.ValidateStructToAppError(input); err != nil {
 		return err
 	}

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"server/internal/config"
+	"server/internal/dto"
 	"server/internal/service/auth"
 	"server/internal/utils"
 
@@ -29,7 +30,7 @@ func NewAccountHandler(svc *service.AccountService, cfg *config.Config) *Account
 // ─────────────────────────────────────────────────────────────────────────────
 
 func (h *AccountHandler) Register(c *fiber.Ctx) error {
-	var input service.RegisterInput
+	var input dto.RegisterRequest
 	if err := c.BodyParser(&input); err != nil {
 		return utils.BadRequest("invalid request body")
 	}
@@ -121,10 +122,10 @@ func setRefreshCookie(c *fiber.Ctx, sessionID string, cfg *config.Config) {
 }
 
 // parseClientInfo extracts device + location metadata from the request.
-func parseClientInfo(c *fiber.Ctx) service.ClientInfo {
+func parseClientInfo(c *fiber.Ctx) dto.ClientInfo {
 	parsed := utils.ParseClientInfo(c.IP(), c.Get("User-Agent"))
 
-	return service.ClientInfo{
+	return dto.ClientInfo{
 		IP:         c.IP(),
 		Browser:    parsed.Browser,
 		OS:         parsed.OS,

@@ -45,7 +45,7 @@ type Dependencies struct {
 }
 
 // Wire builds and connects all dependencies in the correct order.
-func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *broker.RabbitBroker) *Dependencies {
+func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *broker.RabbitBroker, emailSvc *email.EmailService) *Dependencies {
 	// ── Security ──────────────────────────────────────────────────────────────
 	jwt := security.NewJWTManager(&cfg.JWT)
 
@@ -55,12 +55,13 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	tokenRepo := repo.NewTokenRepository(redisClient)
 
 	// ── Services ──────────────────────────────────────────────────────────────
-	emailSvc := email.NewEmailService(cfg, brk)
 	accountSvc := service.NewAccountService(cfg, authRepo, tokenRepo, sessionRepo, emailSvc)
 	passwordSvc := service.NewPasswordService(cfg, authRepo, tokenRepo, emailSvc)
+
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	accountHandler := handler.NewAccountHandler(accountSvc, cfg)
 	passwordHandler := handler.NewPasswordHandler(passwordSvc)
+
 	// ── Middleware ─────────────────────────────────────────────────────────────
 	loggerMW := middleware.NewLogger(log, cfg)
 	limiters := middleware.NewLimiters(redisClient)

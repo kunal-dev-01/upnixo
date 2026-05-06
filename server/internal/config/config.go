@@ -35,6 +35,7 @@ type Config struct {
 // App Config
 // ============================================================================
 type AppConfig struct {
+	AppName           string
 	Env               string
 	Port              int
 	RequestBodyLimit  int
@@ -122,10 +123,11 @@ type JWTConfig struct {
 // Security Config
 // ============================================================================
 type SecurityConfig struct {
-	MaxLoginAttempts int
-	LockoutDuration  time.Duration
-	RateLimitMax     int
-	MaxSessions      int
+	MaxLoginAttempts  int
+	LockoutDuration   time.Duration
+	RateLimitMax      int
+	MaxSessions       int
+	TOTPEncryptionKey string
 }
 
 // ============================================================================
@@ -281,10 +283,11 @@ func Load() (*Config, error) {
 			Issuer:               getEnv("ADMIN_JWT_ISSUER", "admin.upnixo.com"),
 		},
 		Security: SecurityConfig{
-			MaxLoginAttempts: getEnvAsInt("MAX_LOGIN_ATTEMPTS", 5),
-			LockoutDuration:  getEnvAsDuration("LOCKOUT_DURATION", 30*time.Minute),
-			RateLimitMax:     getEnvAsInt("RATE_LIMIT_MAX", 100),
-			MaxSessions:      getEnvAsInt("MAX_SESSIONS", 5),
+			MaxLoginAttempts:  getEnvAsInt("MAX_LOGIN_ATTEMPTS", 5),
+			LockoutDuration:   getEnvAsDuration("LOCKOUT_DURATION", 30*time.Minute),
+			RateLimitMax:      getEnvAsInt("RATE_LIMIT_MAX", 100),
+			MaxSessions:       getEnvAsInt("MAX_SESSIONS", 5),
+			TOTPEncryptionKey: getEnv("TOTP_ENCRYPTION_KEY", "default_totp_encryption_key"),
 		},
 		Frontend: FrontendConfig{
 			FrontendUrl:           getEnv("FRONTEND_URL", "http://localhost:3000"),
@@ -319,6 +322,7 @@ func Load() (*Config, error) {
 			WebhookSecret: getEnv("PADDLE_WEBHOOK_SECRET", ""),
 		},
 		App: AppConfig{
+			AppName:           getEnv("APP_NAME", "Upnixo"),
 			Env:               getEnv("ENV", "development"),
 			Port:              getEnvAsInt("PORT", 8080),
 			RequestBodyLimit:  getEnvAsInt("REQUEST_BODY_LIMIT", 10*1024*1024),

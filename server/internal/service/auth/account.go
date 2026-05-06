@@ -44,30 +44,10 @@ func NewAccountService(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DTOs
-// ─────────────────────────────────────────────────────────────────────────────
-
-type RegisterInput struct {
-	FullName string `json:"full_name" validate:"required,valid_name"`
-	Email    string `json:"email"     validate:"required,email"`
-	Password string `json:"password"  validate:"required,secure_password"`
-}
-
-type RegisterResult struct {
-	Message string `json:"message"`
-}
-
-type VerifyEmailResult struct {
-	User        *models.SafeUser `json:"user"`
-	AccessToken string           `json:"access_token"`
-	SessionID   string           `json:"session_id"`
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // REGISTER
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (s *AccountService) Register(ctx context.Context, input RegisterInput) (*RegisterResult, error) {
+func (s *AccountService) Register(ctx context.Context, input dto.RegisterRequest) (*dto.RegisterResponse, error) {
 	// 1. Validate input
 	if err := utils.ValidateStructToAppError(input); err != nil {
 		return nil, err
@@ -92,7 +72,7 @@ func (s *AccountService) Register(ctx context.Context, input RegisterInput) (*Re
 	// 4. Send verification email in background — never block register response
 	go s.sendVerificationEmail(user)
 
-	return &RegisterResult{
+	return &dto.RegisterResponse{
 		Message: "account created — please check your email to verify your account",
 	}, nil
 }
@@ -101,7 +81,7 @@ func (s *AccountService) Register(ctx context.Context, input RegisterInput) (*Re
 // VERIFY EMAIL
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (s *AccountService) VerifyEmail(ctx context.Context, token string, clientInfo ClientInfo) (*VerifyEmailResult, error) {
+func (s *AccountService) VerifyEmail(ctx context.Context, token string, clientInfo dto.ClientInfo) (*dto.VerifyEmailResult, error) {
 	// 1. Consume token (single-use, deletes from Redis)
 	userIDStr, err := s.tokenRepo.ConsumeEmailVerifyToken(ctx, token)
 	if err != nil {
@@ -195,7 +175,7 @@ func (s *AccountService) sendVerificationEmail(user *models.User) {
 }
 
 // createSession builds JWT pair + stores session in Redis.
-func (s *AccountService) createSession(ctx context.Context, user *models.User, info ClientInfo) (*VerifyEmailResult, error) {
+func (s *AccountService) createSession(ctx context.Context, user *models.User, info dto.ClientInfo) (*dto.VerifyEmailResult, error) {
 	sessionID, err := security.GenerateSessionID()
 	if err != nil {
 		return nil, err
@@ -231,15 +211,14 @@ func (s *AccountService) createSession(ctx context.Context, user *models.User, i
 
 	safe := user.ToSafe()
 
-	return &VerifyEmailResult{
+	return &dto.VerifyEmailResult{
 		User:        &safe,
 		AccessToken: pair.AccessToken,
 		SessionID:   sessionID,
 	}, nil
 }
 
-// fetchUserByID is a thin wrapper — add a GetByID method to AuthRepository
-// or use a separate UserRepository if preferred.
+// fetchUserByID is a helper to get user by ID. Used in VerifyEmail after marking email as verified.
 func (s *AccountService) fetchUserByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
 	// Delegate to authRepo — add GetByID to AuthRepository interface if not present
 	user, err := s.authRepo.GetByID(ctx, id)
@@ -247,14 +226,4 @@ func (s *AccountService) fetchUserByID(ctx context.Context, id uuid.UUID) (*mode
 		return nil, err
 	}
 	return user, nil
-}
-
-// ClientInfo carries parsed request metadata passed from the handler.
-type ClientInfo struct {
-	IP         string
-	Browser    string
-	OS         string
-	DeviceName string
-	City       string
-	Country    string
 }

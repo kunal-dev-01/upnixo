@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"server/internal/dto"
 	"server/internal/middleware"
 	"server/internal/service/auth"
 	"server/internal/utils"
@@ -26,7 +27,7 @@ func NewPasswordHandler(svc *service.PasswordService) *PasswordHandler {
 // ─────────────────────────────────────────────────────────────────────────────
 
 func (h *PasswordHandler) ForgotPassword(c *fiber.Ctx) error {
-	var input service.ForgotPasswordInput
+	var input dto.ForgotPasswordInput
 	if err := c.BodyParser(&input); err != nil {
 		return utils.BadRequest("invalid request body")
 	}
@@ -46,7 +47,7 @@ func (h *PasswordHandler) ForgotPassword(c *fiber.Ctx) error {
 // ─────────────────────────────────────────────────────────────────────────────
 
 func (h *PasswordHandler) ResetPassword(c *fiber.Ctx) error {
-	var input service.ResetPasswordInput
+	var input dto.ResetPasswordInput
 	if err := c.BodyParser(&input); err != nil {
 		return utils.BadRequest("invalid request body")
 	}
@@ -72,7 +73,7 @@ func (h *PasswordHandler) ChangePassword(c *fiber.Ctx) error {
 		return utils.Unauthorized("authentication required")
 	}
 
-	var input service.ChangePasswordInput
+	var input dto.ChangePasswordInput
 	if err := c.BodyParser(&input); err != nil {
 		return utils.BadRequest("invalid request body")
 	}
