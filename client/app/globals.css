@@ -58,7 +58,6 @@
 }
 
 @theme {
-  /* Tailwind 4 mein custom fonts yahan register hote hain */
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-heading: "Satoshi", sans-serif;
 }
