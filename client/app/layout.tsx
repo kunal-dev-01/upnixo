@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ThemeProvider } from "next-themes";
+import { AppToaster } from "@/utils/app-toaster"; 
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -8,7 +10,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "32x32" }, 
+      { url: "/favicon.ico", sizes: "32x32" },
     ],
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
@@ -22,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link
           rel="preload"
@@ -40,7 +42,10 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+          <AppToaster /> 
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -45,8 +45,6 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage', 
       storage: createJSONStorage(() => localStorage), 
-      // Note: Agar aap data ko secure rakhna chahte ho (like no plain text in localstorage),
-      // toh zustand persist ke custom storage engine ko encrypt/decrypt ke sath wrap kar sakte ho.
     }
   )
 );
