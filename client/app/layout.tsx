@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
-import { AppToaster } from "@/utils/app-toaster"; 
+import { Providers } from "./provider";
+import { AppToaster } from "@/utils/app-toaster";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -43,8 +44,8 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-          <AppToaster /> 
+          <Providers>{children}</Providers>
+          <AppToaster />
         </ThemeProvider>
       </body>
     </html>
