@@ -15,11 +15,13 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springConfig = { damping: 20, stiffness: 150, mass: 0.5 };
+  const mouseY = useMotionValue(1000);
+
+  const springConfig = { damping: 25, stiffness: 150, mass: 0.5 };
   const smoothX = useSpring(mouseX, springConfig);
   const smoothY = useSpring(mouseY, springConfig);
-  const maskImage = useMotionTemplate`radial-gradient(200px circle at ${smoothX}px ${smoothY}px, black, transparent)`;
+
+  const maskImage = useMotionTemplate`radial-gradient(350px circle at ${smoothX}px ${smoothY}px, black, transparent)`;
 
   function handleMouseMove({
     currentTarget,
@@ -49,14 +51,13 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         </div>
       </div>
 
-      {/* --- Right Side: Framer Motion Optimized Grid --- */}
+      {/* --- Right Side --- */}
       <div
         onMouseMove={handleMouseMove}
-        className="hidden lg:block relative border-l border-zinc-100 dark:border-zinc-900 bg-zinc-50/20 dark:bg-zinc-950/20 overflow-hidden group"
+        className="hidden lg:block relative border-l border-zinc-100 dark:border-zinc-900 bg-zinc-50/20 dark:bg-zinc-950/20 overflow-hidden"
       >
-        {/* Layer 1: Base Muted Grid */}
         <svg
-          className="absolute inset-0 h-full w-full stroke-zinc-100 dark:stroke-zinc-950"
+          className="absolute inset-0 h-full w-full stroke-zinc-50 dark:stroke-zinc-900/10"
           fill="none"
         >
           <defs>
@@ -74,15 +75,14 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           <rect width="100%" height="100%" fill="url(#grid-base)" />
         </svg>
 
-        {/* Layer 2: Animated Indigo Grid */}
         <motion.div
-          className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          className="absolute inset-0 pointer-events-none opacity-100"
           style={{
             maskImage: maskImage,
             WebkitMaskImage: maskImage,
           }}
         >
-          <svg className="h-full w-full stroke-indigo-600" fill="none">
+          <svg className="h-full w-full stroke-indigo-500" fill="none">
             <defs>
               <pattern
                 id="grid-high"
@@ -97,14 +97,12 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             </defs>
             <rect width="100%" height="100%" fill="url(#grid-high)" />
           </svg>
-
-          {/* Subtle Glow Overlay inside the mask */}
-          <div className="absolute inset-0 bg-indigo-500/5 dark:bg-indigo-400/5" />
+          <div className="absolute inset-0 bg-indigo-500/5" />
         </motion.div>
 
-        {/* Bottom Fade aur Text Container */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end bg-linear-to-t from-zinc-50 dark:from-zinc-950/50 via-transparent to-transparent pointer-events-none">
-          <h1 className="text-[10vh] lg:text-[20vh] font-black tracking-tighter bg-clip-text text-transparent bg-linear-to-b from-zinc-200/60 to-zinc-100 dark:from-zinc-950/50 dark:to-zinc-900/50 opacity-75">
+        {/* Branding Text */}
+        <div className="absolute inset-0 flex flex-col items-center justify-end bg-linear-to-t from-zinc-50 dark:from-zinc-950/80 via-transparent to-transparent pointer-events-none">
+          <h1 className="text-[10vh] lg:text-[20vh] font-black tracking-tighter bg-clip-text text-transparent bg-linear-to-b from-zinc-200/60 to-zinc-100 dark:from-zinc-900 dark:to-zinc-950/20 opacity-75">
             Upnixo.
           </h1>
         </div>
