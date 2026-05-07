@@ -37,9 +37,23 @@ export const authKeys = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useRegister() {
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (data: RegisterRequest) => authService.register(data),
+    onError: (error: ApiError) => {
+      console.error('[Register]', error.code, error.message)
+    },
   })
+
+  return {
+    register: mutation.mutate,
+    registerAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -51,13 +65,27 @@ export function useVerifyEmail() {
   const setAuth = useAuthStore((s) => s.setAuth)
   const queryClient = useQueryClient()
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (token: string) => authService.verifyEmail(token),
     onSuccess: (data) => {
       setAuth(data.user, data.access_token)
       queryClient.invalidateQueries({ queryKey: authKeys.me })
     },
+    onError: (error: ApiError) => {
+      console.error('[VerifyEmail]', error.code, error.message)
+    },
   })
+
+  return {
+    verifyEmail: mutation.mutate,
+    verifyEmailAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -66,9 +94,23 @@ export function useVerifyEmail() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useResendVerify() {
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (data: ResendVerifyRequest) => authService.resendVerify(data),
+    onError: (error: ApiError) => {
+      console.error('[ResendVerify]', error.code, error.message)
+    },
   })
+
+  return {
+    resendVerify: mutation.mutate,
+    resendVerifyAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -82,7 +124,7 @@ export function useLogin() {
   const queryClient = useQueryClient()
   const router = useRouter()
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (data: LoginRequest) => authService.login(data),
     onSuccess: (data) => {
       if (isTwoFAPending(data)) {
@@ -97,7 +139,21 @@ export function useLogin() {
         router.push('/dashboard')
       }
     },
+    onError: (error: ApiError) => {
+      console.error('[Login]', error.code, error.message)
+    },
   })
+
+  return {
+    login: mutation.mutate,
+    loginAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -116,11 +172,25 @@ export function useLogout() {
     router.replace('/auth/login')
   }
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: () => authService.logout(),
     onSuccess: cleanup,
-    onError: cleanup,
+    onError: (error: ApiError) => {
+      console.error('[Logout]', error.code, error.message)
+      cleanup()
+    },
   })
+
+  return {
+    logout: mutation.mutate,
+    logoutAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 export function useLogoutAll() {
@@ -128,14 +198,31 @@ export function useLogoutAll() {
   const queryClient = useQueryClient()
   const router = useRouter()
 
-  return useMutation({
+  const cleanup = () => {
+    clearAuth()
+    queryClient.clear()
+    router.replace('/auth/login')
+  }
+
+  const mutation = useMutation({
     mutationFn: () => authService.logoutAll(),
-    onSuccess: () => {
-      clearAuth()
-      queryClient.clear()
-      router.replace('/auth/login')
+    onSuccess: cleanup,
+    onError: (error: ApiError) => {
+      console.error('[LogoutAll]', error.code, error.message)
+      cleanup()
     },
   })
+
+  return {
+    logoutAll: mutation.mutate,
+    logoutAllAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -156,21 +243,63 @@ export function useGitHubLogin() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useForgotPassword() {
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (data: ForgotPasswordRequest) => authService.forgotPassword(data),
+    onError: (error: ApiError) => {
+      console.error('[ForgotPassword]', error.code, error.message)
+    },
   })
+
+  return {
+    forgotPassword: mutation.mutate,
+    forgotPasswordAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 export function useResetPassword() {
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (data: ResetPasswordRequest) => authService.resetPassword(data),
+    onError: (error: ApiError) => {
+      console.error('[ResetPassword]', error.code, error.message)
+    },
   })
+
+  return {
+    resetPassword: mutation.mutate,
+    resetPasswordAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 export function useChangePassword() {
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (data: ChangePasswordRequest) => authService.changePassword(data),
+    onError: (error: ApiError) => {
+      console.error('[ChangePassword]', error.code, error.message)
+    },
   })
+
+  return {
+    changePassword: mutation.mutate,
+    changePasswordAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -183,7 +312,7 @@ export function useVerify2FA() {
   const queryClient = useQueryClient()
   const router = useRouter()
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (data: Verify2FARequest) => authService.verify2FA(data),
     onSuccess: (data) => {
       sessionStorage.removeItem('2fa_pending_token')
@@ -191,7 +320,21 @@ export function useVerify2FA() {
       queryClient.invalidateQueries({ queryKey: authKeys.me })
       router.replace('/dashboard')
     },
+    onError: (error: ApiError) => {
+      console.error('[Verify2FA]', error.code, error.message)
+    },
   })
+
+  return {
+    verify2FA: mutation.mutate,
+    verify2FAAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 export function useVerifyBackupCode() {
@@ -199,7 +342,7 @@ export function useVerifyBackupCode() {
   const queryClient = useQueryClient()
   const router = useRouter()
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (data: VerifyBackupCodeRequest) => authService.verifyBackupCode(data),
     onSuccess: (data) => {
       sessionStorage.removeItem('2fa_pending_token')
@@ -207,7 +350,21 @@ export function useVerifyBackupCode() {
       queryClient.invalidateQueries({ queryKey: authKeys.me })
       router.replace('/dashboard')
     },
+    onError: (error: ApiError) => {
+      console.error('[VerifyBackupCode]', error.code, error.message)
+    },
   })
+
+  return {
+    verifyBackupCode: mutation.mutate,
+    verifyBackupCodeAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -216,9 +373,23 @@ export function useVerifyBackupCode() {
 
 // Response: { success, data: { qr_code_url, secret, backup_codes }, message }
 export function useSetup2FA() {
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: () => authService.setup2FA(),
+    onError: (error: ApiError) => {
+      console.error('[Setup2FA]', error.code, error.message)
+    },
   })
+
+  return {
+    setup2FA: mutation.mutate,
+    setup2FAAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 // Response: { success, message }
@@ -226,13 +397,27 @@ export function useConfirm2FA() {
   const updateUser = useAuthStore((s) => s.updateUserLocally)
   const queryClient = useQueryClient()
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (data: Confirm2FARequest) => authService.confirm2FA(data),
     onSuccess: () => {
       updateUser({ two_factor_enabled: true })
       queryClient.invalidateQueries({ queryKey: authKeys.me })
     },
+    onError: (error: ApiError) => {
+      console.error('[Confirm2FA]', error.code, error.message)
+    },
   })
+
+  return {
+    confirm2FA: mutation.mutate,
+    confirm2FAAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 // Response: { success, message } — backend revokes all sessions
@@ -241,22 +426,50 @@ export function useDisable2FA() {
   const queryClient = useQueryClient()
   const router = useRouter()
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (data: Disable2FARequest) => authService.disable2FA(data),
     onSuccess: () => {
       clearAuth()
       queryClient.clear()
       router.replace('/auth/login')
     },
+    onError: (error: ApiError) => {
+      console.error('[Disable2FA]', error.code, error.message)
+    },
   })
+
+  return {
+    disable2FA: mutation.mutate,
+    disable2FAAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 // Response: { success, backup_codes, message }
 export function useRegenerate2FABackupCodes() {
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (data: Regenerate2FABackupRequest) =>
       authService.regenerateBackupCodes(data),
+    onError: (error: ApiError) => {
+      console.error('[RegenerateBackupCodes]', error.code, error.message)
+    },
   })
+
+  return {
+    regenerateBackupCodes: mutation.mutate,
+    regenerateBackupCodesAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -267,7 +480,7 @@ export function useRegenerate2FABackupCodes() {
 export function useSessions() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
 
-  return useQuery({
+  const query = useQuery({
     queryKey: authKeys.sessions,
     queryFn: authService.getSessions,
     enabled: isAuthenticated,
@@ -276,29 +489,66 @@ export function useSessions() {
     refetchOnWindowFocus: false,
     retry: 1,
   })
+
+  return {
+    sessions: query.data ?? [],
+    isPending: query.isPending,
+    isSuccess: query.isSuccess,
+    isError: query.isError,
+    error: query.error as ApiError | null,
+    refetch: query.refetch,
+  }
 }
 
 // Response: { success, message }
 export function useRevokeSession() {
   const queryClient = useQueryClient()
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (sessionId: string) => authService.revokeSession(sessionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authKeys.sessions })
     },
+    onError: (error: ApiError) => {
+      console.error('[RevokeSession]', error.code, error.message)
+    },
   })
+
+  return {
+    revokeSession: mutation.mutate,
+    revokeSessionAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 export function useRevokeAllOtherSessions() {
   const queryClient = useQueryClient()
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: () => authService.revokeAllOtherSessions(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authKeys.sessions })
     },
+    onError: (error: ApiError) => {
+      console.error('[RevokeAllOther]', error.code, error.message)
+    },
   })
+
+  return {
+    revokeAllOther: mutation.mutate,
+    revokeAllOtherAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
