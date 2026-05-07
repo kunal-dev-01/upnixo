@@ -8,7 +8,7 @@ function WithMail({ onClick }: { onClick: () => void }) {
       <button
         onClick={onClick}
         type="button"
-        className="relative z-10 flex items-center justify-center gap-3 w-full px-3 py-2 border border-zinc-100 dark:border-zinc-900 rounded-full cursor-pointer overflow-hidden"
+        className="relative z-10 flex items-center justify-center gap-3 w-full px-3 py-2 border border-zinc-200 dark:border-zinc-900 rounded-full cursor-pointer overflow-hidden"
       >
         <Mail className="w-5.5 h-5.5 group-hover:text-white transition-colors duration-300 ease-in-out" />
         <span className="font-semibold text-md group-hover:text-white transition-colors duration-300 ease-in-out">

@@ -21,11 +21,8 @@ export default function Submit({
         outline-none relative overflow-hidden group
         w-full flex items-center justify-center gap-2
         py-2.5 px-6 rounded-full cursor-pointer
-        bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400
+        bg-indigo-600 hover:bg-indigo-700 
         text-white font-medium text-sm tracking-wide
-        border border-transparent
-        shadow-md shadow-indigo-600/20 hover:shadow-lg hover:shadow-indigo-600/40
-        focus:ring-4 focus:ring-indigo-600/20 dark:focus:ring-indigo-400/20
         transition-all duration-300 ease-in-out
         disabled:opacity-70 disabled:cursor-not-allowed disabled:shadow-none
         ${className}
