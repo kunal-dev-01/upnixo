@@ -14,7 +14,7 @@ function SocialLoginButton({ Icon, text, onClick }: SocialLoginButtonProps) {
       <button
         onClick={onClick}
         type="button"
-        className="relative z-10 flex items-center justify-center gap-3 w-full px-3 py-2 border border-zinc-200 dark:border-zinc-900 rounded-full cursor-pointer overflow-hidden"
+        className="relative z-10 flex items-center justify-center gap-3 w-full px-3 py-2 border border-zinc-200 dark:border-zinc-800 lg:dark:border-zinc-800/60 rounded-full cursor-pointer overflow-hidden"
       >
         <Icon className="w-5 h-5 shrink-0" />
 
