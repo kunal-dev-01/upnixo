@@ -1,7 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// services/auth.service.ts
-// All routes under /api/v1/auth
-// Backend response shape: { success: true, access_token?, user?, message? }
+// services/auth.service.ts — matches backend routes + response shapes exactly
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { apiClient } from '@/lib/axios'
@@ -11,12 +9,11 @@ import type {
   LoginRequest,
   LoginResponse,
   AuthResponse,
-  VerifyEmailRequest,
-  ResendVerifyRequest,
   MessageResponse,
   ForgotPasswordRequest,
   ResetPasswordRequest,
   ChangePasswordRequest,
+  ResendVerifyRequest,
   Verify2FARequest,
   VerifyBackupCodeRequest,
   Confirm2FARequest,
@@ -24,6 +21,7 @@ import type {
   Regenerate2FABackupRequest,
   Setup2FAResponse,
   RegenerateBackupCodesResponse,
+  SessionsResponse,
   SessionView,
 } from '@/types/auth.types'
 
@@ -33,11 +31,13 @@ const BASE = '/auth'
 // ACCOUNT
 // ─────────────────────────────────────────────────────────────────────────────
 
+// POST /auth/register → { success, message }
 async function register(data: RegisterRequest): Promise<RegisterResponse> {
   const res = await apiClient.post<RegisterResponse>(`${BASE}/register`, data)
   return res.data
 }
 
+// GET /auth/verify-email?token=xxx → { success, access_token, user }
 async function verifyEmail(token: string): Promise<AuthResponse> {
   const res = await apiClient.get<AuthResponse>(`${BASE}/verify-email`, {
     params: { token },
@@ -45,6 +45,7 @@ async function verifyEmail(token: string): Promise<AuthResponse> {
   return res.data
 }
 
+// POST /auth/resend-verify → { success, message }
 async function resendVerify(data: ResendVerifyRequest): Promise<MessageResponse> {
   const res = await apiClient.post<MessageResponse>(`${BASE}/resend-verify`, data)
   return res.data
@@ -54,29 +55,32 @@ async function resendVerify(data: ResendVerifyRequest): Promise<MessageResponse>
 // LOGIN
 // ─────────────────────────────────────────────────────────────────────────────
 
+// POST /auth/login → { success, access_token, user } | { success, two_fa_required, two_fa_pending_token }
 async function login(data: LoginRequest): Promise<LoginResponse> {
   const res = await apiClient.post<LoginResponse>(`${BASE}/login`, data)
   return res.data
 }
 
+// POST /auth/refresh → { success, access_token, user }
 async function refresh(): Promise<AuthResponse> {
   const res = await apiClient.post<AuthResponse>(`${BASE}/refresh`)
   return res.data
 }
 
+// POST /auth/logout → { success, message }
 async function logout(): Promise<MessageResponse> {
   const res = await apiClient.post<MessageResponse>(`${BASE}/logout`)
   return res.data
 }
 
+// POST /auth/logout-all → { success, message }
 async function logoutAll(): Promise<MessageResponse> {
   const res = await apiClient.post<MessageResponse>(`${BASE}/logout-all`)
   return res.data
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// OAUTH
-// Redirect user to backend — backend handles provider redirect + callback
+// OAUTH — redirect to backend, backend handles provider + callback
 // ─────────────────────────────────────────────────────────────────────────────
 
 function redirectToGoogle(): void {
@@ -91,16 +95,19 @@ function redirectToGitHub(): void {
 // PASSWORD
 // ─────────────────────────────────────────────────────────────────────────────
 
+// POST /auth/forgot-password → { success, message }
 async function forgotPassword(data: ForgotPasswordRequest): Promise<MessageResponse> {
   const res = await apiClient.post<MessageResponse>(`${BASE}/forgot-password`, data)
   return res.data
 }
 
+// POST /auth/reset-password → { success, message }
 async function resetPassword(data: ResetPasswordRequest): Promise<MessageResponse> {
   const res = await apiClient.post<MessageResponse>(`${BASE}/reset-password`, data)
   return res.data
 }
 
+// POST /auth/change-password → { success, message }
 async function changePassword(data: ChangePasswordRequest): Promise<MessageResponse> {
   const res = await apiClient.post<MessageResponse>(`${BASE}/change-password`, data)
   return res.data
@@ -110,32 +117,40 @@ async function changePassword(data: ChangePasswordRequest): Promise<MessageRespo
 // 2FA
 // ─────────────────────────────────────────────────────────────────────────────
 
+// POST /auth/2fa/setup → { success, data: { qr_code_url, secret, backup_codes }, message }
 async function setup2FA(): Promise<Setup2FAResponse> {
   const res = await apiClient.post<Setup2FAResponse>(`${BASE}/2fa/setup`)
   return res.data
 }
 
+// POST /auth/2fa/confirm → { success, message }
 async function confirm2FA(data: Confirm2FARequest): Promise<MessageResponse> {
   const res = await apiClient.post<MessageResponse>(`${BASE}/2fa/confirm`, data)
   return res.data
 }
 
+// POST /auth/2fa/verify → { success, access_token, user }
 async function verify2FA(data: Verify2FARequest): Promise<AuthResponse> {
   const res = await apiClient.post<AuthResponse>(`${BASE}/2fa/verify`, data)
   return res.data
 }
 
+// POST /auth/2fa/backup → { success, access_token, user }
 async function verifyBackupCode(data: VerifyBackupCodeRequest): Promise<AuthResponse> {
   const res = await apiClient.post<AuthResponse>(`${BASE}/2fa/backup`, data)
   return res.data
 }
 
+// POST /auth/2fa/disable → { success, message }
 async function disable2FA(data: Disable2FARequest): Promise<MessageResponse> {
   const res = await apiClient.post<MessageResponse>(`${BASE}/2fa/disable`, data)
   return res.data
 }
 
-async function regenerateBackupCodes(data: Regenerate2FABackupRequest): Promise<RegenerateBackupCodesResponse> {
+// POST /auth/2fa/backup/regenerate → { success, backup_codes, message }
+async function regenerateBackupCodes(
+  data: Regenerate2FABackupRequest,
+): Promise<RegenerateBackupCodesResponse> {
   const res = await apiClient.post<RegenerateBackupCodesResponse>(
     `${BASE}/2fa/backup/regenerate`,
     data,
@@ -147,16 +162,19 @@ async function regenerateBackupCodes(data: Regenerate2FABackupRequest): Promise<
 // SESSIONS
 // ─────────────────────────────────────────────────────────────────────────────
 
+// GET /auth/sessions → { success, sessions: SessionView[] }
 async function getSessions(): Promise<SessionView[]> {
-  const res = await apiClient.get<{ sessions: SessionView[] }>(`${BASE}/sessions`)
+  const res = await apiClient.get<SessionsResponse>(`${BASE}/sessions`)
   return res.data.sessions
 }
 
+// DELETE /auth/sessions/:id → { success, message }
 async function revokeSession(sessionId: string): Promise<MessageResponse> {
   const res = await apiClient.delete<MessageResponse>(`${BASE}/sessions/${sessionId}`)
   return res.data
 }
 
+// POST /auth/logout-all → { success, message }
 async function revokeAllOtherSessions(): Promise<MessageResponse> {
   const res = await apiClient.post<MessageResponse>(`${BASE}/logout-all`)
   return res.data
@@ -167,30 +185,24 @@ async function revokeAllOtherSessions(): Promise<MessageResponse> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const authService = {
-  // Account
   register,
   verifyEmail,
   resendVerify,
-  // Login
   login,
   refresh,
   logout,
   logoutAll,
-  // OAuth
   redirectToGoogle,
   redirectToGitHub,
-  // Password
   forgotPassword,
   resetPassword,
   changePassword,
-  // 2FA
   setup2FA,
   confirm2FA,
   verify2FA,
   verifyBackupCode,
   disable2FA,
   regenerateBackupCodes,
-  // Sessions
   getSessions,
   revokeSession,
   revokeAllOtherSessions,

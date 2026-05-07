@@ -1,124 +1,156 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// types/auth/auth.types.ts
-// All types match backend dto package exactly
+// types/auth/auth.types.ts — matches backend handler responses exactly
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type { User } from '@/types/user.types'
 
-// ── Requests ─────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// REQUESTS
+// ─────────────────────────────────────────────────────────────────────────────
 
 export interface RegisterRequest {
-    full_name: string
-    email: string
-    password: string
+  full_name: string
+  email: string
+  password: string
 }
 
 export interface LoginRequest {
-    email: string
-    password: string
+  email: string
+  password: string
 }
 
 export interface VerifyEmailRequest {
-    token: string
+  token: string
 }
 
 export interface ResendVerifyRequest {
-    email: string
+  email: string
 }
 
 export interface ForgotPasswordRequest {
-    email: string
+  email: string
 }
 
 export interface ResetPasswordRequest {
-    token: string
-    password: string
+  token: string
+  password: string
 }
 
 export interface ChangePasswordRequest {
-    current_password: string
-    new_password: string
-}
-
-// ── 2FA Requests ──────────────────────────────────────────────────────────────
-
-export interface Verify2FARequest {
-    code: string
-    two_fa_pending_token: string
-}
-
-export interface VerifyBackupCodeRequest {
-    backup_code: string
-    two_fa_pending_token: string
+  current_password: string
+  new_password: string
 }
 
 export interface Confirm2FARequest {
-    code: string
+  code: string
+}
+
+export interface Verify2FARequest {
+  code: string
+  two_fa_pending_token: string
+}
+
+export interface VerifyBackupCodeRequest {
+  backup_code: string
+  two_fa_pending_token: string
 }
 
 export interface Disable2FARequest {
-    code: string
+  code: string
 }
 
 export interface Regenerate2FABackupRequest {
-    code: string
+  code: string
 }
 
-// ── Responses ────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// RESPONSES — match backend fiber.Map exactly
+// ─────────────────────────────────────────────────────────────────────────────
 
+// { success: true, message: string }
 export interface MessageResponse {
-    message: string
+  success: true
+  message: string
 }
 
-export interface RegisterResponse extends MessageResponse { }
+// POST /register → { success, message }
+export type RegisterResponse = MessageResponse
 
-// Returned after email verify, login (no 2FA), and OAuth (no 2FA)
+// GET /verify-email → { success, access_token, user }
+// POST /2fa/verify  → { success, access_token, user }
+// POST /2fa/backup  → { success, access_token, user }
 export interface AuthResponse {
-    access_token: string
-    user: User
+  success: true
+  access_token: string
+  user: User
 }
 
-// Returned when login succeeds but 2FA is required
+// POST /login — two possible shapes
+export interface LoginSuccessResponse {
+  success: true
+  access_token: string
+  user: User
+}
+
 export interface TwoFAPendingResponse {
-    two_fa_required: true
-    two_fa_pending_token: string
-    email: string
+  success: true
+  two_fa_required: true
+  two_fa_pending_token: string
+  message: string
 }
 
-// Login can return either full auth or 2FA pending
-export type LoginResponse = AuthResponse | TwoFAPendingResponse
+export type LoginResponse = LoginSuccessResponse | TwoFAPendingResponse
+
+// POST /auth/oauth/google/callback — same two shapes as login
+export type OAuthCallbackResponse = LoginSuccessResponse | TwoFAPendingResponse
+
+// POST /2fa/setup → { success, data: { qr_code_url, secret, backup_codes }, message }
+export interface Setup2FAData {
+  qr_code_url: string
+  secret: string
+  backup_codes: string[]
+}
 
 export interface Setup2FAResponse {
-    qr_code_url: string
-    secret: string
-    backup_codes: string[]
+  success: true
+  data: Setup2FAData
+  message: string
 }
 
+// POST /2fa/backup/regenerate → { success, backup_codes, message }
 export interface RegenerateBackupCodesResponse {
-    backup_codes: string[]
+  success: true
+  backup_codes: string[]
+  message: string
 }
 
-// ── Session ───────────────────────────────────────────────────────────────────
-
+// GET /sessions → { success, sessions: SessionView[] }
 export interface SessionView {
-    id: string
-    ip_address: string
-    browser: string
-    os: string
-    device_name: string
-    city: string
-    country: string
-    created_at: string
-    expires_at: string
-    is_current: boolean
+  id: string
+  ip_address: string
+  browser: string
+  os: string
+  device_name: string
+  city: string
+  country: string
+  created_at: string
+  expires_at: string
+  is_current: boolean
 }
 
-// ── Type guards ───────────────────────────────────────────────────────────────
+export interface SessionsResponse {
+  success: true
+  sessions: SessionView[]
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TYPE GUARDS
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function isTwoFAPending(res: LoginResponse): res is TwoFAPendingResponse {
-    return (res as TwoFAPendingResponse).two_fa_required === true
+  return 'two_fa_required' in res && res.two_fa_required === true
 }
 
-export function isAuthResponse(res: LoginResponse): res is AuthResponse {
-    return (res as AuthResponse).access_token !== undefined
+export function isAuthSuccess(res: LoginResponse): res is LoginSuccessResponse {
+  return 'access_token' in res
 }

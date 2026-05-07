@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/services/auth.service'
 import { useAuthStore } from '@/store/auth.store'
-import { isTwoFAPending } from '@/types/auth.types'
+import { isTwoFAPending, isAuthSuccess } from '@/types/auth.types'
 import type { ApiError } from '@/types/api.types'
 import type {
   RegisterRequest,
@@ -33,6 +33,7 @@ export const authKeys = {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // REGISTER
+// Response: { success, message }
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useRegister() {
@@ -43,7 +44,7 @@ export function useRegister() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // VERIFY EMAIL
-// Auto-logs in on success
+// Response: { success, access_token, user }
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useVerifyEmail() {
@@ -61,6 +62,7 @@ export function useVerifyEmail() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // RESEND VERIFY
+// Response: { success, message }
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useResendVerify() {
@@ -71,8 +73,8 @@ export function useResendVerify() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LOGIN
-// No 2FA  → setAuth, redirect to dashboard
-// 2FA req → redirect to /auth/2fa with pending token
+// Response A: { success, access_token, user }       → setAuth, go dashboard
+// Response B: { success, two_fa_required, token }   → go /auth/2fa
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useLogin() {
@@ -84,22 +86,23 @@ export function useLogin() {
     mutationFn: (data: LoginRequest) => authService.login(data),
     onSuccess: (data) => {
       if (isTwoFAPending(data)) {
-        // Store pending token in session storage — cleared after 2FA
         sessionStorage.setItem('2fa_pending_token', data.two_fa_pending_token)
-        sessionStorage.setItem('2fa_email', data.email)
         router.push('/auth/2fa')
         return
       }
-      setAuth(data.user, data.access_token)
-      queryClient.invalidateQueries({ queryKey: authKeys.me })
-      router.push('/dashboard')
+
+      if (isAuthSuccess(data)) {
+        setAuth(data.user, data.access_token)
+        queryClient.invalidateQueries({ queryKey: authKeys.me })
+        router.push('/dashboard')
+      }
     },
   })
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LOGOUT
-// Always clear local state — even if backend call fails
+// Always clear local state — even if backend fails
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useLogout() {
@@ -116,7 +119,7 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => authService.logout(),
     onSuccess: cleanup,
-    onError: cleanup, // always logout locally
+    onError: cleanup,
   })
 }
 
@@ -136,7 +139,7 @@ export function useLogoutAll() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// OAUTH
+// OAUTH — just redirect, backend handles everything
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useGoogleLogin() {
@@ -149,6 +152,7 @@ export function useGitHubLogin() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PASSWORD
+// All responses: { success, message }
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useForgotPassword() {
@@ -171,6 +175,7 @@ export function useChangePassword() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 2FA — LOGIN STEP 2
+// Response: { success, access_token, user }
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function useVerify2FA() {
@@ -182,7 +187,6 @@ export function useVerify2FA() {
     mutationFn: (data: Verify2FARequest) => authService.verify2FA(data),
     onSuccess: (data) => {
       sessionStorage.removeItem('2fa_pending_token')
-      sessionStorage.removeItem('2fa_email')
       setAuth(data.user, data.access_token)
       queryClient.invalidateQueries({ queryKey: authKeys.me })
       router.replace('/dashboard')
@@ -199,7 +203,6 @@ export function useVerifyBackupCode() {
     mutationFn: (data: VerifyBackupCodeRequest) => authService.verifyBackupCode(data),
     onSuccess: (data) => {
       sessionStorage.removeItem('2fa_pending_token')
-      sessionStorage.removeItem('2fa_email')
       setAuth(data.user, data.access_token)
       queryClient.invalidateQueries({ queryKey: authKeys.me })
       router.replace('/dashboard')
@@ -208,18 +211,20 @@ export function useVerifyBackupCode() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 2FA — MANAGEMENT (authenticated)
+// 2FA — MANAGEMENT
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Response: { success, data: { qr_code_url, secret, backup_codes }, message }
 export function useSetup2FA() {
   return useMutation({
     mutationFn: () => authService.setup2FA(),
   })
 }
 
+// Response: { success, message }
 export function useConfirm2FA() {
-  const queryClient = useQueryClient()
   const updateUser = useAuthStore((s) => s.updateUserLocally)
+  const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (data: Confirm2FARequest) => authService.confirm2FA(data),
@@ -230,6 +235,7 @@ export function useConfirm2FA() {
   })
 }
 
+// Response: { success, message } — backend revokes all sessions
 export function useDisable2FA() {
   const clearAuth = useAuthStore((s) => s.clearAuth)
   const queryClient = useQueryClient()
@@ -238,7 +244,6 @@ export function useDisable2FA() {
   return useMutation({
     mutationFn: (data: Disable2FARequest) => authService.disable2FA(data),
     onSuccess: () => {
-      // Backend revokes all sessions on disable — force re-login
       clearAuth()
       queryClient.clear()
       router.replace('/auth/login')
@@ -246,6 +251,7 @@ export function useDisable2FA() {
   })
 }
 
+// Response: { success, backup_codes, message }
 export function useRegenerate2FABackupCodes() {
   return useMutation({
     mutationFn: (data: Regenerate2FABackupRequest) =>
@@ -257,6 +263,7 @@ export function useRegenerate2FABackupCodes() {
 // SESSIONS
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Response: { success, sessions: SessionView[] }
 export function useSessions() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
 
@@ -271,6 +278,7 @@ export function useSessions() {
   })
 }
 
+// Response: { success, message }
 export function useRevokeSession() {
   const queryClient = useQueryClient()
 
@@ -294,10 +302,9 @@ export function useRevokeAllOtherSessions() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HELPERS — use in components
+// HELPERS — use directly in components
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Returns field-level validation errors from an ApiError, or null */
 export function getFieldErrors(error: unknown): Record<string, string> | null {
   if (error && typeof error === 'object' && 'fields' in error) {
     return (error as ApiError).fields ?? null
@@ -305,10 +312,9 @@ export function getFieldErrors(error: unknown): Record<string, string> | null {
   return null
 }
 
-/** Returns human-readable error message from an ApiError */
 export function getErrorMessage(error: unknown): string {
   if (error && typeof error === 'object' && 'message' in error) {
-    return (error as ApiError).message
+    return (error as Error).message
   }
   return 'Something went wrong'
 }
