@@ -6,13 +6,13 @@ import { motion } from "framer-motion";
 import { NAV_LINKS } from "@/utils/constants";
 
 
+const MotionLink = motion(Link);
 
 interface NavbarProps {
   onOpenSidebar: () => void;
 }
 
 function Navbar({ onOpenSidebar }: NavbarProps) {
-  const MotionLink = motion(Link);
 
   return (
     <div className="w-fit flex items-center justify-center md:gap-x-3 gap-x-5 py-2 h-12 border border-zinc-100 dark:border-zinc-900 rounded-full pl-4 pr-1 backdrop-blur-lg bg-zinc-50/50 dark:bg-zinc-950/50">
@@ -109,7 +109,7 @@ function Navbar({ onOpenSidebar }: NavbarProps) {
           className="text-sm font-semibold  px-4 py-2 rounded-full border-2 border-indigo-600 text-zinc-800 dark:text-white hover:text-white transition-all duration-300 ease-in-out relative group cursor-pointer"
         >
           <span>Start a Project</span>
-          <div className="absolute inset-0 bg-indigo-600 rounded-full scale-80 opacity-0 -z-10 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 ease-in-out"></div>
+          <div className="absolute inset-0 bg-indigo-600 rounded-full scale-80 opacity-0 -z-10 group-hover:opacity-100 group-hover:scale-100 transition-all duration-400 ease-in-out"></div>
         </Link>
       </div>
 
