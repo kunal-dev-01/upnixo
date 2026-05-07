@@ -129,14 +129,11 @@ export function useLogin() {
     onSuccess: (data) => {
       if (isTwoFAPending(data)) {
         sessionStorage.setItem('2fa_pending_token', data.two_fa_pending_token)
-        router.push('/auth/2fa')
-        return
       }
 
       if (isAuthSuccess(data)) {
         setAuth(data.user, data.access_token)
         queryClient.invalidateQueries({ queryKey: authKeys.me })
-        router.push('/dashboard')
       }
     },
     onError: (error: ApiError) => {
@@ -318,7 +315,6 @@ export function useVerify2FA() {
       sessionStorage.removeItem('2fa_pending_token')
       setAuth(data.user, data.access_token)
       queryClient.invalidateQueries({ queryKey: authKeys.me })
-      router.replace('/dashboard')
     },
     onError: (error: ApiError) => {
       console.error('[Verify2FA]', error.code, error.message)
@@ -348,7 +344,6 @@ export function useVerifyBackupCode() {
       sessionStorage.removeItem('2fa_pending_token')
       setAuth(data.user, data.access_token)
       queryClient.invalidateQueries({ queryKey: authKeys.me })
-      router.replace('/dashboard')
     },
     onError: (error: ApiError) => {
       console.error('[VerifyBackupCode]', error.code, error.message)

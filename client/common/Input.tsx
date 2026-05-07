@@ -1,25 +1,24 @@
 import { EyeClose, EyeOpen } from "@/svg/Common";
 import { memo, useState } from "react";
+import type { InputHTMLAttributes } from "react";
 
-interface InputProps {
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  type: string;
-  placeholder: string;
   register: any;
   error?: string;
   name: string;
-  disabled?: boolean;
 }
 
 const Input = memo(
   ({
     label,
-    type,
+    type = "text",
     placeholder,
     register,
     error,
     name,
     disabled,
+    ...rest
   }: InputProps) => {
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === "password";
@@ -39,6 +38,7 @@ const Input = memo(
             disabled={disabled}
             type={isPassword ? (showPassword ? "text" : "password") : type}
             placeholder={placeholder}
+            {...rest}
             {...register(name)}
             className={`
             w-full px-5 py-2.5 text-sm font-semibold border-2 rounded-full outline-none transition-all duration-300

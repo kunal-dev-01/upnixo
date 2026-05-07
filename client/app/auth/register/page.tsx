@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { registerSchema, type RegisterSchema } from "@/schemas/auth.schema";
@@ -15,14 +16,17 @@ import { motion } from "framer-motion";
 
 // Components
 import WithMail from "@/common/WithMail";
-import GoogleButton from "@/common/GoogleButton";
-import GithubButton from "@/common/GithubButton";
+import IconButton from "@/common/IconButton";
 import RegisterForm from "@/components/auth/Register";
 import ResendEmail from "@/components/auth/ResendEmail";
+import { Google } from "@/svg/Auth";
+import { Github } from "@/svg/More";
+import { User } from "@/svg/Common";
 
 type Step = "initial" | "form" | "success";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>("initial");
   const [registeredEmail, setRegisteredEmail] = useState("");
   const [countdown, setCountdown] = useState(0);
@@ -124,6 +128,11 @@ export default function RegisterPage() {
 
           <motion.div variants={itemVariants} className="space-y-4 pt-4">
             <WithMail onClick={() => setStep("form")} />
+            <IconButton
+              Icon={User}
+              text="Login to your account"
+              onClick={() => router.push("/auth/login")}
+            />
 
             <div className="relative flex items-center py-2">
               <div className="grow border-t border-zinc-200 dark:border-zinc-800"></div>
@@ -134,8 +143,16 @@ export default function RegisterPage() {
             </div>
 
             <div className="grid grid-rows-2 gap-4">
-              <GoogleButton onClick={() => googleLogin()} />
-              <GithubButton onClick={() => githubLogin()} />
+              <IconButton
+                Icon={Google}
+                text="Continue with Google"
+                onClick={() => googleLogin()}
+              />
+              <IconButton
+                Icon={Github}
+                text="Continue with Github"
+                onClick={() => githubLogin()}
+              />
             </div>
           </motion.div>
         </motion.div>
