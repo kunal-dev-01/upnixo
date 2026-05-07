@@ -5,6 +5,8 @@ import { Sidebar } from "@/svg/Common";
 import { motion } from "framer-motion";
 import { NAV_LINKS } from "@/utils/constants";
 
+
+
 interface NavbarProps {
   onOpenSidebar: () => void;
 }
