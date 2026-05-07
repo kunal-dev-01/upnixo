@@ -73,10 +73,10 @@ export default function LoginForm({ isLoading, onBack }: LoginFormProps) {
             error={errors.password?.message}
             disabled={isLoading}
           />
-          <div className="flex justify-end px-1">
+          <div className="flex justify-end px-1 mt-5">
             <Link
               href="/auth/forgot-password"
-              className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+              className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors hover:underline"
             >
               Forgot password?
             </Link>
