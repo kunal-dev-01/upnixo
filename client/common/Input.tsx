@@ -1,88 +1,85 @@
-import { EyeClose, EyeOpen, TriangleAlert } from '@/svg/Common';
-import React, { useState, forwardRef } from 'react';
+import { EyeClose, EyeOpen } from "@/svg/Common";
+import { memo, useState } from "react";
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
+interface InputProps {
+  label: string;
+  type: string;
+  placeholder: string;
+  register: any;
   error?: string;
-  variant?: 'default' | 'auth';
+  name: string;
+  disabled?: boolean;
 }
 
-const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, type = 'text', variant = 'default', className = '', ...props }, ref) => {
+const Input = memo(
+  ({
+    label,
+    type,
+    placeholder,
+    register,
+    error,
+    name,
+    disabled,
+  }: InputProps) => {
     const [showPassword, setShowPassword] = useState(false);
-
-    // Determine the actual input type for password toggle
-    const inputType = type === 'password' && showPassword ? 'text' : type;
-
-    // Base styles for all inputs
-    const baseInputStyles = "w-full transition-all duration-200 outline-none placeholder:text-gray-400";
-    
-    // Variant specific styling
-    const variants = {
-      default: "rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500",
-      auth: "rounded-lg border-2 border-gray-100 bg-gray-50 px-4 py-3 text-base focus:border-gray-900 focus:bg-white disabled:cursor-not-allowed disabled:opacity-50"
-    };
-
-    // Error styling
-    const errorStyles = error 
-      ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 bg-red-50/10" 
-      : "";
+    const isPassword = type === "password";
 
     return (
-      <div className={`w-full flex flex-col gap-1.5 ${className}`}>
-        {/* Label */}
-        {label && (
-          <label 
-            className={`font-medium ${variant === 'auth' ? 'text-gray-900 text-sm' : 'text-gray-700 text-sm'}`}
-            htmlFor={props.id}
-          >
-            {label}
-          </label>
-        )}
+      <div className="flex flex-col gap-1.5 w-full">
+        <label
+          htmlFor={name}
+          className="text-sm font-medium text-zinc-700 dark:text-zinc-300 ml-1"
+        >
+          {label}
+        </label>
 
-        {/* Input Wrapper (Relative for absolute positioning of icons) */}
-        <div className="relative">
+        <div className="relative group">
           <input
-            ref={ref}
-            type={inputType}
+            id={name}
+            disabled={disabled}
+            type={isPassword ? (showPassword ? "text" : "password") : type}
+            placeholder={placeholder}
+            {...register(name)}
             className={`
-              ${baseInputStyles}
-              ${variants[variant]}
-              ${errorStyles}
-              ${type === 'password' ? 'pr-10' : ''} 
-            `}
-            {...props}
+            w-full px-5 py-2.5 text-sm font-semibold border-2 rounded-full outline-none transition-all duration-300
+            ${isPassword ? "pr-12" : ""} 
+            ${
+              error
+                ? "border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 dark:focus:ring-red-500/20"
+                : "border-zinc-200 dark:border-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-4 focus:ring-indigo-600/10 dark:focus:ring-indigo-400/20"
+            } 
+            text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 
+            disabled:cursor-not-allowed disabled:bg-zinc-100 dark:disabled:bg-zinc-800 disabled:text-zinc-500 dark:disabled:text-zinc-600
+          `}
           />
 
-          {/* Password Eye Toggle */}
-          {type === 'password' && (
+          {isPassword && (
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800 focus:outline-none transition-colors"
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              tabIndex={-1}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
             >
               {showPassword ? (
-                <EyeClose className="h-5 w-5" aria-hidden="true" />
+                <EyeOpen className="w-5 h-5" />
               ) : (
-                <EyeOpen className="h-5 w-5" aria-hidden="true" />
+                <EyeClose className="w-5.5 h-5.5" />
               )}
             </button>
           )}
         </div>
 
-        {/* Error Message */}
+        {/* Error text */}
         {error && (
-          <div className="flex items-center gap-1 text-sm text-red-500 mt-0.5 animate-in fade-in slide-in-from-top-1">
-            <TriangleAlert className="h-4 w-4" />
-            <span>{error}</span>
-          </div>
+          <span className="text-[13px] text-red-500 mt-0.5 ml-1 font-medium">
+            {error}
+          </span>
         )}
       </div>
     );
-  }
+  },
 );
 
-Input.displayName = 'Input';
+Input.displayName = "Input";
 
 export default Input;
