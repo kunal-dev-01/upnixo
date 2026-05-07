@@ -12,6 +12,7 @@ interface NavbarProps {
 }
 
 function Navbar({ onOpenSidebar }: NavbarProps) {
+  const MotionLink = motion(Link);
 
   return (
     <div className="w-fit flex items-center justify-center md:gap-x-3 gap-x-5 py-2 h-12 border border-zinc-100 dark:border-zinc-900 rounded-full pl-4 pr-1 backdrop-blur-lg bg-zinc-50/50 dark:bg-zinc-950/50">
@@ -37,14 +38,14 @@ function Navbar({ onOpenSidebar }: NavbarProps) {
         className="hidden md:flex items-center gap-1 relative px-2"
       >
         {NAV_LINKS.map((link) => (
-          <Link
+          <MotionLink
             key={link.name}
             href={link.href}
+            initial="initial"
+            whileHover="hover"
             className="relative px-3 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-300 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-full"
           >
-            <motion.div
-              initial="initial"
-              whileHover="hover"
+            <div
               className="relative flex overflow-hidden whitespace-nowrap"
             >
               {/* Top Text - Goes Up */}
@@ -88,8 +89,8 @@ function Navbar({ onOpenSidebar }: NavbarProps) {
                   </motion.span>
                 ))}
               </div>
-            </motion.div>
-          </Link>
+            </div>
+          </MotionLink>
         ))}
       </nav>
 
