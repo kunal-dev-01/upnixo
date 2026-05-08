@@ -18,12 +18,12 @@ import (
 // ─────────────────────────────────────────────────────────────────────────────
 
 type AuthRepository interface {
-	GetByID(ctx context.Context, id uuid.UUID) (*models.User, error)
-	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*models.User, *models.UserPreferences, error)
+	GetUserByEmail(ctx context.Context, email string) (*models.User, *models.UserPreferences, error)
 
 	// Email + Password
 	Register(ctx context.Context, params RegisterParams) (*models.User, error)
-	GetUserForLogin(ctx context.Context, email string) (*models.User, error)
+	GetUserForLogin(ctx context.Context, email string) (*models.User, *models.UserPreferences, error)
 	VerifyEmail(ctx context.Context, userID uuid.UUID) error
 
 	// Password reset
@@ -31,7 +31,7 @@ type AuthRepository interface {
 	ResetPassword(ctx context.Context, userID uuid.UUID, newHash string) error
 
 	// OAuth
-	FindOrCreateOAuthUser(ctx context.Context, params OAuthLoginParams) (*models.User, bool, error)
+	FindOrCreateOAuthUser(ctx context.Context, params OAuthLoginParams) (*models.User, *models.UserPreferences, bool, error)
 	LinkOAuthAccount(ctx context.Context, params LinkOAuthParams) error
 
 	// 2FA
@@ -197,50 +197,50 @@ func (r *authRepo) Register(ctx context.Context, params RegisterParams) (*models
 // GET BY ID
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (r *authRepo) GetByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
+func (r *authRepo) GetByID(ctx context.Context, id uuid.UUID) (*models.User, *models.UserPreferences, error) {
 	sql := `SELECT ` + userWithPrefsColumns + userJoinPrefs + ` WHERE u.id = @id AND u.deleted_at IS NULL`
 
 	rows, err := db.Pool.Query(ctx, sql, pgx.NamedArgs{"id": id})
 	if err != nil {
 		r.log.Error("get by id: query failed", err, map[string]any{"user_id": id})
-		return nil, utils.Internal(err)
+		return nil, nil, utils.Internal(err)
 	}
 
-	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
+	res, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.UserWithPrefs])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, utils.NotFound("user not found")
+			return nil, nil, utils.NotFound("user not found")
 		}
 		r.log.Error("get by id: scan failed", err, map[string]any{"user_id": id})
-		return nil, utils.Internal(err)
+		return nil, nil, utils.Internal(err)
 	}
 
-	return &user, nil
+	return &res.User, &res.UserPreferences, nil
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LOGIN
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (r *authRepo) GetUserForLogin(ctx context.Context, email string) (*models.User, error) {
+func (r *authRepo) GetUserForLogin(ctx context.Context, email string) (*models.User, *models.UserPreferences, error) {
 	sql := `SELECT ` + userWithPrefsColumns + userJoinPrefs + ` WHERE u.email = @email AND u.deleted_at IS NULL`
 
 	rows, err := db.Pool.Query(ctx, sql, pgx.NamedArgs{"email": email})
 	if err != nil {
 		r.log.Error("login: query failed", err, nil)
-		return nil, utils.Internal(err)
+		return nil, nil, utils.Internal(err)
 	}
 
-	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
+	res, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.UserWithPrefs])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, utils.Unauthorized("invalid email or password")
+			return nil, nil, utils.Unauthorized("invalid email or password")
 		}
 		r.log.Error("login: scan failed", err, nil)
-		return nil, utils.Internal(err)
+		return nil, nil, utils.Internal(err)
 	}
 
-	return &user, nil
+	return &res.User, &res.UserPreferences, nil
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -311,26 +311,29 @@ func (r *authRepo) ResetPassword(ctx context.Context, userID uuid.UUID, newHash 
 // OAUTH — FIND OR CREATE
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (r *authRepo) FindOrCreateOAuthUser(ctx context.Context, params OAuthLoginParams) (*models.User, bool, error) {
-	existing, err := r.findOAuthUser(ctx, params.Provider, params.ProviderUserID)
+func (r *authRepo) FindOrCreateOAuthUser(ctx context.Context, params OAuthLoginParams) (*models.User, *models.UserPreferences, bool, error) {
+	u, p, err := r.findOAuthUser(ctx, params.Provider, params.ProviderUserID)
 	if err == nil {
-		return existing, false, nil
+		return u, p, false, nil
 	}
 	if !errors.Is(err, errOAuthNotFound) {
-		return nil, false, err
+		return nil, nil, false, err
 	}
 
 	user, err := r.createOAuthUser(ctx, params)
 	if err != nil {
-		return nil, false, err
+		return nil, nil, false, err
 	}
 
-	return user, true, nil
+	// For new users, we don't fetch prefs yet, but we inserted them.
+	// We can just return nil or fetch them. Let's fetch them to be safe.
+	_, prefs, err := r.GetByID(ctx, user.ID)
+	return user, prefs, true, err
 }
 
 var errOAuthNotFound = errors.New("oauth account not found")
 
-func (r *authRepo) findOAuthUser(ctx context.Context, provider models.OAuthProvider, providerUserID string) (*models.User, error) {
+func (r *authRepo) findOAuthUser(ctx context.Context, provider models.OAuthProvider, providerUserID string) (*models.User, *models.UserPreferences, error) {
 	sql := `
 		SELECT ` + userWithPrefsColumns + `
 		FROM   users u
@@ -345,18 +348,18 @@ func (r *authRepo) findOAuthUser(ctx context.Context, provider models.OAuthProvi
 		"provider_user_id": providerUserID,
 	})
 	if err != nil {
-		return nil, utils.Internal(err)
+		return nil, nil, utils.Internal(err)
 	}
 
-	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
+	res, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.UserWithPrefs])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errOAuthNotFound
+			return nil, nil, errOAuthNotFound
 		}
-		return nil, utils.Internal(err)
+		return nil, nil, utils.Internal(err)
 	}
 
-	return &user, nil
+	return &res.User, &res.UserPreferences, nil
 }
 
 func (r *authRepo) createOAuthUser(ctx context.Context, params OAuthLoginParams) (*models.User, error) {
@@ -716,26 +719,26 @@ func (r *authRepo) UpdatePreferences(ctx context.Context, userID uuid.UUID, para
 // GET USER BY EMAIL
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (r *authRepo) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+func (r *authRepo) GetUserByEmail(ctx context.Context, email string) (*models.User, *models.UserPreferences, error) {
 	// Wahi same join query use kar rahe hain taaki preferences bhi sath mein aayein
 	sql := `SELECT ` + userWithPrefsColumns + userJoinPrefs + ` WHERE u.email = @email AND u.deleted_at IS NULL`
 
 	rows, err := db.Pool.Query(ctx, sql, pgx.NamedArgs{"email": email})
 	if err != nil {
 		r.log.Error("get user by email: query failed", err, map[string]any{"email": email})
-		return nil, utils.Internal(err)
+		return nil, nil, utils.Internal(err)
 	}
 
-	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
+	res, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.UserWithPrefs])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, utils.NotFound("user not found")
+			return nil, nil, utils.NotFound("user not found")
 		}
 		r.log.Error("get user by email: scan failed", err, map[string]any{"email": email})
-		return nil, utils.Internal(err)
+		return nil, nil, utils.Internal(err)
 	}
 
-	return &user, nil
+	return &res.User, &res.UserPreferences, nil
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -128,7 +128,7 @@ func (s *OAuthService) HandleCallback(
 	}
 
 	// 4. Find or create user + link OAuth account
-	user, _, err := s.authRepo.FindOrCreateOAuthUser(ctx, repo.OAuthLoginParams{
+	user, prefs, _, err := s.authRepo.FindOrCreateOAuthUser(ctx, repo.OAuthLoginParams{
 		Provider:          provider,
 		ProviderUserID:    profile.ID,
 		ProviderEmail:     profile.Email,
@@ -168,7 +168,7 @@ func (s *OAuthService) HandleCallback(
 	}
 
 	// 7. No 2FA — create full session
-	result, err := s.createSession(ctx, user, clientInfo)
+	result, err := s.createSession(ctx, user, prefs, clientInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -309,7 +309,7 @@ func (s *OAuthService) fetchGitHubPrimaryEmail(client *http.Client) (string, err
 // INTERNAL
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (s *OAuthService) createSession(ctx context.Context, user *models.User, info dto.ClientInfo) (*dto.AuthResult, error) {
+func (s *OAuthService) createSession(ctx context.Context, user *models.User, prefs *models.UserPreferences, info dto.ClientInfo) (*dto.AuthResult, error) {
 	sessionID, err := security.GenerateSessionID()
 	if err != nil {
 		return nil, err
@@ -340,7 +340,7 @@ func (s *OAuthService) createSession(ctx context.Context, user *models.User, inf
 		return nil, err
 	}
 
-	safe := user.ToSafe()
+	safe := user.ToSafe(prefs)
 	return &dto.AuthResult{
 		AccessToken: pair.AccessToken,
 		SessionID:   sessionID,

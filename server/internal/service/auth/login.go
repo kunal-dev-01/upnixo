@@ -83,7 +83,7 @@ func (s *LoginService) Login(
 	// FIND USER
 	// ─────────────────────────────────────────────────────────────────────
 
-	user, err := s.authRepo.GetUserForLogin(ctx, email)
+	user, prefs, err := s.authRepo.GetUserForLogin(ctx, email)
 	if err != nil {
 		utils.Warn("login failed", map[string]any{
 			"email": email,
@@ -193,7 +193,7 @@ func (s *LoginService) Login(
 	// CREATE SESSION
 	// ─────────────────────────────────────────────────────────────────────
 
-	authResult, err := s.createSession(ctx, user, clientInfo)
+	authResult, err := s.createSession(ctx, user, prefs, clientInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -258,6 +258,7 @@ func (s *LoginService) handleFailedAttempt(
 func (s *LoginService) createSession(
 	ctx context.Context,
 	user *models.User,
+	prefs *models.UserPreferences,
 	info dto.ClientInfo,
 ) (*dto.AuthResult, error) {
 
@@ -291,7 +292,7 @@ func (s *LoginService) createSession(
 		return nil, err
 	}
 
-	safe := user.ToSafe()
+	safe := user.ToSafe(prefs)
 
 	return &dto.AuthResult{
 		AccessToken: pair.AccessToken,

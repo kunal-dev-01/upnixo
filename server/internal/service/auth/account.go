@@ -98,19 +98,14 @@ func (s *AccountService) VerifyEmail(ctx context.Context, token string, clientIn
 		return nil, err
 	}
 
-	// 3. Fetch fresh user
-	user, err := s.authRepo.GetUserForLogin(ctx, "")
-	if err != nil {
-		return nil, err
-	}
-	// Re-fetch by ID since GetUserForLogin takes email
-	user, err = s.fetchUserByID(ctx, userID)
+	// 3. Fetch fresh user (Re-fetch by ID since we have it)
+	user, prefs, err := s.fetchUserByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
 	// 4. Create session + tokens
-	result, err := s.createSession(ctx, user, clientInfo)
+	result, err := s.createSession(ctx, user, prefs, clientInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +119,7 @@ func (s *AccountService) VerifyEmail(ctx context.Context, token string, clientIn
 
 func (s *AccountService) ResendVerifyEmail(ctx context.Context, email string) error {
 	// 1. Fetch user — generic error to prevent email enumeration
-	user, err := s.authRepo.GetUserForLogin(ctx, email)
+	user, _, err := s.authRepo.GetUserForLogin(ctx, email)
 	if err != nil {
 		// Return success anyway — don't leak whether email exists
 		return nil
@@ -175,7 +170,7 @@ func (s *AccountService) sendVerificationEmail(user *models.User) {
 }
 
 // createSession builds JWT pair + stores session in Redis.
-func (s *AccountService) createSession(ctx context.Context, user *models.User, info dto.ClientInfo) (*dto.VerifyEmailResult, error) {
+func (s *AccountService) createSession(ctx context.Context, user *models.User, prefs *models.UserPreferences, info dto.ClientInfo) (*dto.VerifyEmailResult, error) {
 	sessionID, err := security.GenerateSessionID()
 	if err != nil {
 		return nil, err
@@ -209,7 +204,7 @@ func (s *AccountService) createSession(ctx context.Context, user *models.User, i
 		return nil, err
 	}
 
-	safe := user.ToSafe()
+	safe := user.ToSafe(prefs)
 
 	return &dto.VerifyEmailResult{
 		User:        &safe,
@@ -219,11 +214,11 @@ func (s *AccountService) createSession(ctx context.Context, user *models.User, i
 }
 
 // fetchUserByID is a helper to get user by ID. Used in VerifyEmail after marking email as verified.
-func (s *AccountService) fetchUserByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
+func (s *AccountService) fetchUserByID(ctx context.Context, id uuid.UUID) (*models.User, *models.UserPreferences, error) {
 	// Delegate to authRepo — add GetByID to AuthRepository interface if not present
-	user, err := s.authRepo.GetByID(ctx, id)
+	user, prefs, err := s.authRepo.GetByID(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return user, nil
+	return user, prefs, nil
 }

@@ -52,7 +52,7 @@ func (s *PasswordService) ForgotPassword(ctx context.Context, input dto.ForgotPa
 		return err
 	}
 
-	user, err := s.authRepo.GetUserForLogin(ctx, input.Email)
+	user, _, err := s.authRepo.GetUserForLogin(ctx, input.Email)
 	if err != nil {
 		// Silent — do not leak whether email is registered
 		return nil
@@ -115,7 +115,7 @@ func (s *PasswordService) ChangePassword(ctx context.Context, userID uuid.UUID, 
 	}
 
 	// 1. Fetch user
-	user, err := s.authRepo.GetByID(ctx, userID)
+	user, _, err := s.authRepo.GetByID(ctx, userID)
 	if err != nil {
 		return err
 	}

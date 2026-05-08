@@ -48,7 +48,7 @@ func NewTwoFAService(
 // ─────────────────────────────────────────────────────────────────────────────
 
 func (s *TwoFAService) Setup(ctx context.Context, userID uuid.UUID) (*dto.Setup2FAResult, error) {
-	user, err := s.authRepo.GetByID(ctx, userID)
+	user, _, err := s.authRepo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -167,12 +167,12 @@ func (s *TwoFAService) VerifyTOTP(ctx context.Context, input dto.Verify2FAInput,
 	go s.recordVerified(userID, models.TwoFactorMethodTOTP)
 
 	// 5. Issue full session
-	user, err := s.authRepo.GetByID(ctx, userID)
+	user, prefs, err := s.authRepo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	return s.createSession(ctx, user, clientInfo)
+	return s.createSession(ctx, user, prefs, clientInfo)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -221,12 +221,12 @@ func (s *TwoFAService) VerifyBackupCode(ctx context.Context, input dto.VerifyBac
 	go s.recordVerified(userID, models.TwoFactorMethodBackupCode)
 
 	// 6. Issue full session
-	user, err := s.authRepo.GetByID(ctx, userID)
+	user, prefs, err := s.authRepo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	return s.createSession(ctx, user, clientInfo)
+	return s.createSession(ctx, user, prefs, clientInfo)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -333,7 +333,7 @@ func (s *TwoFAService) recordVerified(userID uuid.UUID, method models.TwoFactorM
 	}
 }
 
-func (s *TwoFAService) createSession(ctx context.Context, user *models.User, info dto.ClientInfo) (*dto.VerifyEmailResult, error) {
+func (s *TwoFAService) createSession(ctx context.Context, user *models.User, prefs *models.UserPreferences, info dto.ClientInfo) (*dto.VerifyEmailResult, error) {
 	sessionID, err := security.GenerateSessionID()
 	if err != nil {
 		return nil, err
@@ -364,7 +364,7 @@ func (s *TwoFAService) createSession(ctx context.Context, user *models.User, inf
 		return nil, err
 	}
 
-	safe := user.ToSafe()
+	safe := user.ToSafe(prefs)
 	return &dto.VerifyEmailResult{
 		User:        &safe,
 		AccessToken: pair.AccessToken,

@@ -78,13 +78,16 @@ type User struct {
 	TwoFactorEnabled   bool               `db:"two_factor_enabled"`
 	TwoFactorEnabledAt pgtype.Timestamptz `db:"two_factor_enabled_at"`
 
-	// Embedded Preferences (Mapped from user_preferences table)
-	UserPreferences `db:""`
-
 	// Timestamps
 	CreatedAt time.Time          `db:"created_at"`
 	UpdatedAt time.Time          `db:"updated_at"`
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+}
+
+// UserWithPrefs is used for joined queries (e.g. Login)
+type UserWithPrefs struct {
+	User
+	UserPreferences `db:""`
 }
 
 func (u *User) IsDeleted() bool    { return u.DeletedAt.Valid }
@@ -109,7 +112,7 @@ type SafeUser struct {
 	UpdatedAt        time.Time        `json:"updated_at"`
 }
 
-func (u *User) ToSafe() SafeUser {
+func (u *User) ToSafe(prefs *UserPreferences) SafeUser {
 	s := SafeUser{
 		ID:               u.ID,
 		Email:            u.Email,
@@ -125,8 +128,10 @@ func (u *User) ToSafe() SafeUser {
 	}
 
 	// Map nested preferences
-	if safePrefs, err := u.UserPreferences.ToSafe(); err == nil {
-		s.Preferences = &safePrefs
+	if prefs != nil {
+		if safePrefs, err := prefs.ToSafe(); err == nil {
+			s.Preferences = &safePrefs
+		}
 	}
 
 	if u.Phone.Valid {
