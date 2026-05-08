@@ -39,7 +39,7 @@ const VariantButton = ({
   const isDisabled = disabled || isLoading;
 
   return (
-    <div className="relative group p-0.5 rounded-xl overflow-hidden transition-all duration-300 w-fit">
+    <div className="relative group p-0.5 rounded-2xl overflow-hidden transition-all duration-300 w-full">
       {/* Background Gradient Layer */}
       <div
         className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-linear-to-r ${variantBgConfig[variant]}`}
@@ -52,7 +52,7 @@ const VariantButton = ({
         whileTap={!isDisabled ? { scale: 0.98 } : {}}
         disabled={isDisabled}
         className={`
-          relative px-6 py-2 rounded-[10px] border border-zinc-300/40 dark:border-zinc-700/40
+          relative px-6 py-2 rounded-2xl border border-zinc-300/40 dark:border-zinc-700/40 w-full
           bg-white dark:bg-zinc-950 font-bold text-base tracking-tight
           flex items-center justify-center overflow-hidden z-20
           transition-all duration-300

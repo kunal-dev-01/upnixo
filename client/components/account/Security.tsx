@@ -8,33 +8,28 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import Input from "@/common/Input";
 import VariantButton from "@/common/VariantButton";
-import { 
-  useAuthStore 
-} from "@/store/auth.store";
-import { 
-  useSetup2FA, 
-  useConfirm2FA, 
-  useDisable2FA, 
+import { useAuthStore } from "@/store/auth.store";
+import {
+  useSetup2FA,
+  useConfirm2FA,
+  useDisable2FA,
   useRegenerate2FABackupCodes,
-  useChangePassword 
+  useChangePassword,
 } from "@/hooks/useAuth";
-import { 
-  changePasswordSchema, 
-  confirm2FASchema, 
-  disable2FASchema, 
-  regenerate2FABackupSchema,
+import {
+  changePasswordSchema,
+  confirm2FASchema,
+  disable2FASchema,
   type ChangePasswordSchema,
   type Confirm2FASchema,
-  type Disable2FASchema
 } from "@/schemas/auth.schema";
-import { 
-  Check, 
-  Copy, 
-  Download, 
-  Refresh, 
-  Shield, 
+import {
+  Check,
+  Copy,
+  Download,
+  Shield,
   TriangleAlert,
-  ArrowLeft
+  ArrowLeft,
 } from "@/svg/Common";
 
 function Security() {
@@ -44,7 +39,7 @@ function Security() {
   return (
     <div className="space-y-6">
       {/* Tab Switcher */}
-      <div className="flex p-1 bg-zinc-100 dark:bg-zinc-900 rounded-2xl w-fit">
+      <div className="flex mx-auto p-1 bg-zinc-100 dark:bg-zinc-900 rounded-2xl w-fit">
         <button
           onClick={() => setActiveTab("2fa")}
           className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all ${
@@ -99,16 +94,20 @@ function Security() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function TwoFactorSection({ isEnabled }: { isEnabled: boolean }) {
-  const [step, setStep] = useState<"idle" | "setup" | "disable" | "regenerate">("idle");
+  const [step, setStep] = useState<"idle" | "setup" | "disable" | "regenerate">(
+    "idle",
+  );
   const { setup2FA, data: setupData, isPending: isSettingUp } = useSetup2FA();
   const { confirm2FA, isPending: isConfirming } = useConfirm2FA();
   const { disable2FA, isPending: isDisabling } = useDisable2FA();
-  const { regenerateBackupCodes, isPending: isRegenerating } = useRegenerate2FABackupCodes();
+  const { regenerateBackupCodes, isPending: isRegenerating } =
+    useRegenerate2FABackupCodes();
 
   const handleStartSetup = () => {
     setup2FA(undefined, {
       onSuccess: () => setStep("setup"),
-      onError: (err) => toast.error(err.message || "Failed to initialize 2FA setup"),
+      onError: (err) =>
+        toast.error(err.message || "Failed to initialize 2FA setup"),
     });
   };
 
@@ -116,16 +115,20 @@ function TwoFactorSection({ isEnabled }: { isEnabled: boolean }) {
 
   if (step === "setup" && setupData) {
     return (
-      <SetupFlow 
-        data={setupData.data} 
+      <SetupFlow
+        data={setupData.data}
         onConfirm={(code: string) => {
-          confirm2FA({ code }, {
-            onSuccess: () => {
-              toast.success("2FA enabled successfully!");
-              setStep("idle");
+          confirm2FA(
+            { code },
+            {
+              onSuccess: () => {
+                toast.success("2FA enabled successfully!");
+                setStep("idle");
+              },
+              onError: (err) =>
+                toast.error(err.message || "Invalid verification code"),
             },
-            onError: (err) => toast.error(err.message || "Invalid verification code"),
-          });
+          );
         }}
         isPending={isConfirming}
         onBack={handleBack}
@@ -141,13 +144,16 @@ function TwoFactorSection({ isEnabled }: { isEnabled: boolean }) {
         buttonLabel="Disable 2FA"
         variant="delete"
         onSubmit={(code: string) => {
-          disable2FA({ code }, {
-            onSuccess: () => {
-              toast.success("2FA disabled successfully");
-              setStep("idle");
+          disable2FA(
+            { code },
+            {
+              onSuccess: () => {
+                toast.success("2FA disabled successfully");
+                setStep("idle");
+              },
+              onError: (err) => toast.error(err.message || "Invalid code"),
             },
-            onError: (err) => toast.error(err.message || "Invalid code"),
-          });
+          );
         }}
         isPending={isDisabling}
         onBack={handleBack}
@@ -163,14 +169,17 @@ function TwoFactorSection({ isEnabled }: { isEnabled: boolean }) {
         buttonLabel="Regenerate Codes"
         variant="save"
         onSubmit={(code: string) => {
-          regenerateBackupCodes({ code }, {
-            onSuccess: (res) => {
-              toast.success("Backup codes regenerated!");
-              // Ideally show the new codes here, but for now just success
-              setStep("idle");
+          regenerateBackupCodes(
+            { code },
+            {
+              onSuccess: (res) => {
+                toast.success("Backup codes regenerated!");
+                // Ideally show the new codes here, but for now just success
+                setStep("idle");
+              },
+              onError: (err) => toast.error(err.message || "Invalid code"),
             },
-            onError: (err) => toast.error(err.message || "Invalid code"),
-          });
+          );
         }}
         isPending={isRegenerating}
         onBack={handleBack}
@@ -181,16 +190,20 @@ function TwoFactorSection({ isEnabled }: { isEnabled: boolean }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
-        <div className={`p-3 rounded-xl ${isEnabled ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-500/10 text-zinc-500"}`}>
+        <div
+          className={`p-3 rounded-xl ${isEnabled ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-500/10 text-zinc-500"}`}
+        >
           <Shield className="w-6 h-6" />
         </div>
         <div>
           <h4 className="text-sm font-bold text-zinc-900 dark:text-white">
-            {isEnabled ? "2FA is currently active" : "2FA is currently disabled"}
+            {isEnabled
+              ? "2FA is currently active"
+              : "2FA is currently disabled"}
           </h4>
           <p className="text-xs text-zinc-500">
-            {isEnabled 
-              ? "Your account is protected with an additional layer of security." 
+            {isEnabled
+              ? "Your account is protected with an additional layer of security."
               : "Enable two-factor authentication to better protect your account."}
           </p>
         </div>
@@ -244,7 +257,11 @@ interface SetupFlowProps {
 }
 
 function SetupFlow({ data, onConfirm, isPending, onBack }: SetupFlowProps) {
-  const { register, handleSubmit, formState: { errors } } = useForm<Confirm2FASchema>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Confirm2FASchema>({
     resolver: zodResolver(confirm2FASchema),
   });
 
@@ -254,7 +271,9 @@ function SetupFlow({ data, onConfirm, isPending, onBack }: SetupFlowProps) {
   };
 
   const downloadBackupCodes = () => {
-    const blob = new Blob([data.backup_codes.join("\n")], { type: "text/plain" });
+    const blob = new Blob([data.backup_codes.join("\n")], {
+      type: "text/plain",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -267,7 +286,7 @@ function SetupFlow({ data, onConfirm, isPending, onBack }: SetupFlowProps) {
 
   return (
     <div className="space-y-6">
-      <button 
+      <button
         onClick={onBack}
         className="flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors group"
       >
@@ -279,28 +298,29 @@ function SetupFlow({ data, onConfirm, isPending, onBack }: SetupFlowProps) {
         {/* Left Side: QR and Instructions */}
         <div className="space-y-6">
           <div className="space-y-2">
-            <h4 className="text-sm font-bold text-zinc-900 dark:text-white">1. Scan QR Code</h4>
+            <h4 className="text-sm font-bold text-zinc-900 dark:text-white">
+              1. Scan QR Code
+            </h4>
             <p className="text-xs text-zinc-500">
-              Open your authenticator app (like Google Authenticator or Authy) and scan this QR code.
+              Open your authenticator app (like Google Authenticator or Authy)
+              and scan this QR code.
             </p>
           </div>
 
           <div className="p-4 bg-white rounded-2xl border border-zinc-200 dark:border-zinc-800 w-fit mx-auto lg:mx-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src={data.qr_code_url} 
-              alt="QR Code" 
-              className="w-48 h-48"
-            />
+            <img src={data.qr_code_url} alt="QR Code" className="w-48 h-48" />
           </div>
 
           <div className="space-y-2">
-            <h4 className="text-sm font-bold text-zinc-900 dark:text-white">Manual Entry</h4>
+            <h4 className="text-sm font-bold text-zinc-900 dark:text-white">
+              Manual Entry
+            </h4>
             <div className="flex items-center gap-2 p-3 bg-zinc-100 dark:bg-zinc-900 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700">
               <code className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 break-all">
                 {data.secret}
               </code>
-              <button 
+              <button
                 onClick={() => copyToClipboard(data.secret)}
                 className="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg transition-colors ml-auto"
               >
@@ -313,22 +333,28 @@ function SetupFlow({ data, onConfirm, isPending, onBack }: SetupFlowProps) {
         {/* Right Side: Backup Codes and Verify */}
         <div className="space-y-6">
           <div className="space-y-2">
-            <h4 className="text-sm font-bold text-zinc-900 dark:text-white">2. Save Backup Codes</h4>
+            <h4 className="text-sm font-bold text-zinc-900 dark:text-white">
+              2. Save Backup Codes
+            </h4>
             <p className="text-xs text-zinc-500">
-              If you lose your phone, you can use these codes to log in. Store them safely!
+              If you lose your phone, you can use these codes to log in. Store
+              them safely!
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-2 p-4 bg-zinc-100 dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800">
             {data.backup_codes.map((code: string, i: number) => (
-              <code key={i} className="text-[10px] font-mono text-zinc-600 dark:text-zinc-400">
+              <code
+                key={i}
+                className="text-[10px] font-mono text-zinc-600 dark:text-zinc-400"
+              >
                 {code}
               </code>
             ))}
           </div>
 
           <div className="flex gap-2">
-            <button 
+            <button
               onClick={downloadBackupCodes}
               className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-lg transition-colors"
             >
@@ -339,13 +365,18 @@ function SetupFlow({ data, onConfirm, isPending, onBack }: SetupFlowProps) {
 
           <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-4">
             <div className="space-y-2">
-              <h4 className="text-sm font-bold text-zinc-900 dark:text-white">3. Verify Code</h4>
+              <h4 className="text-sm font-bold text-zinc-900 dark:text-white">
+                3. Verify Code
+              </h4>
               <p className="text-xs text-zinc-500">
                 Enter the 6-digit code from your app to complete the setup.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit((d) => onConfirm(d.code))} className="space-y-4">
+            <form
+              onSubmit={handleSubmit((d) => onConfirm(d.code))}
+              className="space-y-4"
+            >
               <Input
                 label="Verification Code"
                 placeholder="000000"
@@ -383,14 +414,26 @@ interface ActionFlowProps {
   onBack: () => void;
 }
 
-function ActionFlow({ title, description, buttonLabel, variant, onSubmit, isPending, onBack }: ActionFlowProps) {
-  const { register, handleSubmit, formState: { errors } } = useForm<{ code: string }>({
+function ActionFlow({
+  title,
+  description,
+  buttonLabel,
+  variant,
+  onSubmit,
+  isPending,
+  onBack,
+}: ActionFlowProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<{ code: string }>({
     resolver: zodResolver(disable2FASchema), // works for both since they just need code
   });
 
   return (
     <div className="space-y-6">
-      <button 
+      <button
         onClick={onBack}
         className="flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors group"
       >
@@ -400,11 +443,16 @@ function ActionFlow({ title, description, buttonLabel, variant, onSubmit, isPend
 
       <div className="space-y-4 max-w-md">
         <div className="space-y-2">
-          <h4 className="text-sm font-bold text-zinc-900 dark:text-white">{title}</h4>
+          <h4 className="text-sm font-bold text-zinc-900 dark:text-white">
+            {title}
+          </h4>
           <p className="text-xs text-zinc-500">{description}</p>
         </div>
 
-        <form onSubmit={handleSubmit((d) => onSubmit(d.code))} className="space-y-4">
+        <form
+          onSubmit={handleSubmit((d) => onSubmit(d.code))}
+          className="space-y-4"
+        >
           <Input
             label="2FA Verification Code"
             placeholder="000000"
@@ -425,7 +473,8 @@ function ActionFlow({ title, description, buttonLabel, variant, onSubmit, isPend
         <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] leading-relaxed">
           <TriangleAlert className="w-4 h-4 shrink-0 mt-0.5" />
           <p>
-            Make sure you have access to your authenticator app. If you lose access, you will need to use your backup codes or contact support.
+            Make sure you have access to your authenticator app. If you lose
+            access, you will need to use your backup codes or contact support.
           </p>
         </div>
       </div>
@@ -439,7 +488,12 @@ function ActionFlow({ title, description, buttonLabel, variant, onSubmit, isPend
 
 function ChangePasswordSection() {
   const { changePassword, isPending } = useChangePassword();
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<ChangePasswordSchema>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ChangePasswordSchema>({
     resolver: zodResolver(changePasswordSchema),
   });
 
@@ -456,14 +510,7 @@ function ChangePasswordSection() {
   };
 
   return (
-    <div className="max-w-md space-y-6">
-      <div className="space-y-1">
-        <h4 className="text-sm font-bold text-zinc-900 dark:text-white">Change Password</h4>
-        <p className="text-xs text-zinc-500">
-          Update your password to keep your account secure.
-        </p>
-      </div>
-
+    <div className="w-full space-y-6">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <Input
           label="Current Password"
@@ -473,6 +520,7 @@ function ChangePasswordSection() {
           register={register}
           error={errors.current_password?.message}
           variant="form"
+          rounded="rounded-2xl"
         />
 
         <Input
@@ -483,27 +531,33 @@ function ChangePasswordSection() {
           register={register}
           error={errors.new_password?.message}
           variant="form"
+          rounded="rounded-2xl"
         />
 
-        <div className="pt-2">
+        <div className="w-full pt-2">
           <VariantButton
             label="Update Password"
             variant="save"
             isLoading={isPending}
-            className="w-full"
+            type="submit"
           />
         </div>
       </form>
 
       <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 space-y-3">
-        <h5 className="text-[11px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Password Requirements</h5>
+        <h5 className="text-[11px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
+          Password Requirements
+        </h5>
         <ul className="space-y-2">
           {[
             "Minimum 8 characters long",
             "Must be different from current password",
             "Use a mix of letters, numbers, and symbols",
           ].map((req, i) => (
-            <li key={i} className="flex items-center gap-2 text-[11px] text-zinc-500">
+            <li
+              key={i}
+              className="flex items-center gap-2 text-[11px] text-zinc-500"
+            >
               <div className="w-1 h-1 rounded-full bg-indigo-500" />
               {req}
             </li>

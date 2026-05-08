@@ -21,13 +21,12 @@ const Input = memo(
     name,
     disabled,
     variant = "default",
-    rounded, // Yahan default value string mein nahi denge
+    rounded,
     ...rest
   }: InputProps) => {
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === "password";
 
-    // Roundness logic: agar prop hai toh wo use karo, warna default 'rounded-full'
     const borderRadius = rounded || "rounded-full";
 
     const variantStyles = {
