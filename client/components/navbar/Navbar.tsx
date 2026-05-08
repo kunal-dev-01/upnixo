@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { NAV_LINKS } from "@/utils/constants";
 
 
-const MotionLink = motion(Link);
+const MotionLink = motion.create(Link);
 
 interface NavbarProps {
   onOpenSidebar: () => void;
