@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useSidebarStore } from "@/store/sidebar.store";
 import { DesktopSidebar } from "@/components/sidebar/DesktopSidebar";
+import {
+  MobileSidebar,
+  MobileHeader,
+} from "@/components/sidebar/MobileSidebar";
 
 export default function UserLayout({
   children,
@@ -12,6 +16,7 @@ export default function UserLayout({
 }) {
   const { isPinned, togglePin } = useSidebarStore();
   const [isHovered, setIsHovered] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   const pathname = usePathname();
@@ -25,8 +30,13 @@ export default function UserLayout({
   const isExpanded = isPinned || isHovered;
 
   return (
-    <div className="flex min-h-screen w-full">
-      {/* Desktop Sidebar Only */}
+    <div className="min-h-screen w-full">
+      <MobileHeader onOpenMenu={() => setIsMobileMenuOpen(true)} />
+      <MobileSidebar
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        pathname={pathname}
+      />
       <DesktopSidebar
         isExpanded={isExpanded}
         isPinned={isPinned}
@@ -35,13 +45,14 @@ export default function UserLayout({
         togglePin={togglePin}
         pathname={pathname}
       />
-
       <main
         className={`flex-1 transition-all duration-300 ease-in-out p-6 md:p-8 ${
-          isPinned ? "ml-56" : "ml-16"
-        }`}
+          isPinned ? "md:ml-56" : "md:ml-16"
+        } ml-0`}
       >
-        <div className="max-w-6xl mx-auto">{children}</div>
+        <div className="max-w-6xl mr-auto ml-0 lg:mx-auto pt-20 lg:pt-0">
+          {children}
+        </div>
       </main>
     </div>
   );

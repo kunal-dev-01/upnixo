@@ -72,8 +72,8 @@ export function DesktopSidebar({
               <div
                 className={`absolute inset-0 rounded-2xl -z-10 transition-all duration-200 ease-out outline-none ${
                   isActive
-                    ? "bg-zinc-100 dark:bg-zinc-800 scale-100 opacity-100"
-                    : "bg-zinc-100 dark:bg-zinc-800 scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100"
+                    ? "bg-zinc-100 dark:bg-zinc-900 scale-100 opacity-100"
+                    : "bg-zinc-100 dark:bg-zinc-900 scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100"
                 }`}
               />
 
