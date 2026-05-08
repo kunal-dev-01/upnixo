@@ -279,10 +279,10 @@ CREATE TABLE user_preferences (
     -- ── Notification Settings (Granular Control) ─────────────────────
     notifications       JSONB NOT NULL DEFAULT '{
         "email": {
-            "order_updates": true,      -- Naya project start hona ya milestone complete hona
-            "chat_messages": true,      -- Aapka bheja hua message
-            "billing_invoices": true,   -- Invoice generate hone par
-            "marketing": false          -- Promotion/Offers
+            "order_updates": true,
+            "chat_messages": true,
+            "billing_invoices": true,
+            "marketing": false
         },
         "push": {
             "mentions": true,
