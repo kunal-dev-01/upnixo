@@ -168,7 +168,7 @@ func NewLimiters(r *rds.Redis) *Limiters {
 			Message: "too many attempts, please wait 5 minutes and try again",
 		}),
 		OTP: RateLimiter(r, LimitConfig{
-			Max:     3,
+			Max:     5,
 			Window:  10 * time.Minute,
 			Message: "otp request limit reached, please wait 10 minutes",
 		}),
