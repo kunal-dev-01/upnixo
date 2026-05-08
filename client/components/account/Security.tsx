@@ -386,12 +386,14 @@ function SetupFlow({ data, onConfirm, isPending, onBack }: SetupFlowProps) {
                 variant="form"
                 maxLength={6}
               />
-              <VariantButton
-                label="Enable 2FA"
-                variant="save"
-                isLoading={isPending}
-                className="w-full"
-              />
+
+              <div className="w-full">
+                <VariantButton
+                  label="Enable 2FA"
+                  variant="save"
+                  isLoading={isPending}
+                />
+              </div>
             </form>
           </div>
         </div>
@@ -462,12 +464,14 @@ function ActionFlow({
             variant="form"
             maxLength={6}
           />
-          <VariantButton
-            label={buttonLabel}
-            variant={variant}
-            isLoading={isPending}
-            className="w-full"
-          />
+
+          <div className="w-full">
+            <VariantButton
+              label={buttonLabel}
+              variant={variant}
+              isLoading={isPending}
+            />
+          </div>
         </form>
 
         <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] leading-relaxed">
@@ -543,27 +547,6 @@ function ChangePasswordSection() {
           />
         </div>
       </form>
-
-      <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 space-y-3">
-        <h5 className="text-[11px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider">
-          Password Requirements
-        </h5>
-        <ul className="space-y-2">
-          {[
-            "Minimum 8 characters long",
-            "Must be different from current password",
-            "Use a mix of letters, numbers, and symbols",
-          ].map((req, i) => (
-            <li
-              key={i}
-              className="flex items-center gap-2 text-[11px] text-zinc-500"
-            >
-              <div className="w-1 h-1 rounded-full bg-indigo-500" />
-              {req}
-            </li>
-          ))}
-        </ul>
-      </div>
     </div>
   );
 }
