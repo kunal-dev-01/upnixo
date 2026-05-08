@@ -126,15 +126,15 @@ export default function VerifyTwoFA({
           type="button"
           onClick={() => setIsBackupMode(!isBackupMode)}
           disabled={isLoading}
-          className="flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors px-1"
+          className="flex items-center gap-2 text-md font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors px-1 mt-2 hover:underline"
         >
-          <Refresh className="w-3.5 h-3.5" />
+          <Refresh className="w-4.5 h-4.5" />
           {isBackupMode ? "Use authenticator app" : "Use backup code"}
         </button>
       </motion.div>
 
       <motion.div variants={itemVariants} className="pt-2 space-y-4">
-        <Submit loading={isLoading}>
+        <Submit type="submit" loading={isLoading}>
           {isBackupMode ? "Verify Backup Code" : "Verify OTP"}
         </Submit>
 
