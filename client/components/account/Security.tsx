@@ -31,6 +31,7 @@ import {
   TriangleAlert,
   ArrowLeft,
 } from "@/svg/Common";
+import { QRCodeSVG } from "qrcode.react";
 
 function Security() {
   const { user } = useAuthStore();
@@ -308,8 +309,7 @@ function SetupFlow({ data, onConfirm, isPending, onBack }: SetupFlowProps) {
           </div>
 
           <div className="p-4 bg-white rounded-2xl border border-zinc-200 dark:border-zinc-800 w-fit mx-auto lg:mx-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={data.qr_code_url} alt="QR Code" className="w-48 h-48" />
+            <QRCodeSVG value={data.qr_code_url} size={192} />
           </div>
 
           <div className="space-y-2">
