@@ -28,12 +28,12 @@ export function DesktopSidebar({
     <aside
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className={`hidden md:flex flex-col fixed left-0 top-0 h-screen bg-white cursor-pointer dark:bg-zinc-900/30 border-r border-zinc-200 dark:border-zinc-800 transition-all duration-300 ease-in-out z-40 ${
+      className={`hidden md:flex flex-col fixed left-0 top-0 h-screen cursor-pointer border-r border-zinc-200 dark:border-zinc-900 transition-all duration-300 ease-in-out z-40 ${
         isExpanded ? "w-56" : "w-16"
       }`}
     >
       {/* HEADER SECTION */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800/50">
+      <div className="h-16 flex items-center justify-between px-4 border-b border-zinc-200 dark:border-zinc-800/50">
         <div className="flex items-center gap-0 overflow-hidden whitespace-nowrap">
           <img src="/logo.svg" alt="Logo" className="size-6 shrink-0" />
           <span
@@ -46,7 +46,7 @@ export function DesktopSidebar({
         {isExpanded && (
           <button
             onClick={togglePin}
-            className={`px-2.5 py-1 rounded-full transition-colors border ${isPinned ? "dark:text-zinc-300 text-zinc-600 bg-zinc-100 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800" : "dark:text-zinc-400 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 border-zinc-200 dark:border-zinc-800"} cursor-pointer`}
+            className={`px-2.5 py-1 rounded-full transition-colors border ${isPinned ? "dark:text-zinc-300 text-zinc-600 bg-zinc-100 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-900" : "dark:text-zinc-400 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 border-zinc-200 dark:border-zinc-900"} cursor-pointer`}
           >
             <Pin />
           </button>
@@ -93,7 +93,7 @@ export function DesktopSidebar({
 
       {/* ================= USER PROFILE SECTION (BOTTOM) ================= */}
       {user && (
-        <div className="p-3 border-t border-zinc-100 dark:border-zinc-800/50">
+        <div className="p-3 border-t border-zinc-200 dark:border-zinc-900">
           <button
             onClick={() => router.push("/account")}
             className="flex items-center w-full gap-3 p-1 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer overflow-hidden group"
