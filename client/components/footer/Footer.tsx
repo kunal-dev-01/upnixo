@@ -1,4 +1,4 @@
-import { NAV_LINKS } from "@/utils/constants";
+import { FOOTER_LINKS, NAV_LINKS } from "@/utils/constants";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -110,12 +110,7 @@ function Footer() {
             Company
           </h3>
           <ul className="flex flex-col gap-y-1">
-            {[
-              { name: "About Us", href: "/about" },
-              { name: "Contact", href: "/contact" },
-              { name: "Privacy Policy", href: "/privacy" },
-              { name: "Terms of Service", href: "/terms" }, // Naya link add kiya
-            ].map((item) => (
+            {FOOTER_LINKS.map((item) => (
               <li key={item.name}>
                 <MotionLink
                   href={item.href}
