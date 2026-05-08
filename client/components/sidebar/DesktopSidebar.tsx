@@ -34,10 +34,10 @@ export function DesktopSidebar({
     >
       {/* HEADER SECTION */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-zinc-100 dark:border-zinc-800/50">
-        <div className="flex items-center gap-3 overflow-hidden whitespace-nowrap">
-          <img src="/logo.svg" alt="Logo" className="w-7 h-7 shrink-0" />
+        <div className="flex items-center gap-0 overflow-hidden whitespace-nowrap">
+          <img src="/logo.svg" alt="Logo" className="size-6 shrink-0" />
           <span
-            className={`font-bold text-lg text-zinc-700 dark:text-zinc-200 capitalize transition-opacity duration-300 ${isExpanded ? "opacity-100" : "opacity-0"}`}
+            className={`font-bold text-2xl text-zinc-700 dark:text-zinc-200 capitalize transition-opacity duration-300 ${isExpanded ? "opacity-100" : "opacity-0"}`}
           >
             Pnixo
           </span>
