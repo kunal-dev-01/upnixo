@@ -4,6 +4,7 @@ import Image from "next/image";
 import logo from "@/public/logo.svg";
 import { NAV_LINKS } from "@/utils/constants";
 import { X } from "@/svg/Common";
+import Logo from "../logo/Logo";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -11,7 +12,6 @@ interface SidebarProps {
 }
 
 function Sidebar({ isOpen, onClose }: SidebarProps) {
-  // Body scroll lock jab sidebar open ho
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -42,22 +42,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="flex flex-col h-full p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
-            <Link
-              href={"/"}
-              onClick={onClose}
-              className="flex items-center gap-2 select-none"
-            >
-              <Image
-                src={logo}
-                alt="Logo"
-                className="size-7"
-                width={40}
-                height={40}
-              />
-              <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-                Pnixo
-              </h1>
-            </Link>
+            <Logo />
 
             {/* Close Button */}
             <button

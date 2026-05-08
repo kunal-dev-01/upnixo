@@ -1,10 +1,9 @@
-import Image from "next/image";
-import logo from "@/public/logo.svg";
 import Link from "next/link";
 import { Sidebar } from "@/svg/Common";
 import { motion } from "framer-motion";
 import { NAV_LINKS } from "@/utils/constants";
 import { WavyText } from "../footer/Footer";
+import Logo from "../logo/Logo";
 
 const MotionLink = motion.create(Link);
 
@@ -15,22 +14,7 @@ interface NavbarProps {
 function Navbar({ onOpenSidebar }: NavbarProps) {
   return (
     <div className="w-fit flex items-center justify-center md:gap-x-3 gap-x-5 py-2 h-12 border border-zinc-100 dark:border-zinc-900 rounded-full pl-4 pr-1 backdrop-blur-lg bg-zinc-50/50 dark:bg-zinc-950/50">
-      <Link
-        aria-label="Logo"
-        href={"/"}
-        className="flex items-center justify-center select-none"
-      >
-        <Image
-          src={logo}
-          alt="Logo"
-          className="size-6"
-          loading="eager"
-          priority
-          width={40}
-          height={40}
-        />
-        <h1 className="text-2xl font-bold">Pnixo</h1>
-      </Link>
+      <Logo />
 
       <nav
         aria-label="Navigation"
