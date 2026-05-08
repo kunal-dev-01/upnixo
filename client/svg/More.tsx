@@ -712,6 +712,42 @@ export const Projects = memo(
   ),
 );
 
+// ===================== IdCard ===================== //
+export const IdCard = memo(
+  ({ className = "w-5 h-5" }: { className?: string }) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%"
+      height="100%"
+      viewBox="0 0 32 32"
+      className={className}
+    >
+      <path
+        fill="currentColor"
+        d="M5 6C3.355 6 2 7.355 2 9v14c0 1.645 1.355 3 3 3h22c1.645 0 3-1.355 3-3V9c0-1.645-1.355-3-3-3zm0 2h22c.566 0 1 .434 1 1v14c0 .566-.434 1-1 1H5c-.566 0-1-.434-1-1V9c0-.566.434-1 1-1zm6 2c-2.2 0-4 1.8-4 4c0 1.113.477 2.117 1.219 2.844A5.036 5.036 0 0 0 6 21h2c0-1.668 1.332-3 3-3s3 1.332 3 3h2a5.036 5.036 0 0 0-2.219-4.156C14.523 16.117 15 15.114 15 14c0-2.2-1.8-4-4-4zm7 1v2h8v-2zm-7 1c1.117 0 2 .883 2 2s-.883 2-2 2s-2-.883-2-2s.883-2 2-2zm7 3v2h8v-2zm0 4v2h5v-2z"
+      />
+    </svg>
+  ),
+);
+
+// ===================== FingerPrint ===================== //
+export const FingerPrint = memo(
+  ({ className = "w-5 h-5" }: { className?: string }) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%"
+      height="100%"
+      viewBox="0 0 24 24"
+      className={className}
+    >
+      <path
+        fill="currentColor"
+        d="M2 11C2 5.477 6.477 1 12 1s10 4.477 10 10v3c0 2.64-.57 5.15-1.592 7.412l-.413.911l-1.822-.824l.412-.911A15.938 15.938 0 0 0 20 14v-3a8 8 0 1 0-16 0v3H2v-3Zm4.5 0a5.5 5.5 0 1 1 11 0v3c0 2.8-.853 5.403-2.314 7.56l-.561.829l-1.656-1.122l.56-.828A11.442 11.442 0 0 0 15.5 14v-3a3.5 3.5 0 1 0-7 0v3A4.5 4.5 0 0 1 4 18.5H2v-2h2A2.5 2.5 0 0 0 6.5 14v-3Zm6.5-1v4c0 3.39-1.875 6.34-4.639 7.874l-.874.486l-.97-1.75l.874-.484A6.998 6.998 0 0 0 11 14v-4h2Z"
+      />
+    </svg>
+  ),
+);
+
 // ================ Display Name ================ //
 Building.displayName = "Building";
 Bolt.displayName = "Bolt";
@@ -750,3 +786,5 @@ Mute.displayName = "Mute";
 Fullscreen.displayName = "Fullscreen";
 Ebook.displayName = "Ebook";
 Projects.displayName = "Projects";
+IdCard.displayName = "IdCard";
+FingerPrint.displayName = "FingerPrint";

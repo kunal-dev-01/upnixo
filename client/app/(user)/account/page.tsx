@@ -1,5 +1,15 @@
 "use client";
 import Heading from "@/common/Heading";
+import SubHeading from "@/common/SubHeading";
+import Notifications from "@/components/account/Notifications";
+import Preferences from "@/components/account/Preferences";
+import Security from "@/components/account/Security";
+import Sessions from "@/components/account/Sessions";
+import UserDetails from "@/components/account/UserDetails";
+import UserProfile from "@/components/account/UserProfile";
+import { Theme } from "@/svg/Auth";
+import { Bell, Shield, User } from "@/svg/Common";
+import { Lock, FingerPrint } from "@/svg/More";
 
 function Account() {
   return (
@@ -10,65 +20,70 @@ function Account() {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-6 gap-4 lg:gap-6">
-        {/* ROW 1: Identity (Mobile Order 1) */}
-        <div className="md:col-span-2 order-1 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-4">
-            Identity
-          </p>
-          <div className="h-32 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400">
-            Avatar & Quick Info
-          </div>
+        <div className="md:col-span-2 order-1 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 space-y-4">
+          <SubHeading
+            title="Profile"
+            description="View and edit your profile"
+            icon={User}
+            iconBgColor="bg-indigo-50 dark:bg-indigo-500/10"
+            iconClassName="text-indigo-600 dark:text-indigo-400"
+          />
+          <UserProfile />
         </div>
 
-        {/* ROW 1 (Desktop) / Mobile Order 3: Notifications */}
-        <div className="md:col-span-4 order-3 md:order-2 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-4">
-            Notifications
-          </p>
-          <div className="h-32 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400">
-            Email & Push Toggles
-          </div>
+        <div className="md:col-span-4 order-3 md:order-2 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 space-y-4">
+          <SubHeading
+            title="Notifications"
+            description="Manage your notification preferences"
+            icon={Bell}
+            iconBgColor="bg-amber-50 dark:bg-amber-500/10"
+            iconClassName="text-amber-600 dark:text-amber-400"
+          />
+          <Notifications />
         </div>
 
-        {/* ROW 2: Preferences (Desktop main pehle hnn or Bada hnn - 4/6) */}
-        {/* Mobile order 4 hnn taaki niche aaye */}
-        <div className="md:col-span-4 order-4 md:order-3 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-4">
-            Preferences
-          </p>
-          <div className="h-56 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400">
-            Theme, Language, Currency (Desktop: Large View)
-          </div>
+        <div className="md:col-span-4 order-4 md:order-3 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 space-y-4">
+          <SubHeading
+            title="Preferences"
+            description="Manage your themes and platform experience"
+            icon={Theme}
+            iconBgColor="bg-purple-50 dark:bg-purple-500/10"
+            iconClassName="text-purple-600 dark:text-purple-400"
+          />
+          <Preferences />
         </div>
 
-        {/* ROW 2: Personal Information (Desktop main baad main hnn or Chhota hnn - 2/6) */}
-        {/* Mobile order 2 hnn taaki Identity ke turant niche aaye */}
-        <div className="md:col-span-2 order-2 md:order-4 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-4">
-            Personal Details
-          </p>
-          <div className="h-56 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400">
-            Name, Email, Phone
-          </div>
+        <div className="md:col-span-2 order-2 md:order-4 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 space-y-4">
+          <SubHeading
+            title="Personal Details"
+            description="Manage your personal information and contact details"
+            icon={FingerPrint}
+            iconBgColor="bg-sky-50 dark:bg-sky-500/10"
+            iconClassName="text-sky-600 dark:text-sky-400"
+          />
+          <UserDetails />
         </div>
 
-        {/* ROW 3: Security & Sessions (Equal Split) */}
-        <div className="md:col-span-3 order-5 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-4">
-            Security & Auth
-          </p>
-          <div className="h-40 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400">
-            Password & 2FA
-          </div>
+        <div className="md:col-span-2 order-5 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 space-y-4">
+          <SubHeading
+            title="Security & Auth"
+            description="Manage your password and two-factor authentication"
+            icon={Lock}
+            iconBgColor="bg-rose-50 dark:bg-rose-500/10"
+            iconClassName="text-rose-600 dark:text-rose-400"
+          />
+          <Security />
         </div>
 
-        <div className="md:col-span-3 order-6 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-4">
-            Active Sessions
-          </p>
-          <div className="h-40 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400">
-            Devices
-          </div>
+        <div className="md:col-span-4 order-6 p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 space-y-4">
+          <SubHeading
+            title="Active Sessions"
+            description="Manage and track your logged-in devices"
+            icon={Shield}
+            iconBgColor="bg-emerald-50 dark:bg-emerald-500/10"
+            iconClassName="text-emerald-600 dark:text-emerald-400"
+          />
+          <Sessions />
         </div>
       </div>
     </div>
