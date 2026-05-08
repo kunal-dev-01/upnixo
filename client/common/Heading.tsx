@@ -17,7 +17,7 @@ const Heading: React.FC<HeadingProps> = ({
         {title}
       </h1>
       {description && (
-        <p className="lg:text-lg text-base text-zinc-500 dark:text-zinc-400 pl-1">
+        <p className="lg:text-lg text-base text-zinc-500 dark:text-zinc-400">
           {description}
         </p>
       )}
