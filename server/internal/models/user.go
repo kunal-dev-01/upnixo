@@ -79,7 +79,7 @@ type User struct {
 	TwoFactorEnabledAt pgtype.Timestamptz `db:"two_factor_enabled_at"`
 
 	// Embedded Preferences (Mapped from user_preferences table)
-	Preferences UserPreferences `db:"-" json:"-"`
+	UserPreferences `db:""`
 
 	// Timestamps
 	CreatedAt time.Time          `db:"created_at"`
@@ -125,7 +125,7 @@ func (u *User) ToSafe() SafeUser {
 	}
 
 	// Map nested preferences
-	if safePrefs, err := u.Preferences.ToSafe(); err == nil {
+	if safePrefs, err := u.UserPreferences.ToSafe(); err == nil {
 		s.Preferences = &safePrefs
 	}
 
@@ -148,7 +148,7 @@ func (u *User) ToSafe() SafeUser {
 // ─────────────────────────────────────────────────────────────────────────────
 
 type UserPreferences struct {
-	UserID           uuid.UUID `db:"user_id"`
+	UserID           uuid.UUID `db:"-"`
 	Theme            string    `db:"theme"`
 	SidebarCollapsed bool      `db:"sidebar_collapsed"`
 	CompactView      bool      `db:"compact_view"`
@@ -206,7 +206,7 @@ func (p *UserPreferences) ToSafe() (SafePreferences, error) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// OAUTH & 2FA (Baki models same rahenge...)
+// OAUTH & 2FA
 // ─────────────────────────────────────────────────────────────────────────────
 
 type OAuthAccount struct {
