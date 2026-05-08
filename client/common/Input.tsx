@@ -2,13 +2,13 @@ import { EyeClose, EyeOpen } from "@/svg/Common";
 import { memo, useState } from "react";
 import type { InputHTMLAttributes } from "react";
 
-// Added 'variant' to props
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   register: any;
   error?: string;
   name: string;
   variant?: "default" | "form" | "danger";
+  rounded?: string;
 }
 
 const Input = memo(
@@ -21,10 +21,14 @@ const Input = memo(
     name,
     disabled,
     variant = "default",
+    rounded, // Yahan default value string mein nahi denge
     ...rest
   }: InputProps) => {
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === "password";
+
+    // Roundness logic: agar prop hai toh wo use karo, warna default 'rounded-full'
+    const borderRadius = rounded || "rounded-full";
 
     const variantStyles = {
       default: {
@@ -64,7 +68,8 @@ const Input = memo(
             {...rest}
             {...register(name)}
             className={`
-            w-full px-5 py-2.5 text-sm font-semibold border-2 rounded-full outline-none transition-all duration-300 focus:ring-4
+            w-full px-5 py-2.5 text-sm font-semibold border-2 outline-none transition-all duration-300 focus:ring-4
+            ${borderRadius} 
             ${isPassword ? "pr-12" : ""} 
             ${styles.border} 
             ${styles.ring}
