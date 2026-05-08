@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Sidebar } from "@/svg/Common";
 import { motion } from "framer-motion";
 import { NAV_LINKS } from "@/utils/constants";
-
+import { WavyText } from "../footer/Footer";
 
 const MotionLink = motion.create(Link);
 
@@ -13,7 +13,6 @@ interface NavbarProps {
 }
 
 function Navbar({ onOpenSidebar }: NavbarProps) {
-
   return (
     <div className="w-fit flex items-center justify-center md:gap-x-3 gap-x-5 py-2 h-12 border border-zinc-100 dark:border-zinc-900 rounded-full pl-4 pr-1 backdrop-blur-lg bg-zinc-50/50 dark:bg-zinc-950/50">
       <Link
@@ -45,51 +44,7 @@ function Navbar({ onOpenSidebar }: NavbarProps) {
             whileHover="hover"
             className="relative px-3 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-300 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-full"
           >
-            <div
-              className="relative flex overflow-hidden whitespace-nowrap"
-            >
-              {/* Top Text - Goes Up */}
-              <div className="flex">
-                {link.name.split("").map((char, index) => (
-                  <motion.span
-                    key={index}
-                    variants={{
-                      initial: { y: 0 },
-                      hover: { y: "-100%" },
-                    }}
-                    transition={{
-                      duration: 0.3,
-                      ease: [0.33, 1, 0.68, 1],
-                      delay: index * 0.02, 
-                    }}
-                    className="inline-block"
-                  >
-                    {char === " " ? "\u00A0" : char}
-                  </motion.span>
-                ))}
-              </div>
-
-              {/* Bottom Text - Comes from Below */}
-              <div className="absolute inset-0 flex">
-                {link.name.split("").map((char, index) => (
-                  <motion.span
-                    key={index}
-                    variants={{
-                      initial: { y: "100%" },
-                      hover: { y: 0 },
-                    }}
-                    transition={{
-                      duration: 0.3,
-                      ease: [0.33, 1, 0.68, 1],
-                      delay: index * 0.02, // Syncs with the top text
-                    }}
-                    className="inline-block"
-                  >
-                    {char === " " ? "\u00A0" : char}
-                  </motion.span>
-                ))}
-              </div>
-            </div>
+            <WavyText name={link.name} />
           </MotionLink>
         ))}
       </nav>

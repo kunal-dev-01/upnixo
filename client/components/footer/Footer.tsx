@@ -1,60 +1,75 @@
-"use client";
-
 import { NAV_LINKS } from "@/utils/constants";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import BrandingSection from "./BrandSection";
 
-// Reusable MotionLink component
 const MotionLink = motion.create(Link);
+export const WavyText = ({ name }: { name: string }) => (
+  <div className="relative flex overflow-hidden whitespace-nowrap">
+    {/* Top Text */}
+    <div className="flex">
+      {name.split("").map((char, index) => (
+        <motion.span
+          key={index}
+          variants={{
+            initial: { y: 0 },
+            hover: { y: "-100%" },
+          }}
+          transition={{
+            duration: 0.3,
+            ease: [0.33, 1, 0.68, 1],
+            delay: index * 0.01,
+          }}
+          className="inline-block"
+        >
+          {char === " " ? "\u00A0" : char}
+        </motion.span>
+      ))}
+    </div>
+    {/* Bottom Text */}
+    <div className="absolute inset-0 flex">
+      {name.split("").map((char, index) => (
+        <motion.span
+          key={index}
+          variants={{
+            initial: { y: "100%" },
+            hover: { y: 0 },
+          }}
+          transition={{
+            duration: 0.3,
+            ease: [0.33, 1, 0.68, 1],
+            delay: index * 0.01,
+          }}
+          className="inline-block"
+        >
+          {char === " " ? "\u00A0" : char}
+        </motion.span>
+      ))}
+    </div>
+  </div>
+);
 
 function Footer() {
-  const WavyText = ({ name }: { name: string }) => (
-    <div className="relative flex overflow-hidden whitespace-nowrap">
-      {/* Top Text */}
-      <div className="flex">
-        {name.split("").map((char, index) => (
-          <motion.span
-            key={index}
-            variants={{
-              initial: { y: 0 },
-              hover: { y: "-100%" },
-            }}
-            transition={{
-              duration: 0.3,
-              ease: [0.33, 1, 0.68, 1],
-              delay: index * 0.01,
-            }}
-            className="inline-block"
-          >
-            {char === " " ? "\u00A0" : char}
-          </motion.span>
-        ))}
-      </div>
-      {/* Bottom Text */}
-      <div className="absolute inset-0 flex">
-        {name.split("").map((char, index) => (
-          <motion.span
-            key={index}
-            variants={{
-              initial: { y: "100%" },
-              hover: { y: 0 },
-            }}
-            transition={{
-              duration: 0.3,
-              ease: [0.33, 1, 0.68, 1],
-              delay: index * 0.01,
-            }}
-            className="inline-block"
-          >
-            {char === " " ? "\u00A0" : char}
-          </motion.span>
-        ))}
-      </div>
-    </div>
-  );
+  const [time, setTime] = useState("");
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      setTime(
+        now.toLocaleTimeString("en-US", {
+          timeZone: "Asia/Kolkata",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        }),
+      );
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <footer className="w-full flex flex-col items-center justify-center border-t border-zinc-100 dark:border-zinc-900 py-12 gap-y-12">
+    <footer className="w-full flex flex-col items-center justify-center border-t border-zinc-100 dark:border-zinc-900 py-12">
       <div className="w-full px-6 max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-10">
         {/* Section 1: Brand */}
         <div className="flex flex-col gap-y-4">
@@ -115,6 +130,8 @@ function Footer() {
           </ul>
         </div>
       </div>
+
+      <BrandingSection time={time} />
 
       {/* Bottom Section */}
       <div className="w-full px-6 border-t border-zinc-100 dark:border-zinc-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-y-4">
