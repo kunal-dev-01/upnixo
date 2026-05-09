@@ -48,6 +48,7 @@ export default function ActionFlow({
           register={register}
           error={errors.code?.message as string}
           variant="form"
+          rounded="rounded-2xl"
           maxLength={6}
         />
 
