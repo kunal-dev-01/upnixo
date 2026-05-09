@@ -10,15 +10,18 @@ import {
 } from "@/hooks/useAuth";
 import SetupFlow from "./SetupFlow";
 import ActionFlow from "./ActionFlow";
+import BackupCodesDisplay from "./BackupCodesDisplay";
 
 export default function TwoFactorSection({
   isEnabled,
 }: {
   isEnabled: boolean;
 }) {
-  const [step, setStep] = useState<"idle" | "setup" | "disable" | "regenerate">(
-    "idle",
-  );
+  const [step, setStep] = useState<
+    "idle" | "setup" | "disable" | "regenerate" | "regenerate_success"
+  >("idle");
+  const [newCodes, setNewCodes] = useState<string[]>([]);
+
   const { setup2FA, data: setupData, isPending: isSettingUp } = useSetup2FA();
   const { confirm2FA, isPending: isConfirming } = useConfirm2FA();
   const { disable2FA, isPending: isDisabling } = useDisable2FA();
@@ -33,7 +36,16 @@ export default function TwoFactorSection({
     });
   };
 
-  const handleBack = () => setStep("idle");
+  const handleBack = () => {
+    setStep("idle");
+    setNewCodes([]);
+  };
+
+  if (step === "regenerate_success") {
+    return (
+      <BackupCodesDisplay codes={newCodes} onDone={() => setStep("idle")} />
+    );
+  }
 
   if (step === "setup" && setupData) {
     return (
@@ -67,21 +79,30 @@ export default function TwoFactorSection({
         isPending={isDisable ? isDisabling : isRegenerating}
         onBack={handleBack}
         onSubmit={(code) => {
-          const action = isDisable ? disable2FA : regenerateBackupCodes;
-          action(
-            { code },
-            {
-              onSuccess: () => {
-                toast.success(
-                  isDisable
-                    ? "2FA disabled successfully"
-                    : "Backup codes regenerated!",
-                );
-                setStep("idle");
+          if (isDisable) {
+            disable2FA(
+              { code },
+              {
+                onSuccess: () => {
+                  toast.success("2FA disabled successfully");
+                  setStep("idle");
+                },
+                onError: (err) => toast.error(err.message || "Invalid code"),
               },
-              onError: (err) => toast.error(err.message || "Invalid code"),
-            },
-          );
+            );
+          } else {
+            regenerateBackupCodes(
+              { code },
+              {
+                onSuccess: (res) => {
+                  setNewCodes(res.backup_codes);
+                  setStep("regenerate_success");
+                  toast.success("Backup codes regenerated!");
+                },
+                onError: (err) => toast.error(err.message || "Invalid code"),
+              },
+            );
+          }
         }}
       />
     );
