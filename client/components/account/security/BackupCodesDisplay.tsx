@@ -1,5 +1,3 @@
-"use client";
-
 import { SimpleCheck } from "@/svg/Common";
 import BackupCodesGrid from "./BackupCodesGrid";
 import VariantButton from "@/common/VariantButton";
@@ -10,7 +8,6 @@ interface Props {
 }
 
 export default function BackupCodesDisplay({ codes, onDone }: Props) {
-
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="text-center space-y-2">
