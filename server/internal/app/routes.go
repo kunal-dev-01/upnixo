@@ -58,8 +58,8 @@ func registerAuthRoutes(r fiber.Router, d *Dependencies) {
 
 	// ── Token Refresh & 2FA Verify (Public/Special Auth) ──────────────────
 	auth.Post("/refresh", d.LoginHandler.Refresh)
-	auth.Post("/2fa/verify", middleware.TwoFAPending(d.JWT), d.TwoFAHandler.VerifyTOTP)
-	auth.Post("/2fa/backup", middleware.TwoFAPending(d.JWT), d.TwoFAHandler.VerifyBackupCode)
+	auth.Post("/2fa/verify", d.TwoFAHandler.VerifyTOTP)
+	auth.Post("/2fa/backup", d.TwoFAHandler.VerifyBackupCode)
 
 	// ── Protected ─────────────────────────────────────────────────────────────
 	protected := auth.Group("",

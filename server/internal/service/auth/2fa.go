@@ -317,7 +317,14 @@ func (s *TwoFAService) verifyTOTPCode(tf *models.TwoFactorAuth, code string) err
 		return err
 	}
 
-	valid := totp.Validate(code, secret)
+	valid, err := totp.ValidateCustom(code, secret, time.Now(), totp.ValidateOpts{
+		Period: 30,
+		Skew:   1,
+		Digits: 6,
+	})
+	if err != nil {
+		return utils.Internal(err)
+	}
 	if !valid {
 		return utils.Unauthorized("invalid 2FA code")
 	}

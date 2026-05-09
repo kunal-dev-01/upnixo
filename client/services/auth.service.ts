@@ -131,13 +131,21 @@ async function confirm2FA(data: Confirm2FARequest): Promise<MessageResponse> {
 
 // POST /auth/2fa/verify → { success, access_token, user }
 async function verify2FA(data: Verify2FARequest): Promise<AuthResponse> {
-  const res = await apiClient.post<AuthResponse>(`${BASE}/2fa/verify`, data)
+  const res = await apiClient.post<AuthResponse>(`${BASE}/2fa/verify`, data, {
+    headers: {
+      Authorization: `Bearer ${data.two_fa_pending_token}`,
+    },
+  })
   return res.data
 }
 
 // POST /auth/2fa/backup → { success, access_token, user }
 async function verifyBackupCode(data: VerifyBackupCodeRequest): Promise<AuthResponse> {
-  const res = await apiClient.post<AuthResponse>(`${BASE}/2fa/backup`, data)
+  const res = await apiClient.post<AuthResponse>(`${BASE}/2fa/backup`, data, {
+    headers: {
+      Authorization: `Bearer ${data.two_fa_pending_token}`,
+    },
+  })
   return res.data
 }
 

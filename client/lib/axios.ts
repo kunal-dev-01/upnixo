@@ -63,7 +63,9 @@ apiClient.interceptors.response.use(
 
     const isAuthEndpoint =
       config?.url?.includes("/auth/refresh") ||
-      config?.url?.includes("/auth/login");
+      config?.url?.includes("/auth/login") ||
+      config?.url?.includes("/auth/2fa/verify") ||
+      config?.url?.includes("/auth/2fa/backup");
 
     // ── 401 → try silent refresh ────────────────────────────────────────────
     if (status === 401 && config && !config._retry && !isAuthEndpoint) {
