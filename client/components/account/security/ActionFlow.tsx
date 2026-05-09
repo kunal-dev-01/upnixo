@@ -1,8 +1,6 @@
-"use client";
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, TriangleAlert } from "@/svg/Common";
+import { TriangleAlert } from "@/svg/Common";
 import Input from "@/common/Input";
 import VariantButton from "@/common/VariantButton";
 import { disable2FASchema } from "@/schemas/auth.schema";

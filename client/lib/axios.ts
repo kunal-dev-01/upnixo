@@ -61,11 +61,14 @@ apiClient.interceptors.response.use(
     const config = error.config as RetryConfig | undefined;
     const status = error.response?.status;
 
-    const isAuthEndpoint =
-      config?.url?.includes("/auth/refresh") ||
-      config?.url?.includes("/auth/login") ||
-      config?.url?.includes("/auth/2fa/verify") ||
-      config?.url?.includes("/auth/2fa/backup");
+    const authPaths = [
+      "/auth/login",
+      "/auth/refresh",
+      "/auth/2fa/verify",
+      "/auth/2fa/backup",
+    ];
+
+    const isAuthEndpoint = authPaths.some((path) => config?.url === path);
 
     // ── 401 → try silent refresh ────────────────────────────────────────────
     if (status === 401 && config && !config._retry && !isAuthEndpoint) {
