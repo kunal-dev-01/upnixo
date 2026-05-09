@@ -3,7 +3,7 @@ import Heading from "@/common/Heading";
 import SubHeading from "@/common/SubHeading";
 import Notifications from "@/components/account/Notifications";
 import Preferences from "@/components/account/Preferences";
-import Security from "@/components/account/Security";
+import Security from "@/components/account/security/Security";
 import Sessions from "@/components/account/Sessions";
 import UserDetails from "@/components/account/UserDetails";
 import UserProfile from "@/components/account/UserProfile";
