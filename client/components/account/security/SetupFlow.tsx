@@ -7,11 +7,9 @@ import { toast } from "sonner";
 import { Copy, ArrowLeft } from "@/svg/Common";
 import Input from "@/common/Input";
 import VariantButton from "@/common/VariantButton";
-import {
-  confirm2FASchema,
-  type Confirm2FASchema,
-} from "@/schemas/auth.schema";
+import { confirm2FASchema, type Confirm2FASchema } from "@/schemas/auth.schema";
 import BackupCodesGrid from "./BackupCodesGrid";
+import BackButton from "@/common/BackButton";
 
 interface Props {
   data: { qr_code_url: string; secret: string; backup_codes: string[] };
@@ -41,12 +39,11 @@ export default function SetupFlow({
 
   return (
     <div className="space-y-8 max-w-xl mx-auto pb-8">
-      <button
+      <BackButton
+        label="Back to security"
         onClick={onBack}
-        className="flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-900 transition-colors"
-      >
-        <ArrowLeft className="w-3 h-3" /> Back to Security
-      </button>
+        className="w-full flex items-center justify-center"
+      />
 
       {/* Step 1: QR Code */}
       <div className="space-y-4">
@@ -125,6 +122,7 @@ export default function SetupFlow({
             register={register}
             error={errors.code?.message}
             variant="form"
+            rounded="rounded-2xl"
             maxLength={6}
           />
           <VariantButton
