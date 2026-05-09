@@ -67,12 +67,10 @@ export const confirm2FASchema = z.object({
 
 export const verify2FASchema = z.object({
   code: otpSchema,
-  two_fa_pending_token: z.string().min(1, "Pending token is required"),
 });
 
 export const verifyBackupCodeSchema = z.object({
   backup_code: z.string().min(8, "Backup code is invalid"),
-  two_fa_pending_token: z.string().min(1, "Pending token is required"),
 });
 
 export const disable2FASchema = z.object({
