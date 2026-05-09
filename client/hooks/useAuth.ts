@@ -39,9 +39,6 @@ export const authKeys = {
 export function useRegister() {
   const mutation = useMutation({
     mutationFn: (data: RegisterRequest) => authService.register(data),
-    onError: (error: ApiError) => {
-      console.error('[Register]', error.code, error.message)
-    },
   })
 
   return {
@@ -71,9 +68,6 @@ export function useVerifyEmail() {
       setAuth(data.user, data.access_token)
       queryClient.invalidateQueries({ queryKey: authKeys.me })
     },
-    onError: (error: ApiError) => {
-      console.error('[VerifyEmail]', error.code, error.message)
-    },
   })
 
   return {
@@ -96,9 +90,6 @@ export function useVerifyEmail() {
 export function useResendVerify() {
   const mutation = useMutation({
     mutationFn: (data: ResendVerifyRequest) => authService.resendVerify(data),
-    onError: (error: ApiError) => {
-      console.error('[ResendVerify]', error.code, error.message)
-    },
   })
 
   return {
@@ -136,9 +127,6 @@ export function useLogin() {
         queryClient.invalidateQueries({ queryKey: authKeys.me })
       }
     },
-    onError: (error: ApiError) => {
-      console.error('[Login]', error.code, error.message)
-    },
   })
 
   return {
@@ -172,10 +160,7 @@ export function useLogout() {
   const mutation = useMutation({
     mutationFn: () => authService.logout(),
     onSuccess: cleanup,
-    onError: (error: ApiError) => {
-      console.error('[Logout]', error.code, error.message)
-      cleanup()
-    },
+    onError: cleanup,
   })
 
   return {
@@ -204,10 +189,7 @@ export function useLogoutAll() {
   const mutation = useMutation({
     mutationFn: () => authService.logoutAll(),
     onSuccess: cleanup,
-    onError: (error: ApiError) => {
-      console.error('[LogoutAll]', error.code, error.message)
-      cleanup()
-    },
+    onError: cleanup,
   })
 
   return {
@@ -242,9 +224,6 @@ export function useGitHubLogin() {
 export function useForgotPassword() {
   const mutation = useMutation({
     mutationFn: (data: ForgotPasswordRequest) => authService.forgotPassword(data),
-    onError: (error: ApiError) => {
-      console.error('[ForgotPassword]', error.code, error.message)
-    },
   })
 
   return {
@@ -262,9 +241,6 @@ export function useForgotPassword() {
 export function useResetPassword() {
   const mutation = useMutation({
     mutationFn: (data: ResetPasswordRequest) => authService.resetPassword(data),
-    onError: (error: ApiError) => {
-      console.error('[ResetPassword]', error.code, error.message)
-    },
   })
 
   return {
@@ -282,9 +258,6 @@ export function useResetPassword() {
 export function useChangePassword() {
   const mutation = useMutation({
     mutationFn: (data: ChangePasswordRequest) => authService.changePassword(data),
-    onError: (error: ApiError) => {
-      console.error('[ChangePassword]', error.code, error.message)
-    },
   })
 
   return {
@@ -316,9 +289,6 @@ export function useVerify2FA() {
       setAuth(data.user, data.access_token)
       queryClient.invalidateQueries({ queryKey: authKeys.me })
     },
-    onError: (error: ApiError) => {
-      console.error('[Verify2FA]', error.code, error.message)
-    },
   })
 
   return {
@@ -345,9 +315,6 @@ export function useVerifyBackupCode() {
       setAuth(data.user, data.access_token)
       queryClient.invalidateQueries({ queryKey: authKeys.me })
     },
-    onError: (error: ApiError) => {
-      console.error('[VerifyBackupCode]', error.code, error.message)
-    },
   })
 
   return {
@@ -370,9 +337,6 @@ export function useVerifyBackupCode() {
 export function useSetup2FA() {
   const mutation = useMutation({
     mutationFn: () => authService.setup2FA(),
-    onError: (error: ApiError) => {
-      console.error('[Setup2FA]', error.code, error.message)
-    },
   })
 
   return {
@@ -397,9 +361,6 @@ export function useConfirm2FA() {
     onSuccess: () => {
       updateUser({ two_factor_enabled: true })
       queryClient.invalidateQueries({ queryKey: authKeys.me })
-    },
-    onError: (error: ApiError) => {
-      console.error('[Confirm2FA]', error.code, error.message)
     },
   })
 
@@ -428,9 +389,6 @@ export function useDisable2FA() {
       queryClient.clear()
       router.replace('/auth/login')
     },
-    onError: (error: ApiError) => {
-      console.error('[Disable2FA]', error.code, error.message)
-    },
   })
 
   return {
@@ -450,9 +408,6 @@ export function useRegenerate2FABackupCodes() {
   const mutation = useMutation({
     mutationFn: (data: Regenerate2FABackupRequest) =>
       authService.regenerateBackupCodes(data),
-    onError: (error: ApiError) => {
-      console.error('[RegenerateBackupCodes]', error.code, error.message)
-    },
   })
 
   return {
@@ -504,9 +459,6 @@ export function useRevokeSession() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authKeys.sessions })
     },
-    onError: (error: ApiError) => {
-      console.error('[RevokeSession]', error.code, error.message)
-    },
   })
 
   return {
@@ -528,9 +480,6 @@ export function useRevokeAllOtherSessions() {
     mutationFn: () => authService.revokeAllOtherSessions(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authKeys.sessions })
-    },
-    onError: (error: ApiError) => {
-      console.error('[RevokeAllOther]', error.code, error.message)
     },
   })
 
