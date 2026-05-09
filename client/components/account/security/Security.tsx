@@ -10,12 +10,12 @@ export default function Security() {
 
   return (
     <div className="space-y-6">
-      <div className="flex mx-auto p-1 bg-zinc-100 dark:bg-zinc-900 rounded-2xl w-fit">
+      <div className="flex p-1 bg-zinc-100 dark:bg-zinc-900 rounded-2xl w-full">
         {(["2fa", "password"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all ${
+            className={`flex-1 px-4 py-2 text-sm font-semibold rounded-xl transition-all ${
               activeTab === tab
                 ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm"
                 : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
