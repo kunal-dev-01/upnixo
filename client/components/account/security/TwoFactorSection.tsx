@@ -62,12 +62,6 @@ export default function TwoFactorSection({
     const isDisable = step === "disable";
     return (
       <ActionFlow
-        title={isDisable ? "Disable 2FA" : "Regenerate Backup Codes"}
-        description={
-          isDisable
-            ? "Please enter your 6-digit verification code to disable Two-Factor Authentication."
-            : "Regenerating backup codes will invalidate your existing codes. Enter your 2FA code to proceed."
-        }
         buttonLabel={isDisable ? "Disable 2FA" : "Regenerate Codes"}
         variant={isDisable ? "delete" : "save"}
         isPending={isDisable ? isDisabling : isRegenerating}
