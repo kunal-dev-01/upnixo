@@ -77,3 +77,29 @@ func (h *LoginHandler) Login(c *fiber.Ctx) error {
 		"user":         result.AuthResult.User,
 	})
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REFRESH
+// POST /api/v1/auth/refresh
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (h *LoginHandler) Refresh(c *fiber.Ctx) error {
+	// Read session ID from httpOnly cookie
+	sessionID := c.Cookies("refresh_token")
+	if sessionID == "" {
+		return utils.Unauthorized("missing refresh token cookie")
+	}
+
+	result, err := h.svc.Refresh(c.Context(), sessionID)
+	if err != nil {
+		// If refresh fails (e.g. session expired), clear the invalid cookie
+		clearRefreshCookie(c, h.cfg)
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success":      true,
+		"access_token": result.AccessToken,
+		"user":         result.User,
+	})
+}

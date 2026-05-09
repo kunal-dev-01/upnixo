@@ -300,3 +300,48 @@ func (s *LoginService) createSession(
 		User:        &safe,
 	}, nil
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REFRESH
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (s *LoginService) Refresh(
+	ctx context.Context,
+	sessionID string,
+) (*dto.AuthResult, error) {
+
+	if sessionID == "" {
+		return nil, utils.Unauthorized("missing refresh session")
+	}
+
+	// 1. Get session from Redis
+	session, err := s.sessionRepo.GetSession(ctx, sessionID)
+	if err != nil {
+		return nil, utils.Unauthorized("session expired or invalid")
+	}
+
+	// 2. Get user to ensure account is still valid/active
+	user, prefs, err := s.authRepo.GetUserForLogin(ctx, session.UserID)
+	if err != nil {
+		return nil, utils.Unauthorized("user no longer exists")
+	}
+
+	// 3. Security checks
+	if user.IsBlocked || !user.IsActive || user.IsDeleted() {
+		return nil, utils.Forbidden("account is no longer active")
+	}
+
+	// 4. Generate only NEW access token (keep same session ID)
+	pair, err := s.jwt.GenerateTokenPair(user, sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	safe := user.ToSafe(prefs)
+
+	return &dto.AuthResult{
+		AccessToken: pair.AccessToken,
+		SessionID:   sessionID,
+		User:        &safe,
+	}, nil
+}
