@@ -25,12 +25,7 @@ export default function BackupCodesDisplay({ codes, onDone }: Props) {
 
       <BackupCodesGrid codes={codes} variant="full" />
 
-      <VariantButton
-        label="Done"
-        variant="save"
-        onClick={onDone}
-        className="w-full mt-6"
-      />
+      <VariantButton label="Done" variant="save" onClick={onDone} />
     </div>
   );
 }
