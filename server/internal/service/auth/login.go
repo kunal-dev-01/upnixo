@@ -10,6 +10,8 @@ import (
 	"server/internal/repo"
 	"server/internal/security"
 	"server/internal/utils"
+
+	"github.com/google/uuid"
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -321,7 +323,12 @@ func (s *LoginService) Refresh(
 	}
 
 	// 2. Get user to ensure account is still valid/active
-	user, prefs, err := s.authRepo.GetUserForLogin(ctx, session.UserID)
+	uid, err := uuid.Parse(session.UserID)
+	if err != nil {
+		return nil, utils.Unauthorized("invalid session data")
+	}
+
+	user, prefs, err := s.authRepo.GetByID(ctx, uid)
 	if err != nil {
 		return nil, utils.Unauthorized("user no longer exists")
 	}
