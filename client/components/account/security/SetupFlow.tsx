@@ -39,7 +39,7 @@ export default function SetupFlow({
   };
 
   return (
-    <div className="space-y-8 max-w-xl mx-auto pb-8">
+    <div className="space-y-8 mx-auto">
       <BackButton
         label={currentStep === 1 ? "Cancel Setup" : "Previous Step"}
         onClick={
@@ -93,14 +93,13 @@ export default function SetupFlow({
             label="I've Saved the Codes"
             variant="save"
             onClick={() => setCurrentStep(2)}
-            className="w-full h-12 rounded-2xl"
           />
         </div>
       )}
 
       {/* Step 2: QR Code */}
       {currentStep === 2 && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+        <div className="space-y-6 duration-500">
           <div className="space-y-2 text-center">
             <h4 className="text-lg font-bold text-zinc-900 dark:text-white">
               Scan QR Code
@@ -138,7 +137,6 @@ export default function SetupFlow({
             label="Continue"
             variant="save"
             onClick={() => setCurrentStep(3)}
-            className="w-full h-12 rounded-2xl"
           />
         </div>
       )}
