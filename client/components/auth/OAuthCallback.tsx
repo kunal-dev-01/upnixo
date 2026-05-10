@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, FormProvider } from "react-hook-form";
@@ -14,6 +16,7 @@ import { isTwoFAPending, isAuthSuccess } from "@/types/auth.types";
 import VerifyTwoFA from "./VerifyTwoFA";
 import { AlertCircle } from "@/svg/Extra";
 import { z } from "zod";
+import MonoButton from "@/common/MonoButton";
 
 const unified2FASchema = z.object({
   code: z.string().optional(),
@@ -123,7 +126,7 @@ export default function OAuthCallback({ provider }: Props) {
             className="text-center space-y-6"
           >
             {authError ? (
-              <div className="space-y-4">
+              <div className="space-y-4 flex flex-col items-center justify-center">
                 <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto">
                   <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
                 </div>
@@ -136,12 +139,12 @@ export default function OAuthCallback({ provider }: Props) {
                       "Something went wrong during the sign-in process."}
                   </p>
                 </div>
-                <button
+                <MonoButton
+                  type="button"
                   onClick={() => router.replace("/auth/login")}
-                  className="px-6 py-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl font-bold text-sm hover:scale-105 transition-transform"
                 >
                   Return to Login
-                </button>
+                </MonoButton>
               </div>
             ) : (
               <div className="space-y-4">
