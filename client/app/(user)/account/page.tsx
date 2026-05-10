@@ -11,7 +11,63 @@ import { Theme } from "@/svg/Auth";
 import { Bell, Shield, User } from "@/svg/Common";
 import { Lock, FingerPrint } from "@/svg/More";
 
+import { useMe } from "@/hooks/useUser";
+
 function Account() {
+  const { isPending } = useMe();
+
+  if (isPending) {
+    return (
+      <div className="w-full max-w-7xl mx-auto space-y-6 animate-pulse">
+        {/* Header Skeleton */}
+        <div className="space-y-3">
+          <div className="h-10 w-64 bg-zinc-200 dark:bg-zinc-800 rounded-2xl" />
+          <div className="h-4 w-96 bg-zinc-100 dark:bg-zinc-900 rounded-lg" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 items-start">
+          {/* Left Column Skeletons */}
+          <div className="space-y-4 lg:space-y-6">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-64 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/50 p-6 space-y-4"
+              >
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-200 dark:bg-zinc-800" />
+                  <div className="space-y-2 mt-1">
+                    <div className="h-5 w-32 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                    <div className="h-3 w-48 bg-zinc-100 dark:bg-zinc-900 rounded-md" />
+                  </div>
+                </div>
+                <div className="h-32 w-full bg-zinc-100 dark:bg-zinc-900 rounded-2xl opacity-50" />
+              </div>
+            ))}
+          </div>
+
+          {/* Right Column Skeletons */}
+          <div className="lg:col-span-2 space-y-4 lg:space-y-6">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-48 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/50 p-6 space-y-4"
+              >
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-200 dark:bg-zinc-800" />
+                  <div className="space-y-2 mt-1">
+                    <div className="h-5 w-32 bg-zinc-200 dark:bg-zinc-800 rounded-lg" />
+                    <div className="h-3 w-48 bg-zinc-100 dark:bg-zinc-900 rounded-md" />
+                  </div>
+                </div>
+                <div className="h-16 w-full bg-zinc-100 dark:bg-zinc-900 rounded-2xl opacity-50" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6">
       <Heading
