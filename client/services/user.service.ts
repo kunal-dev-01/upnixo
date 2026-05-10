@@ -22,8 +22,21 @@ async function updatePreferences(data: UpdatePreferencesPayload): Promise<Update
   return res.data.data;
 }
 
+async function updateAvatar(file: File): Promise<{ message: string }> {
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  const res = await apiClient.post<{ success: boolean; message: string }>(`${BASE}/avatar`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return res.data;
+}
+
 export const userService = {
   getMe,
   updateProfile,
   updatePreferences,
+  updateAvatar,
 };

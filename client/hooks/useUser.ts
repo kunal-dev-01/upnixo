@@ -3,7 +3,10 @@ import { userService } from "@/services/user.service";
 import { useAuthStore } from "@/store/auth.store";
 import type { ApiError } from "@/types/api.types";
 import { useEffect } from "react";
-import type { UpdatePreferencesPayload, UpdateUserPayload } from "@/types/user.types";
+import type {
+  UpdatePreferencesPayload,
+  UpdateUserPayload,
+} from "@/types/user.types";
 
 export const userKeys = {
   all: ["user"] as const,
@@ -80,7 +83,8 @@ export function useUpdatePreferences() {
   const updatePrefsLocally = useAuthStore((s) => s.updatePreferencesLocally);
 
   const mutation = useMutation({
-    mutationFn: (data: UpdatePreferencesPayload) => userService.updatePreferences(data),
+    mutationFn: (data: UpdatePreferencesPayload) =>
+      userService.updatePreferences(data),
     onSuccess: (updatedData) => {
       updatePrefsLocally(updatedData);
       queryClient.invalidateQueries({ queryKey: userKeys.me });
@@ -90,6 +94,32 @@ export function useUpdatePreferences() {
   return {
     updatePreferences: mutation.mutate,
     updatePreferencesAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UPDATE AVATAR
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function useUpdateAvatar() {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (file: File) => userService.updateAvatar(file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userKeys.me });
+    },
+  });
+
+  return {
+    updateAvatar: mutation.mutate,
+    updateAvatarAsync: mutation.mutateAsync,
     isPending: mutation.isPending,
     isSuccess: mutation.isSuccess,
     isError: mutation.isError,
