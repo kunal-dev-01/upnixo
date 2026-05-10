@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { apiClient } from "@/lib/axios";
-import type { User } from "@/types/user.types";
+import type { UpdatePreferencesPayload, UpdateUserPayload, User } from "@/types/user.types";
 
 const BASE = "/auth/user"; // Matches the routes.go grouping
 
@@ -12,6 +12,18 @@ async function getMe(): Promise<User> {
   return res.data;
 }
 
+async function updateProfile(data: UpdateUserPayload): Promise<UpdateUserPayload> {
+  const res = await apiClient.patch<{ success: boolean; data: UpdateUserPayload }>(`${BASE}/profile`, data);
+  return res.data.data;
+}
+
+async function updatePreferences(data: UpdatePreferencesPayload): Promise<UpdatePreferencesPayload> {
+  const res = await apiClient.patch<{ success: boolean; data: UpdatePreferencesPayload }>(`${BASE}/preferences`, data);
+  return res.data.data;
+}
+
 export const userService = {
   getMe,
+  updateProfile,
+  updatePreferences,
 };

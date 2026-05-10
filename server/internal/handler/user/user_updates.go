@@ -23,11 +23,16 @@ func (h *UserHandler) UpdateProfile(c *fiber.Ctx) error {
 
 	// Validation can be added here if needed
 
-	if err := h.userSvc.UpdateProfile(c.Context(), userID, req); err != nil {
+	data, err := h.userSvc.UpdateProfile(c.Context(), userID, req)
+	if err != nil {
 		return err
 	}
 
-	return c.JSON(dto.MessageResponse{Message: "profile updated successfully"})
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "profile updated successfully",
+		"data":    data,
+	})
 }
 
 // UpdatePreferences handles updating the user's application preferences
@@ -43,9 +48,14 @@ func (h *UserHandler) UpdatePreferences(c *fiber.Ctx) error {
 		return utils.BadRequest("invalid request body")
 	}
 
-	if err := h.userSvc.UpdatePreferences(c.Context(), userID, req); err != nil {
+	data, err := h.userSvc.UpdatePreferences(c.Context(), userID, req)
+	if err != nil {
 		return err
 	}
 
-	return c.JSON(dto.MessageResponse{Message: "preferences updated successfully"})
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "preferences updated successfully",
+		"data":    data,
+	})
 }

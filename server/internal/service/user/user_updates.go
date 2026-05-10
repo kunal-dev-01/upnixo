@@ -10,25 +10,29 @@ import (
 )
 
 // UpdateProfile updates the user's basic profile information
-func (s *UserService) UpdateProfile(ctx context.Context, userID uuid.UUID, req dto.UpdateUserRequest) error {
+func (s *UserService) UpdateProfile(ctx context.Context, userID uuid.UUID, req dto.UpdateUserRequest) (*dto.UpdateUserRequest, error) {
 	params := repo.UpdateUserParams{
 		FullName: req.FullName,
 		Timezone: req.Timezone,
 		Locale:   req.Locale,
 	}
 
-	return s.authRepo.UpdateUser(ctx, userID, params)
+	if err := s.authRepo.UpdateUser(ctx, userID, params); err != nil {
+		return nil, err
+	}
+
+	return &req, nil
 }
 
 // UpdatePreferences updates the user's application preferences
-func (s *UserService) UpdatePreferences(ctx context.Context, userID uuid.UUID, req dto.UpdatePreferencesRequest) error {
+func (s *UserService) UpdatePreferences(ctx context.Context, userID uuid.UUID, req dto.UpdatePreferencesRequest) (*dto.UpdatePreferencesRequest, error) {
 	var notifJSON []byte
 	var err error
 
 	if req.Notifications != nil {
 		notifJSON, err = json.Marshal(req.Notifications)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -41,5 +45,9 @@ func (s *UserService) UpdatePreferences(ctx context.Context, userID uuid.UUID, r
 		Language:         req.Language,
 	}
 
-	return s.authRepo.UpdatePreferences(ctx, userID, params)
+	if err := s.authRepo.UpdatePreferences(ctx, userID, params); err != nil {
+		return nil, err
+	}
+
+	return &req, nil
 }
