@@ -89,4 +89,10 @@ func registerAuthRoutes(r fiber.Router, d *Dependencies) {
 	protected.Delete("/sessions/:id",
 		d.SessionHandler.RevokeSession,
 	)
+
+	// ── User Profile ──────────────────────────────────────────────────────────
+	user := protected.Group("/user")
+	user.Get("/me", d.UserHandler.GetMe)
+	user.Get("/:id", d.UserHandler.GetByID)
+	user.Get("/email/:email", d.UserHandler.GetByEmail)
 }

@@ -5,11 +5,13 @@ import (
 	"server/internal/config"
 	"server/internal/email"
 	"server/internal/handler/auth"
+	userHandler "server/internal/handler/user"
 	"server/internal/middleware"
 	rds "server/internal/redis"
 	"server/internal/repo"
 	"server/internal/security"
 	"server/internal/service/auth"
+	userService "server/internal/service/user"
 	"server/internal/utils"
 )
 
@@ -38,6 +40,7 @@ type Dependencies struct {
 	OAuthSvc    *service.OAuthService
 	LoginSvc    *service.LoginService
 	SessionSvc  *service.SessionService
+	UserSvc     *userService.UserService
 
 	// Handlers
 	AccountHandler  *handler.AccountHandler
@@ -46,6 +49,7 @@ type Dependencies struct {
 	OAuthHandler    *handler.OAuthHandler
 	LoginHandler    *handler.LoginHandler
 	SessionHandler  *handler.SessionHandler
+	UserHandler     *userHandler.UserHandler
 
 	// Middleware
 	LoggerMW *middleware.Logger
@@ -69,6 +73,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	oAuthSvc := service.NewOAuthService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
 	loginSvc := service.NewLoginService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
 	sessionSvc := service.NewSessionService(sessionRepo)
+	userSvc := userService.NewUserService(authRepo)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	accountHandler := handler.NewAccountHandler(accountSvc, cfg)
@@ -77,6 +82,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	oAuthHandler := handler.NewOAuthHandler(oAuthSvc, cfg)
 	loginHandler := handler.NewLoginHandler(loginSvc, cfg)
 	sessionHandler := handler.NewSessionHandler(sessionSvc, cfg)
+	userHandler := userHandler.NewUserHandler(userSvc)
 
 	// ── Middleware ─────────────────────────────────────────────────────────────
 	loggerMW := middleware.NewLogger(log, cfg)
@@ -98,12 +104,14 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 		OAuthSvc:        oAuthSvc,
 		LoginSvc:        loginSvc,
 		SessionSvc:      sessionSvc,
+		UserSvc:         userSvc,
 		AccountHandler:  accountHandler,
 		PasswordHandler: passwordHandler,
 		TwoFAHandler:    twoFAHandler,
 		OAuthHandler:    oAuthHandler,
 		LoginHandler:    loginHandler,
 		SessionHandler:  sessionHandler,
+		UserHandler:     userHandler,
 		LoggerMW:        loggerMW,
 		Limiters:        limiters,
 	}
