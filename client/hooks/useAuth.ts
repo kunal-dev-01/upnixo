@@ -216,6 +216,44 @@ export function useGitHubLogin() {
   return { login: authService.redirectToGitHub }
 }
 
+export function useOAuthCallback() {
+  const setAuth = useAuthStore((s) => s.setAuth)
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: ({
+      provider,
+      code,
+      state,
+    }: {
+      provider: string
+      code: string
+      state: string
+    }) => authService.handleOAuthCallback(provider, code, state),
+    onSuccess: (data) => {
+      if (isTwoFAPending(data)) {
+        sessionStorage.setItem('2fa_pending_token', data.two_fa_pending_token)
+      }
+
+      if (isAuthSuccess(data)) {
+        setAuth(data.user, data.access_token)
+        queryClient.invalidateQueries({ queryKey: authKeys.me })
+      }
+    },
+  })
+
+  return {
+    handleCallback: mutation.mutate,
+    handleCallbackAsync: mutation.mutateAsync,
+    isPending: mutation.isPending,
+    isSuccess: mutation.isSuccess,
+    isError: mutation.isError,
+    error: mutation.error as ApiError | null,
+    data: mutation.data,
+    reset: mutation.reset,
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // PASSWORD
 // All responses: { success, message }

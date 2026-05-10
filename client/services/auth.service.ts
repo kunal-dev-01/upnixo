@@ -91,6 +91,20 @@ function redirectToGitHub(): void {
   window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/oauth/github`
 }
 
+async function handleOAuthCallback(
+  provider: string,
+  code: string,
+  state: string,
+): Promise<LoginResponse> {
+  const res = await apiClient.get<LoginResponse>(
+    `${BASE}/oauth/${provider}/callback`,
+    {
+      params: { code, state },
+    },
+  )
+  return res.data
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // PASSWORD
 // ─────────────────────────────────────────────────────────────────────────────
@@ -202,6 +216,7 @@ export const authService = {
   logoutAll,
   redirectToGoogle,
   redirectToGitHub,
+  handleOAuthCallback,
   forgotPassword,
   resetPassword,
   changePassword,
