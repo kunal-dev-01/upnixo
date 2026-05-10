@@ -95,4 +95,6 @@ func registerAuthRoutes(r fiber.Router, d *Dependencies) {
 	user.Get("/me", d.UserHandler.GetMe)
 	user.Get("/:id", d.UserHandler.GetByID)
 	user.Get("/email/:email", d.UserHandler.GetByEmail)
+	user.Patch("/profile", d.UserHandler.UpdateProfile)
+	user.Patch("/preferences", d.UserHandler.UpdatePreferences)
 }
