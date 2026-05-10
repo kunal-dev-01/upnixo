@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"server/internal/config"
@@ -53,13 +54,29 @@ func (s *AccountService) Register(ctx context.Context, input dto.RegisterRequest
 		return nil, err
 	}
 
-	// 2. Hash password
+	// 2. Check for existing account (Security: prevent registration overlap with OAuth)
+	existingUser, _, err := s.authRepo.GetUserByEmail(ctx, input.Email)
+	if err == nil && existingUser != nil {
+		// Fetch linked OAuth accounts
+		accounts, err := s.authRepo.GetOAuthAccountsByUserID(ctx, existingUser.ID)
+		if err == nil && len(accounts) > 0 {
+			// Found an OAuth account -> tell them to login via provider
+			return nil, utils.Conflict(fmt.Sprintf(
+				"This email is already associated with a %s account. Please sign in using %s.",
+				accounts[0].Provider, accounts[0].Provider,
+			))
+		}
+		// Found a regular user -> standard conflict
+		return nil, utils.Conflict("Email is already registered. Please log in instead.")
+	}
+
+	// 3. Hash password
 	hash, err := security.HashPassword(input.Password)
 	if err != nil {
 		return nil, err
 	}
 
-	// 3. Create user
+	// 4. Create user
 	user, err := s.authRepo.Register(ctx, repo.RegisterParams{
 		Email:        input.Email,
 		PasswordHash: hash,
@@ -69,7 +86,7 @@ func (s *AccountService) Register(ctx context.Context, input dto.RegisterRequest
 		return nil, err
 	}
 
-	// 4. Send verification email in background — never block register response
+	// 5. Send verification email in background — never block register response
 	go s.sendVerificationEmail(user)
 
 	return &dto.RegisterResponse{
