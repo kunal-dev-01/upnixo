@@ -31,18 +31,21 @@ function Sessions() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const getDeviceIcon = (deviceName: string, browser: string) => {
+  const getDeviceIcon = (deviceName: string = "", browser: string = "") => {
     const device = deviceName.toLowerCase();
     const browserLower = browser.toLowerCase();
 
-    if (device.includes("iphone") || device.includes("ipad"))
+    if (
+      device.includes("iphone") ||
+      device.includes("ipad") ||
+      browserLower.includes("mobile")
+    )
       return <Smartphone className="w-5 h-5" />;
-    if (device.includes("mac")) return <Laptop className="w-5 h-5" />;
+    if (device.includes("mac") || device.includes("laptop"))
+      return <Laptop className="w-5 h-5" />;
     if (device.includes("windows")) return <Monitor className="w-5 h-5" />;
     if (device.includes("tablet")) return <Tablet className="w-5 h-5" />;
-    if (browserLower.includes("mobile"))
-      return <Smartphone className="w-5 h-5" />;
-    return <Laptop className="w-5 h-5" />;
+    return <Monitor className="w-5 h-5" />;
   };
 
   const getBrowserIcon = (browser: string) => {
@@ -62,23 +65,19 @@ function Sessions() {
     );
 
     if (diffHours < 1) return "Just now";
-    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
     if (diffHours < 48) return "Yesterday";
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    return date.toLocaleDateString();
   };
 
   const handleRevokeSession = async (sessionId: string) => {
     setRevokingId(sessionId);
     try {
       await revokeSession.revokeSessionAsync(sessionId);
-      showToast("success", "Session revoked successfully");
+      showToast("success", "Session revoked");
       refetch();
     } catch (error) {
-      showToast("error", "Failed to revoke session");
+      showToast("error", "Failed to revoke");
     } finally {
       setRevokingId(null);
     }
@@ -95,18 +94,11 @@ function Sessions() {
     }
   };
 
-  const handleLogoutCurrent = async () => {
-    setShowConfirmModal(null);
-    await logout.logoutAsync();
-  };
-
   if (isPending) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <Loader className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
-        <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
-          Loading your sessions...
-        </p>
+      <div className="flex flex-col items-center justify-center py-20">
+        <Loader className="w-8 h-8 text-indigo-600 animate-spin" />
+        <p className="mt-4 text-sm text-zinc-500">Syncing active sessions...</p>
       </div>
     );
   }
@@ -115,238 +107,214 @@ function Sessions() {
   const otherSessions = sessions.filter((s) => !s.is_current);
 
   return (
-    <div className="space-y-6">
-      {/* Toast Notifications */}
+    <div className="max-w-4xl mx-auto space-y-8 p-1">
+      {/* Toast - Responsive positioning */}
       {toast && (
-        <div className="fixed top-20 right-4 left-4 sm:left-auto z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg max-w-sm mx-auto sm:mx-0">
+        <div className="fixed bottom-6 right-4 left-4 sm:left-auto z-60 animate-in fade-in slide-in-from-bottom-4">
           <div
-            className={`absolute inset-0 rounded-xl ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border ${
               toast.type === "success"
-                ? "bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30"
-                : "bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30"
+                ? "bg-white dark:bg-zinc-900 border-emerald-500/20 text-emerald-600"
+                : "bg-white dark:bg-zinc-900 border-red-500/20 text-red-600"
             }`}
-          />
-          <div className="relative flex items-center gap-2">
+          >
             {toast.type === "success" ? (
-              <CircleCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              <CircleCheck className="w-5 h-5" />
             ) : (
-              <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+              <XCircle className="w-5 h-5" />
             )}
-            <span
-              className={`text-sm font-medium ${
-                toast.type === "success"
-                  ? "text-emerald-700 dark:text-emerald-300"
-                  : "text-red-700 dark:text-red-300"
-              }`}
-            >
-              {toast.message}
-            </span>
+            <span className="text-sm font-semibold">{toast.message}</span>
           </div>
         </div>
       )}
 
-      {/* Current Session */}
+      {/* CURRENT SESSION SECTION */}
       {currentSession && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-              Current Session
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 px-1">
+            <Shield className="w-4 h-4 text-emerald-500" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500">
+              Current Device
             </h3>
           </div>
 
-          <div className="relative overflow-hidden rounded-xl border-2 border-emerald-200 dark:border-emerald-500/30 bg-linear-to-r from-emerald-50/50 to-transparent dark:from-emerald-500/5 p-4">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl" />
-
-            <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-3 flex-1 flex-wrap">
-                <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-500/20">
+          <div className="group relative overflow-hidden rounded-2xl border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-500/5 p-5 transition-all hover:shadow-md">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-xl bg-white dark:bg-zinc-900 shadow-sm border border-emerald-100 dark:border-emerald-500/20 text-emerald-600">
                   {getDeviceIcon(
                     currentSession.device_name,
                     currentSession.browser,
                   )}
                 </div>
-
-                <div className="space-y-1 flex-1 min-w-0">
+                <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-bold text-zinc-900 dark:text-white truncate">
-                      {currentSession.device_name || "Unknown Device"}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-medium whitespace-nowrap">
-                      Active Now
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 flex-wrap">
-                    <span className="flex items-center gap-1">
-                      {getBrowserIcon(currentSession.browser)}{" "}
-                      {currentSession.browser}
-                    </span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1">
-                      <Globe className="w-3 h-3" />
-                      {currentSession.os}
+                    <h4 className="text-base font-bold text-zinc-900 dark:text-white">
+                      {currentSession.device_name || "Current Device"}
+                    </h4>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-white font-bold uppercase tracking-tight">
+                      Active
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 flex-wrap">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {currentSession.city}, {currentSession.country}
-                    </span>
-                    <span>•</span>
-                    <span className="font-mono text-xs break-all">
-                      {currentSession.ip_address}
-                    </span>
+                  {/* Info Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400">
+                    <div className="flex items-center gap-1.5 leading-none">
+                      <span className="opacity-70">
+                        {getBrowserIcon(currentSession.browser)}
+                      </span>
+                      <span>
+                        {currentSession.browser} on {currentSession.os}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 leading-none">
+                      <MapPin className="w-3.5 h-3.5 opacity-70" />
+                      <span>
+                        {currentSession.city}, {currentSession.country}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 leading-none font-mono">
+                      <Globe className="w-3.5 h-3.5 opacity-70" />
+                      <span>{currentSession.ip_address}</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <VariantButton
-                variant="delete"
-                label="Logout"
-                isLoading={logout.isPending}
-                onClick={() => setShowConfirmModal("current")}
-                className="sm:w-auto px-4 py-2 text-sm whitespace-nowrap"
-              />
+              <div className="pt-2 md:pt-0 border-t md:border-t-0 border-emerald-200/50">
+                <VariantButton
+                  variant="delete"
+                  label="Log out device"
+                  isLoading={logout.isPending}
+                  onClick={() => setShowConfirmModal("current")}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Other Sessions */}
+      {/* OTHER SESSIONS SECTION */}
       {otherSessions.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between flex-wrap gap-3">
+        <section className="space-y-4">
+          <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
-              <Logout className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
-              <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-                Other Sessions ({otherSessions.length})
+              <Logout className="w-4 h-4 text-zinc-400" />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500">
+                Logged in elsewhere ({otherSessions.length})
               </h3>
             </div>
-
-            <VariantButton
-              variant="delete"
-              label="Revoke All"
-              isLoading={revokeAllOther.isPending}
+            <button
               onClick={() => setShowConfirmModal("all")}
-              className="px-3 py-1.5 text-xs whitespace-nowrap"
-            />
+              className="text-xs font-bold text-red-600 hover:text-red-700 dark:text-red-400 transition-colors bg-red-50 dark:bg-red-500/10 px-3 py-1.5 rounded-lg"
+            >
+              Log out all others
+            </button>
           </div>
 
-          <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+          <div className="grid gap-3">
             {otherSessions.map((session) => (
               <div
                 key={session.id}
-                className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all p-4"
+                className="group p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 shrink-0">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">
                       {getDeviceIcon(session.device_name, session.browser)}
                     </div>
-
-                    <div className="space-y-1 flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium text-zinc-900 dark:text-white truncate">
-                          {session.device_name || "Unknown Device"}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 flex-wrap">
-                        <span className="flex items-center gap-1">
-                          {getBrowserIcon(session.browser)} {session.browser}
-                        </span>
-                        <span>•</span>
-                        <span className="truncate">{session.os}</span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1 whitespace-nowrap">
-                          <Clock className="w-3 h-3" />
-                          {formatDate(session.created_at)}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 flex-wrap">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {session.city}, {session.country}
-                        </span>
-                        <span>•</span>
-                        <span className="font-mono text-xs break-all">
-                          {session.ip_address}
-                        </span>
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-bold text-zinc-800 dark:text-zinc-200">
+                        {session.device_name || "Unknown Device"}
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-zinc-500">
+                        <div className="flex items-center gap-1.5">
+                          <span className="opacity-70">
+                            {getBrowserIcon(session.browser)}
+                          </span>
+                          <span className="truncate">
+                            {session.browser} • {session.os}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="w-3 h-3 opacity-70" />
+                          <span>
+                            Last seen: {formatDate(session.created_at)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="w-3 h-3 opacity-70" />
+                          <span>
+                            {session.city}, {session.country}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 font-mono">
+                          <span className="opacity-70">IP:</span>
+                          <span>{session.ip_address}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <VariantButton
-                    variant="delete"
-                    label="Revoke"
-                    isLoading={revokingId === session.id}
-                    onClick={() => handleRevokeSession(session.id)}
-                    className="sm:w-auto px-4 py-1.5 text-sm"
-                  />
+                  <div className="flex sm:block">
+                    <VariantButton
+                      variant="delete"
+                      label="Revoke"
+                      isLoading={revokingId === session.id}
+                      onClick={() => handleRevokeSession(session.id)}
+                    />
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
-      {sessions.length === 0 && !isPending && (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="p-4 rounded-full bg-zinc-100 dark:bg-zinc-800 mb-4">
-            <Smartphone className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
-          </div>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            No active sessions found
-          </p>
-        </div>
-      )}
-
-      {/* Confirmation Modal */}
+      {/* Confirmation Modal - Mobile Optimized */}
       {showConfirmModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-          onClick={() => setShowConfirmModal(null)}
-        >
+        <div className="fixed inset-0 z-100 flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div
-            className="p-6 max-w-md w-full rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-full bg-red-100 dark:bg-red-500/10">
-                <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+            className="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in"
+            onClick={() => setShowConfirmModal(null)}
+          />
+          <div className="relative w-full max-w-sm bg-white dark:bg-zinc-950 rounded-t-3xl sm:rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95">
+            <div className="flex items-center gap-4 mb-5">
+              <div className="p-3 rounded-full bg-red-50 dark:bg-red-500/10">
+                <AlertCircle className="w-6 h-6 text-red-600" />
               </div>
-              <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
-                {showConfirmModal === "current"
-                  ? "Logout Current Device?"
-                  : "Revoke All Sessions?"}
-              </h3>
+              <div>
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
+                  Confirm Logout
+                </h3>
+                <p className="text-xs text-zinc-500">
+                  This action cannot be undone.
+                </p>
+              </div>
             </div>
 
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-8 leading-relaxed">
               {showConfirmModal === "current"
-                ? "You will be logged out from this device and redirected to login page."
-                : "This will log you out from all other devices. You will stay logged in on this device."}
+                ? "Are you sure you want to log out from this session? You will need to login again."
+                : "This will terminate all other active sessions except for this one. Other devices will be logged out immediately."}
             </p>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => setShowConfirmModal(null)}
-                className="flex-1 px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                className="flex-1 order-2 sm:order-1 px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 text-sm font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={
                   showConfirmModal === "current"
-                    ? handleLogoutCurrent
-                    : handleRevokeAllOthers
+                    ? () => logout.logoutAsync()
+                    : () => handleRevokeAllOthers()
                 }
-                className="flex-1 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-medium transition-colors"
+                className="flex-1 order-1 sm:order-2 px-4 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold shadow-lg shadow-red-500/20 transition-all active:scale-95"
               >
-                {showConfirmModal === "current" ? "Logout" : "Revoke All"}
+                Confirm Logout
               </button>
             </div>
           </div>
