@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"server/internal/config"
+	"server/internal/middleware"
 	"server/internal/service/auth"
 	"server/internal/utils"
 
@@ -35,12 +36,15 @@ func NewSessionHandler(
 // ─────────────────────────────────────────────────────────────────────────────
 
 func (h *SessionHandler) GetSessions(c *fiber.Ctx) error {
-	userID := c.Locals("user_id").(string)
-	sessionID := c.Locals("session_id").(string)
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		return utils.Unauthorized("authentication required")
+	}
+	sessionID := middleware.GetSessionID(c)
 
 	sessions, err := h.svc.GetActiveSessions(
 		c.Context(),
-		userID,
+		userID.String(),
 		sessionID,
 	)
 	if err != nil {
@@ -59,12 +63,15 @@ func (h *SessionHandler) GetSessions(c *fiber.Ctx) error {
 // ─────────────────────────────────────────────────────────────────────────────
 
 func (h *SessionHandler) Logout(c *fiber.Ctx) error {
-	userID := c.Locals("user_id").(string)
-	sessionID := c.Locals("session_id").(string)
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		return utils.Unauthorized("authentication required")
+	}
+	sessionID := middleware.GetSessionID(c)
 
 	err := h.svc.Logout(
 		c.Context(),
-		userID,
+		userID.String(),
 		sessionID,
 	)
 	if err != nil {
@@ -85,8 +92,11 @@ func (h *SessionHandler) Logout(c *fiber.Ctx) error {
 // ─────────────────────────────────────────────────────────────────────────────
 
 func (h *SessionHandler) RevokeSession(c *fiber.Ctx) error {
-	userID := c.Locals("user_id").(string)
-	currentSessionID := c.Locals("session_id").(string)
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		return utils.Unauthorized("authentication required")
+	}
+	currentSessionID := middleware.GetSessionID(c)
 
 	targetSessionID := c.Params("id")
 	if targetSessionID == "" {
@@ -95,7 +105,7 @@ func (h *SessionHandler) RevokeSession(c *fiber.Ctx) error {
 
 	err := h.svc.RevokeSession(
 		c.Context(),
-		userID,
+		userID.String(),
 		currentSessionID,
 		targetSessionID,
 	)
@@ -115,12 +125,15 @@ func (h *SessionHandler) RevokeSession(c *fiber.Ctx) error {
 // ─────────────────────────────────────────────────────────────────────────────
 
 func (h *SessionHandler) RevokeAllSessions(c *fiber.Ctx) error {
-	userID := c.Locals("user_id").(string)
-	currentSessionID := c.Locals("session_id").(string)
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		return utils.Unauthorized("authentication required")
+	}
+	currentSessionID := middleware.GetSessionID(c)
 
 	err := h.svc.RevokeAllSessions(
 		c.Context(),
-		userID,
+		userID.String(),
 		currentSessionID,
 	)
 	if err != nil {
