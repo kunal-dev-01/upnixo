@@ -2,6 +2,7 @@ import { useUpdatePreferences } from "@/hooks/useUser";
 import { useAuthStore } from "@/store/auth.store";
 import ThemeSelector from "./ThemeCard";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 
 const defaultThemes = [
   {
@@ -27,12 +28,17 @@ const defaultThemes = [
 function Preferences() {
   const user = useAuthStore((s) => s.user);
   const { updatePreferences, isPending } = useUpdatePreferences();
+  const { setTheme } = useTheme();
 
   const currentTheme = user?.preferences?.theme || "system";
 
   const handleThemeSelect = (themeId: string) => {
     if (themeId === currentTheme) return;
 
+    // Update UI immediately
+    setTheme(themeId);
+
+    // Update Backend
     updatePreferences(
       { theme: themeId as "light" | "dark" | "system" },
       {
@@ -40,6 +46,8 @@ function Preferences() {
           toast.success(`Theme updated to ${themeId}`);
         },
         onError: () => {
+          // Rollback UI if backend fails
+          setTheme(currentTheme);
           toast.error("Failed to update theme");
         },
       },
