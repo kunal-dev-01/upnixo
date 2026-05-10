@@ -119,6 +119,7 @@ export default function ResendVerificationEmailPage() {
         </Submit>
 
         <BackButton
+          type="button"
           label="Back to login"
           onClick={() => router.push("/auth/login")}
           className="w-full flex items-center justify-center"
