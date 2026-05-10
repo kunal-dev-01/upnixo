@@ -15,7 +15,7 @@ export interface NotificationSettings {
 }
 
 export interface UserPreferences {
-  theme: 'light' | 'dark' | 'system';
+  theme: "light" | "dark" | "system";
   sidebar_collapsed: boolean;
   compact_view: boolean;
   notifications: NotificationSettings;
@@ -48,10 +48,10 @@ export interface UpdateUserPayload {
 }
 
 export interface UpdatePreferencesPayload {
-  theme?: 'light' | 'dark' | 'system';
+  theme?: "light" | "dark" | "system";
   sidebar_collapsed?: boolean;
   compact_view?: boolean;
-  notifications?: NotificationSettings; // Yahan JSON override hoga backend pe
+  notifications?: NotificationSettings;
   default_currency?: string;
   language?: string;
 }
