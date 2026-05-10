@@ -59,7 +59,6 @@ function UserDetails() {
     },
   });
 
-  // Sync form when user data changes (e.g. after a fetch)
   useEffect(() => {
     if (user) {
       reset({
@@ -73,6 +72,7 @@ function UserDetails() {
   }, [user, reset]);
 
   const onSubmit = (data: UserDetailsForm) => {
+    console.log("Submitting Profile Update:", data);
     // 1. Update Profile (Name, Timezone, Locale)
     updateProfile(
       {
