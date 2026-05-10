@@ -33,6 +33,7 @@ type AuthRepository interface {
 	// OAuth
 	FindOrCreateOAuthUser(ctx context.Context, params OAuthLoginParams) (*models.User, *models.UserPreferences, bool, error)
 	LinkOAuthAccount(ctx context.Context, params LinkOAuthParams) error
+	GetOAuthAccountsByUserID(ctx context.Context, userID uuid.UUID) ([]models.OAuthAccount, error)
 
 	// 2FA
 	Setup2FA(ctx context.Context, params Setup2FAParams) error
@@ -765,4 +766,32 @@ func withTx(ctx context.Context, fn func(tx pgx.Tx) error) error {
 
 func isPgConflict(err error) bool {
 	return err != nil && len(err.Error()) > 5 && err.Error()[:5] == "23505"
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET OAUTH ACCOUNTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (r *authRepo) GetOAuthAccountsByUserID(ctx context.Context, userID uuid.UUID) ([]models.OAuthAccount, error) {
+	sql := `
+		SELECT 
+			id, user_id, provider, provider_user_id, 
+			provider_email, provider_name, provider_avatar_url, 
+			scopes, provider_meta, connected_at, last_used_at, updated_at
+		FROM oauth_accounts
+		WHERE user_id = @user_id`
+
+	rows, err := db.Pool.Query(ctx, sql, pgx.NamedArgs{"user_id": userID})
+	if err != nil {
+		r.log.Error("get oauth accounts: query failed", err, map[string]any{"user_id": userID})
+		return nil, utils.Internal(err)
+	}
+
+	accounts, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.OAuthAccount])
+	if err != nil {
+		r.log.Error("get oauth accounts: scan failed", err, map[string]any{"user_id": userID})
+		return nil, utils.Internal(err)
+	}
+
+	return accounts, nil
 }

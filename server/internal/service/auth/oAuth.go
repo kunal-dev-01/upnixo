@@ -127,7 +127,32 @@ func (s *OAuthService) HandleCallback(
 		return nil, err
 	}
 
-	// 4. Find or create user + link OAuth account
+	// 4. Check for existing account with different provider
+	existingUser, _, err := s.authRepo.GetUserByEmail(ctx, profile.Email)
+	if err == nil && existingUser != nil {
+		// Fetch linked OAuth accounts
+		accounts, err := s.authRepo.GetOAuthAccountsByUserID(ctx, existingUser.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(accounts) > 0 {
+			// Check if any account belongs to a different provider
+			for _, acc := range accounts {
+				if acc.Provider != provider {
+					return nil, utils.Conflict(fmt.Sprintf(
+						"This email is already associated with a %s account. Please sign in using %s.",
+						acc.Provider, acc.Provider,
+					))
+				}
+			}
+		} else if existingUser.HasPassword() {
+			// Email exists but no OAuth linked -> probably email/password user
+			return nil, utils.Conflict("This email is already registered with a password. Please sign in with your email and password.")
+		}
+	}
+
+	// 5. Find or create user + link OAuth account
 	user, prefs, _, err := s.authRepo.FindOrCreateOAuthUser(ctx, repo.OAuthLoginParams{
 		Provider:          provider,
 		ProviderUserID:    profile.ID,
@@ -141,7 +166,7 @@ func (s *OAuthService) HandleCallback(
 		return nil, err
 	}
 
-	// 5. Block check
+	// 6. Block check
 	if user.IsBlocked {
 		return nil, utils.Forbidden("your account has been suspended")
 	}
@@ -150,7 +175,7 @@ func (s *OAuthService) HandleCallback(
 		return nil, utils.Forbidden("your account is inactive")
 	}
 
-	// 6. 2FA check — issue pending token instead of full session
+	// 7. 2FA check — issue pending token instead of full session
 	if user.TwoFactorEnabled {
 		pendingToken, err := security.GenerateTwoFAPendingToken()
 		if err != nil {
@@ -167,13 +192,13 @@ func (s *OAuthService) HandleCallback(
 		}, nil
 	}
 
-	// 7. No 2FA — create full session
+	// 8. No 2FA — create full session
 	result, err := s.createSession(ctx, user, prefs, clientInfo)
 	if err != nil {
 		return nil, err
 	}
 
-	// 8. Record login in background
+	// 9. Record login in background
 	go s.authRepo.RecordLogin(ctx, user.ID, clientInfo.IP)
 
 	return &OAuthCallbackResult{AuthResult: result}, nil
