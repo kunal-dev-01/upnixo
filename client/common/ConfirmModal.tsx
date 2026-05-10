@@ -1,6 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle } from "@/svg/Extra";
 import VariantButton from "./VariantButton";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -21,7 +23,13 @@ export default function ConfirmModal({
   confirmLabel = "Confirm",
   cancelLabel = "Go Back",
 }: ConfirmModalProps) {
-  return (
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const modalContent = (
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-110 flex items-center justify-center p-4 pointer-events-auto">
@@ -29,11 +37,10 @@ export default function ConfirmModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm cursor-pointer transform-gpu will-change-opacity"
+            className="absolute inset-0 dark:bg-zinc-950/80 bg-zinc-50/50 cursor-pointer"
             onClick={onClose}
           />
 
-          {/* Modal Content */}
           <motion.div
             initial={{ y: "100%", opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -58,7 +65,7 @@ export default function ConfirmModal({
             </div>
 
             {/* Actions */}
-            <div className="grid grid-cols-2  gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <VariantButton
                 variant="default"
                 label={cancelLabel}
@@ -75,4 +82,8 @@ export default function ConfirmModal({
       )}
     </AnimatePresence>
   );
+
+  if (!mounted) return null;
+
+  return createPortal(modalContent, document.body);
 }
