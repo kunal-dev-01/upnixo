@@ -109,6 +109,7 @@ func (m *Manager) Publish(queueName string, body any) error {
 // Add new queues here as the platform grows.
 func (m *Manager) allQueues() []string {
 	return []string{
-		m.cfg.RabbitMQ.EmailQueue, // auth emails — verify, reset, 2fa
+		m.cfg.RabbitMQ.EmailQueue,  // auth emails — verify, reset, 2fa
+		m.cfg.RabbitMQ.AvatarQueue, // avatar processing — compression, R2 upload
 	}
 }

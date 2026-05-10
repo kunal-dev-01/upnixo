@@ -97,4 +97,5 @@ func registerAuthRoutes(r fiber.Router, d *Dependencies) {
 	user.Get("/email/:email", d.UserHandler.GetByEmail)
 	user.Patch("/profile", d.UserHandler.UpdateProfile)
 	user.Patch("/preferences", d.UserHandler.UpdatePreferences)
+	user.Post("/avatar", d.UserHandler.UpdateAvatar)
 }

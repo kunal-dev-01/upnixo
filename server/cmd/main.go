@@ -16,6 +16,7 @@ import (
 	"server/internal/middleware"
 	rds "server/internal/redis"
 	"server/internal/utils"
+	"server/internal/worker"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -70,6 +71,9 @@ func main() {
 
 	// ── Wire Dependencies ─────────────────────────────────────────────────────
 	deps := app.Wire(cfg, log, redisClient, rabbitBroker, emailSvc)
+
+	// ── Background Workers ────────────────────────────────────────────────────
+	worker.StartAllWorkers(context.Background(), deps)
 
 	// ── Fiber ─────────────────────────────────────────────────────────────────
 	fiberApp := fiber.New(fiber.Config{

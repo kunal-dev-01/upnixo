@@ -2,19 +2,25 @@ package service
 
 import (
 	"context"
+	"server/internal/config"
 	"server/internal/models"
+	"server/internal/queue"
 	"server/internal/repo"
 
 	"github.com/google/uuid"
 )
 
 type UserService struct {
+	cfg      *config.Config
 	authRepo repo.AuthRepository
+	queue    *queue.Manager
 }
 
-func NewUserService(authRepo repo.AuthRepository) *UserService {
+func NewUserService(cfg *config.Config, authRepo repo.AuthRepository, q *queue.Manager) *UserService {
 	return &UserService{
+		cfg:      cfg,
 		authRepo: authRepo,
+		queue:    q,
 	}
 }
 

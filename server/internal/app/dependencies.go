@@ -7,10 +7,12 @@ import (
 	"server/internal/handler/auth"
 	userHandler "server/internal/handler/user"
 	"server/internal/middleware"
+	"server/internal/queue"
 	rds "server/internal/redis"
 	"server/internal/repo"
 	"server/internal/security"
 	"server/internal/service/auth"
+	"server/internal/service/storage"
 	userService "server/internal/service/user"
 	"server/internal/utils"
 )
@@ -23,6 +25,8 @@ type Dependencies struct {
 	Logger *utils.Logger
 	Redis  *rds.Redis
 	Broker *broker.RabbitBroker
+	Queue  *queue.Manager
+	R2     *storage.R2Service
 
 	// Security
 	JWT *security.JWTManager
@@ -61,6 +65,14 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	// ── Security ──────────────────────────────────────────────────────────────
 	jwt := security.NewJWTManager(&cfg.JWT)
 
+	// ── Infrastructure ───────────────────────────────────────────────────────
+	qManager := queue.NewManager(cfg, brk)
+	if err := qManager.SetupQueues(); err != nil {
+		utils.Fatal("failed to setup queues", err, nil)
+	}
+
+	r2Svc := storage.NewR2Service(cfg)
+
 	// ── Repositories ──────────────────────────────────────────────────────────
 	authRepo := repo.NewAuthRepository(log)
 	sessionRepo := repo.NewSessionRepository(redisClient, cfg)
@@ -73,7 +85,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	oAuthSvc := service.NewOAuthService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
 	loginSvc := service.NewLoginService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
 	sessionSvc := service.NewSessionService(sessionRepo)
-	userSvc := userService.NewUserService(authRepo)
+	userSvc := userService.NewUserService(cfg, authRepo, qManager)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	accountHandler := handler.NewAccountHandler(accountSvc, cfg)
@@ -93,6 +105,8 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 		Logger:          log,
 		Redis:           redisClient,
 		Broker:          brk,
+		Queue:           qManager,
+		R2:              r2Svc,
 		JWT:             jwt,
 		AuthRepo:        authRepo,
 		SessionRepo:     sessionRepo,
