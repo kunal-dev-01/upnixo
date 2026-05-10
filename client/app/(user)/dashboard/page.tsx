@@ -1,5 +1,5 @@
 function Dashboard() {
-  return <div className="w-full"></div>;
+  return <div>Dashboard</div>;
 }
 
 export default Dashboard;
