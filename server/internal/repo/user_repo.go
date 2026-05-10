@@ -689,8 +689,6 @@ func (r *authRepo) UpdatePreferences(ctx context.Context, userID uuid.UUID, para
 			updated_at        = NOW()
 		WHERE user_id = @user_id`
 
-	// Agar JSON bytes empty hain, toh usko dynamically nil (NULL) map karenge
-	// taaki purani settings delete na ho jayein.
 	var notifArg any = nil
 	if len(params.Notifications) > 0 {
 		notifArg = params.Notifications
