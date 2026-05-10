@@ -47,7 +47,7 @@ const Dropdown = ({
   return (
     <div className="relative flex-1" ref={containerRef}>
       {label && (
-        <label className="block text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 ml-1 mb-2">
+        <label className="block text-sm font-semibold tracking-wider text-zinc-700 dark:text-zinc-200 ml-1 mb-2">
           {label}
         </label>
       )}
@@ -58,7 +58,7 @@ const Dropdown = ({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={`
-          w-full flex items-center justify-between p-3.5 border-2 rounded-2xl 
+          w-full flex items-center justify-between p-3 border rounded-2xl 
           transition-all duration-300 outline-none group
           ${
             isOpen
@@ -80,7 +80,7 @@ const Dropdown = ({
         </span>
 
         <div
-          className={`p-1 rounded-lg transition-colors ${isOpen ? "bg-indigo-50 dark:bg-indigo-500/10" : "bg-transparent"}`}
+          className={`rounded-lg transition-colors ${isOpen ? "bg-indigo-50 dark:bg-indigo-500/10" : "bg-transparent"}`}
         >
           <ChevronDown
             className={`w-4 h-4 text-zinc-500 dark:text-zinc-400 transition-transform duration-300 ease-out ${
