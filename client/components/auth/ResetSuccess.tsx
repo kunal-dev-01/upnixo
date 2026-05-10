@@ -1,5 +1,3 @@
-"use client";
-
 import { SimpleCheck } from "@/svg/Common";
 import { motion } from "framer-motion";
 import Link from "next/link";

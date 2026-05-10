@@ -1,5 +1,3 @@
-"use client";
-
 import { useFormContext } from "react-hook-form";
 import type { ResetPasswordSchema } from "@/schemas/auth.schema";
 import Input from "@/common/Input";

@@ -1,5 +1,3 @@
-"use client";
-
 import BackButton from "@/common/BackButton";
 import CountdownButton from "@/common/CountdownButton";
 import { Mail, Refresh, ArrowLeft } from "@/svg/Common";

@@ -1,5 +1,3 @@
-"use client";
-
 import { Mail, Refresh } from "@/svg/Common";
 import BackButton from "@/common/BackButton";
 import CountdownButton from "@/common/CountdownButton";
@@ -97,7 +95,10 @@ export default function ForgotResend({
         />
       </motion.div>
 
-      <motion.div variants={itemVariants} className="pt-3 space-y-4 border-t border-zinc-100 dark:border-zinc-900">
+      <motion.div
+        variants={itemVariants}
+        className="pt-3 space-y-4 border-t border-zinc-100 dark:border-zinc-900"
+      >
         <div className="flex flex-col items-center gap-2">
           <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
             Need help?

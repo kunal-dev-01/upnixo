@@ -1,5 +1,3 @@
-"use client";
-
 import { useFormContext } from "react-hook-form";
 import type { LoginSchema } from "@/schemas/auth.schema";
 import Input from "@/common/Input";
@@ -103,6 +101,16 @@ export default function LoginForm({ isLoading, onBack }: LoginFormProps) {
               className="text-indigo-500 dark:text-indigo-400 hover:underline font-semibold"
             >
               Create Account
+            </Link>
+          </p>
+
+          <p className="text-sm text-center text-zinc-500 dark:text-zinc-400">
+            If your account is not verified?{" "}
+            <Link
+              href="/auth/resend-verification-email"
+              className="text-indigo-500 dark:text-indigo-400 hover:underline font-semibold"
+            >
+              Resend email
             </Link>
           </p>
         </div>
