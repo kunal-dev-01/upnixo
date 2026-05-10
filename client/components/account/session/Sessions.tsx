@@ -9,6 +9,8 @@ import {
 import { Loader } from "@/common/Loader";
 import ConfirmModal from "@/common/ConfirmModal";
 import { SessionCard } from "./SessionCard";
+import { TriangleAlert } from "@/svg/Common";
+import MonoButton from "@/common/MonoButton";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COMPONENT
@@ -98,16 +100,33 @@ export default function Sessions() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 px-1">
+    <div className="max-w-4xl mx-auto space-y-4 px-1">
       {/* Header */}
       <div className="w-full">
         {otherSessions.length > 0 && (
-          <button
-            onClick={() => setShowConfirmModal("all")}
-            className="text-[11px] font-bold text-red-500 hover:text-red-600 dark:text-red-400/80 transition-all bg-red-500/5 hover:bg-red-500/10 px-3 py-2 rounded-xl border border-red-500/10 active:scale-95"
-          >
-            Revoke All Other
-          </button>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-start gap-3.5">
+              <div className="p-2.5 bg-zinc-200/50 dark:bg-zinc-800/50 rounded-xl shrink-0 text-zinc-600 dark:text-zinc-400">
+                <TriangleAlert className="w-5 h-5" />
+              </div>
+              <div className="space-y-0.5">
+                <h4 className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight">
+                  Secure your account
+                </h4>
+                <p className="text-[13px] text-zinc-500 dark:text-zinc-400">
+                  Signing out of all other sessions will force them to log in
+                  again.
+                </p>
+              </div>
+            </div>
+
+            <MonoButton
+              onClick={() => setShowConfirmModal("all")}
+              isLoading={revokeAllOther.isPending}
+            >
+              Revoke All Other
+            </MonoButton>
+          </div>
         )}
       </div>
 

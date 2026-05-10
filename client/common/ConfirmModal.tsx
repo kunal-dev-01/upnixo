@@ -2,10 +2,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle } from "@/svg/Extra";
 import VariantButton from "./VariantButton";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TYPES
-// ─────────────────────────────────────────────────────────────────────────────
-
 interface ConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -15,10 +11,6 @@ interface ConfirmModalProps {
   confirmLabel?: string;
   cancelLabel?: string;
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// COMPONENT
-// ─────────────────────────────────────────────────────────────────────────────
 
 export default function ConfirmModal({
   isOpen,
@@ -33,20 +25,24 @@ export default function ConfirmModal({
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-110 flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-auto">
+          {/* Overlay - GPU acceleration added */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm cursor-pointer"
+            // ADDED: transform-gpu aur will-change-opacity
+            className="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm cursor-pointer transform-gpu will-change-opacity"
             onClick={onClose}
           />
 
+          {/* Modal Content - GPU acceleration added */}
           <motion.div
             initial={{ y: "100%", opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative z-10 w-full max-w-md bg-white dark:bg-zinc-950 rounded-t-[2.5rem] sm:rounded-3xl border border-zinc-200 dark:border-zinc-800 p-8 shadow-2xl overflow-hidden"
+            // ADDED: transform-gpu aur will-change-transform
+            className="relative z-10 w-full max-w-md bg-white dark:bg-zinc-950 rounded-t-[2.5rem] sm:rounded-3xl border border-zinc-200 dark:border-zinc-800 p-8 shadow-2xl overflow-hidden transform-gpu will-change-transform"
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-red-500/50 to-transparent" />
 
