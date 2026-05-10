@@ -11,6 +11,7 @@ import {
 import SetupFlow from "./SetupFlow";
 import ActionFlow from "./ActionFlow";
 import BackupCodesDisplay from "./BackupCodesDisplay";
+import { ShieldCheck } from "@/svg/More";
 
 export default function TwoFactorSection({
   isEnabled,
@@ -114,7 +115,7 @@ export default function TwoFactorSection({
         <div
           className={`p-3 rounded-xl ${isEnabled ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-500/10 text-zinc-500"}`}
         >
-          <Shield className="w-6 h-6" />
+          <ShieldCheck className="w-6 h-6" />
         </div>
         <div>
           <h4 className="text-sm font-bold text-zinc-900 dark:text-white">
