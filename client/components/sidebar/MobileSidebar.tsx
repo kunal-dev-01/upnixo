@@ -99,7 +99,11 @@ export function MobileSidebar({
               <div className="w-9 h-9 rounded-full bg-zinc-200/80 dark:bg-zinc-900   flex items-center justify-center shrink-0 dark:text-white text-zinc-800 font-bold text-xs ring-2 ring-zinc-300 dark:ring-zinc-800">
                 {user.avatar_url ? (
                   <img
-                    src={user.avatar_url}
+                    src={
+                      user.avatar_url.startsWith("http")
+                        ? user.avatar_url
+                        : `https://${user.avatar_url}`
+                    }
                     alt={user.full_name}
                     className="w-full h-full rounded-full object-cover"
                   />

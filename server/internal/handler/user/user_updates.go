@@ -21,7 +21,10 @@ func (h *UserHandler) UpdateProfile(c *fiber.Ctx) error {
 		return utils.BadRequest("invalid request body")
 	}
 
-	// Validation can be added here if needed
+	// Validate the request
+	if err := utils.ValidateStructToAppError(&req); err != nil {
+		return err
+	}
 
 	data, err := h.userSvc.UpdateProfile(c.Context(), userID, req)
 	if err != nil {
