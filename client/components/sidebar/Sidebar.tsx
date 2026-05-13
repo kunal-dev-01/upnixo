@@ -1,7 +1,5 @@
 import { useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import logo from "@/public/logo.svg";
 import { NAV_LINKS } from "@/utils/constants";
 import { X } from "@/svg/Common";
 import Logo from "../logo/Logo";

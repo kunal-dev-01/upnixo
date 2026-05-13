@@ -21,7 +21,7 @@ function MainLayout({ children }: MainLayoutProps) {
 
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-      <main className="w-full grow">{children}</main>
+      <main className="w-full grow mt-20">{children}</main>
 
       <footer className="w-full">
         <div className="max-w-7xl mx-auto px-5 lg:px-0">

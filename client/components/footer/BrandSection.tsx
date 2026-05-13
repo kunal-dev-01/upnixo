@@ -2,7 +2,7 @@
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import React from "react";
 
-export default function BrandingSection({ time }: { time: string }) {
+export default function BrandingSection() {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
@@ -30,30 +30,20 @@ export default function BrandingSection({ time }: { time: string }) {
 
   return (
     <div className="w-full max-w-7xl px-4 md:px-6 select-none py-20 relative mx-auto overflow-hidden">
-      {/* Top Labels */}
-      <div className="flex justify-between items-end mb-[-10px] md:mb-[-20px] lg:mb-[-30px] px-2">
-        <span className="text-[10px] md:text-xs font-mono text-zinc-500 tracking-widest uppercase">
-          Based in Delhi, IN
-        </span>
-        <span className="text-[10px] md:text-xs font-mono text-zinc-500">
-          {time} IST
-        </span>
-      </div>
-
       {/* Tilt Parent Div */}
       <div
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         style={{ perspective: 1000 }}
-        className="relative flex justify-center items-center lg:pt-20 pt-8 cursor-default group"
+        className="relative flex justify-center items-center cursor-default group"
       >
         <motion.div
           style={{ rotateX, rotateY }}
           className="relative flex justify-center items-center"
         >
           {/* Main Branding Layer (Foreground) */}
-          <div className="relative z-10 flex items-center justify-center lg:pt-10 pt-5 dark:opacity-[0.95]">
-            <div className="w-[50px] sm:w-[65px] md:w-[95px] lg:w-[210px] flex items-center transition-transform duration-500 group-hover:scale-105">
+          <div className="relative z-10 flex items-center justify-center dark:opacity-[0.95]">
+            <div className="w-12.5 sm:w-16.25 md:w-23.75 lg:w-52.5 flex items-center transition-transform duration-500 group-hover:scale-105">
               <svg
                 viewBox="0 0 629 934"
                 fill="none"
@@ -80,8 +70,8 @@ export default function BrandingSection({ time }: { time: string }) {
             </h1>
           </div>
 
-          <div className="absolute inset-0 flex justify-center items-center pointer-events-none opacity-[0.04] dark:opacity-[0.06] -z-10 translate-z-[-50px]">
-            <div className="w-[50px] sm:w-[85px] md:w-[130px] lg:w-[200px] flex items-center">
+          <div className="absolute inset-0 flex justify-center items-center pointer-events-none opacity-[0.04] dark:opacity-[0.06] -z-10 -translate-z-12.5">
+            <div className="w-12.5 sm:w-21.25 md:w-32.5 lg:w-50 flex items-center">
               <svg
                 viewBox="0 0 629 934"
                 fill="none"

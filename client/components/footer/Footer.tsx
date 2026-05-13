@@ -51,22 +51,6 @@ export const WavyText = ({ name }: { name: string }) => (
 );
 
 function Footer() {
-  const [time, setTime] = useState("");
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date();
-      setTime(
-        now.toLocaleTimeString("en-US", {
-          timeZone: "Asia/Kolkata",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        }),
-      );
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   return (
     <footer className="w-full flex flex-col items-center justify-center border-t border-zinc-100 dark:border-zinc-900 py-12">
@@ -126,7 +110,7 @@ function Footer() {
         </div>
       </div>
 
-      <BrandingSection time={time} />
+      <BrandingSection />
 
       {/* Bottom Section */}
       <div className="w-full px-6 border-t border-zinc-100 dark:border-zinc-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-y-4">
