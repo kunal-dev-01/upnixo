@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Shield, Check } from "@/svg/Common";
+import { Check, Refresh } from "@/svg/Common";
 import VariantButton from "@/common/VariantButton";
 import {
   useSetup2FA,
@@ -12,6 +12,7 @@ import SetupFlow from "./SetupFlow";
 import ActionFlow from "./ActionFlow";
 import BackupCodesDisplay from "./BackupCodesDisplay";
 import { ShieldCheck, ShieldX } from "@/svg/More";
+import { Key } from "@/svg/Auth";
 
 export default function TwoFactorSection({
   isEnabled,
@@ -144,6 +145,7 @@ export default function TwoFactorSection({
         {!isEnabled ? (
           <VariantButton
             label="Setup 2FA"
+            icon={Key}
             variant="save"
             isLoading={isSettingUp}
             onClick={handleStartSetup}
@@ -152,11 +154,13 @@ export default function TwoFactorSection({
           <>
             <VariantButton
               label="Regenerate Backup Codes"
+              icon={Refresh}
               variant="default"
               onClick={() => setStep("regenerate")}
             />
             <VariantButton
               label="Disable 2FA"
+              icon={ShieldX}
               variant="delete"
               onClick={() => setStep("disable")}
             />

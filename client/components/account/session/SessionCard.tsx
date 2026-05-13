@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Globe, Monitor, Smartphone } from "@/svg/Auth";
+import { Clock, Globe, Logout, Monitor, Smartphone } from "@/svg/Auth";
 import { CircleCheck, Shield } from "@/svg/Common";
 import { Laptop, MapPin, Tablet, XCircle } from "@/svg/Extra";
 import VariantButton from "@/common/VariantButton";
@@ -119,9 +119,9 @@ export const SessionCard = ({
         {/* Left — icon + info */}
         <div className="flex items-start gap-4">
           <div
-            className={`p-3 rounded-xl shrink-0 transition-transform group-hover:scale-105 ${
+            className={`p-3 rounded-xl shrink-0 transition-transform ${
               isCurrent
-                ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
+                ? "dark:bg-emerald-500/20 bg-emerald-100 text-emerald-600 border border-emerald-500/30"
                 : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-white"
             }`}
           >
@@ -133,7 +133,7 @@ export const SessionCard = ({
 
           <div className="space-y-1.5 min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="text-[15px] font-bold text-zinc-900 dark:text-white truncate max-w-[200px]">
+              <h4 className="text-[15px] font-bold text-zinc-900 dark:text-white truncate max-w-50">
                 {session.device_name ||
                   (isCurrent ? "Current Device" : "Unknown Device")}
               </h4>
@@ -179,6 +179,7 @@ export const SessionCard = ({
         <div className="flex sm:block pt-3 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800/50">
           <VariantButton
             variant="delete"
+            icon={Logout}
             label={isCurrent ? "Log out" : "Revoke"}
             isLoading={isRevoking}
             onClick={onRevoke}

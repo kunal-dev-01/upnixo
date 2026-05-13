@@ -8,6 +8,7 @@ import {
   changePasswordSchema,
   type ChangePasswordSchema,
 } from "@/schemas/auth.schema";
+import { Key } from "@/svg/Auth";
 
 export default function ChangePasswordSection() {
   const { changePassword, isPending } = useChangePassword();
@@ -54,6 +55,7 @@ export default function ChangePasswordSection() {
       />
       <VariantButton
         label="Update Password"
+        icon={Key}
         variant="save"
         isLoading={isPending}
         type="submit"
