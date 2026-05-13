@@ -45,10 +45,9 @@ function Navbar({ onOpenSidebar }: NavbarProps) {
         </Link>
         <Link
           href="/auth/register"
-          className="text-sm font-semibold  px-4 py-2 rounded-full border-2 border-indigo-600 text-zinc-800 dark:text-white hover:text-white transition-all duration-300 ease-in-out relative group cursor-pointer"
+          className="text-sm font-semibold px-4 py-2 rounded-full border-2 border-indigo-900 text-white relative group cursor-pointer bg-indigo-600"
         >
-          <span>Start a Project</span>
-          <div className="absolute inset-0 bg-indigo-600 rounded-full scale-80 opacity-0 -z-10 group-hover:opacity-100 group-hover:scale-100 transition-all duration-400 ease-in-out"></div>
+          Start a Project
         </Link>
       </div>
 
