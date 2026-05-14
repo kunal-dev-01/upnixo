@@ -741,32 +741,6 @@ func (r *authRepo) GetUserByEmail(ctx context.Context, email string) (*models.Us
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HELPERS
-// ─────────────────────────────────────────────────────────────────────────────
-
-func withTx(ctx context.Context, fn func(tx pgx.Tx) error) error {
-	tx, err := db.Pool.Begin(ctx)
-	if err != nil {
-		return utils.Internal(err)
-	}
-
-	if err := fn(tx); err != nil {
-		_ = tx.Rollback(ctx)
-		return err
-	}
-
-	if err := tx.Commit(ctx); err != nil {
-		return utils.Internal(err)
-	}
-
-	return nil
-}
-
-func isPgConflict(err error) bool {
-	return err != nil && len(err.Error()) > 5 && err.Error()[:5] == "23505"
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // GET OAUTH ACCOUNTS
 // ─────────────────────────────────────────────────────────────────────────────
 
