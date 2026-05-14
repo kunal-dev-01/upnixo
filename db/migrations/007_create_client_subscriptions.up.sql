@@ -35,7 +35,6 @@ CREATE TABLE client_subscriptions (
     -- ── State Management ────────────────────────────────────────────
     status                          subscription_status     NOT NULL DEFAULT 'active',
     
-    -- Agar client cancel karta hai, toh immediately band nahi hota.
     -- Current billing cycle khatam hone tak chalta hai.
     cancel_at_period_end            BOOLEAN                 NOT NULL DEFAULT FALSE,
 
@@ -53,7 +52,6 @@ CREATE TABLE client_subscriptions (
     CONSTRAINT fk_subscription_client FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_subscription_plan FOREIGN KEY (plan_id) REFERENCES subscription_plans(id),
     
-    -- Ek client ek plan ka ek hi active subscription rakh sakta hai at a time
     CONSTRAINT unique_active_plan_per_client UNIQUE (client_id, plan_id, paddle_subscription_id)
 );
 
@@ -61,11 +59,9 @@ CREATE TABLE client_subscriptions (
 -- 3. INDEXES (Optimized for Webhooks and Cron Jobs)
 -- ───────────────────────────────────────────────────────────────────
 
--- Fast lookup when Paddle Webhook hits your server
 CREATE INDEX idx_subscriptions_paddle_id 
     ON client_subscriptions (paddle_subscription_id);
 
--- Daily CRON Job ke liye: Jo subscriptions expire hone wali hain unhe nikalne ke liye
 CREATE INDEX idx_subscriptions_period_end 
     ON client_subscriptions (current_period_end) 
     WHERE status = 'active';
