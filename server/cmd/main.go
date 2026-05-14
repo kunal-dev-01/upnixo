@@ -46,6 +46,12 @@ func main() {
 	}
 	defer db.Close()
 
+	// ── MongoDB ───────────────────────────────────────────────────────────────
+	if err = db.ConnectMongo(startCtx, cfg); err != nil {
+		log.Fatal("mongodb connection failed", err, nil)
+	}
+	defer db.CloseMongo(context.Background())
+
 	// ── Redis ─────────────────────────────────────────────────────────────────
 	redisClient := rds.New(cfg)
 	if err = redisClient.Connect(startCtx); err != nil {

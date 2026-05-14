@@ -29,6 +29,7 @@ type Config struct {
 	R2       R2Config
 	Logger   LoggerConfig
 	Paddle   PaddleConfig
+	MongoDB  MongoDBConfig
 }
 
 // ============================================================================
@@ -181,6 +182,21 @@ type PaddleConfig struct {
 	APIKey        string
 	ClientToken   string
 	WebhookSecret string
+}
+
+// ============================================================================
+// MongoDB Config
+// ============================================================================
+type MongoDBConfig struct {
+	Host           string
+	Port           int
+	User           string
+	Password       string
+	DBName         string
+	ConnectTimeout time.Duration
+	QueryTimeout   time.Duration
+	RetryAttempts  int
+	RetryDelay     time.Duration
 }
 
 // ============================================================================
@@ -364,6 +380,17 @@ func Load() (*Config, error) {
 			BucketName: getEnv("R2_BUCKET_NAME", ""),
 			PublicURL:  getEnv("R2_PUBLIC_URL", "http://upraizo.com"),
 		},
+		MongoDB: MongoDBConfig{
+			Host:           getEnv("MONGO_HOST", "localhost"),
+			Port:           getEnvAsInt("MONGO_PORT", 27017),
+			User:           getEnv("MONGO_USER", "admin"),
+			Password:       getEnv("MONGO_PASSWORD", "password"),
+			DBName:         getEnv("MONGO_DB", "upnixo_chat"),
+			ConnectTimeout:  getEnvAsDuration("MONGO_CONNECT_TIMEOUT", 10*time.Second),
+			QueryTimeout:    getEnvAsDuration("MONGO_QUERY_TIMEOUT", 30*time.Second),
+			RetryAttempts:   getEnvAsInt("MONGO_RETRY_ATTEMPTS", 3),
+			RetryDelay:      getEnvAsDuration("MONGO_RETRY_DELAY", 5*time.Second),
+		},
 	}
 
 	// Validate required fields
@@ -513,6 +540,17 @@ func (c *RabbitMQConfig) GetURL() string {
 	// amqp://user:password@host:port/vhost
 	return fmt.Sprintf("amqp://%s:%s@%s:%d/%s",
 		c.User, c.Password, c.Host, c.Port, c.VHost)
+}
+
+/* ───────────────── MongoDB DSN Builders ───────────────── */
+
+// GetURI builds MongoDB connection string
+func (c *MongoDBConfig) GetURI() string {
+	if c.User != "" && c.Password != "" {
+		return fmt.Sprintf("mongodb://%s:%s@%s:%d/%s?authSource=admin",
+			c.User, c.Password, c.Host, c.Port, c.DBName)
+	}
+	return fmt.Sprintf("mongodb://%s:%d/%s", c.Host, c.Port, c.DBName)
 }
 
 /* ───────────────── Environment-Specific Helpers ───────────────── */
