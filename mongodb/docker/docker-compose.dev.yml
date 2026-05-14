@@ -1,0 +1,40 @@
+# ===================================================================
+# Description: Upnixo MongoDB Docker Compose Development Configuration
+# ===================================================================
+
+services:
+  mongodb:
+    image: mongo:7.0.14
+    container_name: upnixo-mongodb-dev
+    restart: unless-stopped
+
+    env_file:
+      - .env.dev
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-upnixo_chat}
+
+    ports:
+      - "127.0.0.1:${MONGO_PORT:-27017}:27017"
+
+    volumes:
+      - upnixo_mongodb_data:/data/db
+
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 1m
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  upnixo_mongodb_data:
+    name: upnixo_mongodb_data

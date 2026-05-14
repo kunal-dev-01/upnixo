@@ -3,12 +3,14 @@
 # ==============================================================================
 
 DB_COMPOSE     = docker compose -f db/docker/docker-compose.dev.yml
+MONGO_COMPOSE  = docker compose -f mongodb/docker/docker-compose.dev.yml
 SERVER_COMPOSE = docker compose -f server/docker-compose.dev.yml
 
 # ==============================================================================
 # PHONY Targets
 # ==============================================================================
 .PHONY: db db-down migrate reset \
+        mongo mongo-down \
         redis redis-down rabbitmq rabbitmq-down \
         server-up server-down \
         dev full-up full-down logs \
@@ -32,6 +34,16 @@ reset:
 	$(DB_COMPOSE) up -d db
 	sleep 3
 	$(DB_COMPOSE) --profile migrate up migrate
+
+# ==============================================================================
+# 🍃 MONGODB (MONGO COMPOSE)
+# ==============================================================================
+
+mongo:
+	$(MONGO_COMPOSE) up -d mongodb
+
+mongo-down:
+	$(MONGO_COMPOSE) down
 
 # ==============================================================================
 # ⚡ REDIS + 🐰 RABBITMQ (SERVER COMPOSE)
@@ -63,16 +75,19 @@ server-down:
 
 dev:
 	$(DB_COMPOSE) up -d db
+	$(MONGO_COMPOSE) up -d mongodb
 	$(SERVER_COMPOSE) up -d redis rabbitmq
 	sleep 3
 	$(DB_COMPOSE) --profile migrate up migrate
 
 full-up:
 	$(DB_COMPOSE) up -d db
+	$(MONGO_COMPOSE) up -d mongodb
 	$(SERVER_COMPOSE) up -d redis rabbitmq
 
 full-down:
 	$(DB_COMPOSE) down
+	$(MONGO_COMPOSE) down
 	$(SERVER_COMPOSE) down
 
 # ==============================================================================
@@ -88,4 +103,5 @@ app-up:
 
 logs:
 	$(DB_COMPOSE) logs -f
+	$(MONGO_COMPOSE) logs -f
 	$(SERVER_COMPOSE) logs -f
