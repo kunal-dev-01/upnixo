@@ -2,6 +2,8 @@
 # Docker Compose Files
 # ==============================================================================
 
+export COMPOSE_IGNORE_ORPHANS=True
+
 DB_COMPOSE     = docker compose -f db/docker/docker-compose.dev.yml
 MONGO_COMPOSE  = docker compose -f mongodb/docker/docker-compose.dev.yml
 SERVER_COMPOSE = docker compose -f server/docker-compose.dev.yml
