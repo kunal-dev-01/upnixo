@@ -48,7 +48,7 @@ const tryRefresh = async (): Promise<string> => {
   isRefreshing = true;
   try {
     const { data } = await apiClient.post<{ access_token: string }>(
-      "/auth/refresh",
+      "/auth/admin/refresh",
     );
     const newToken = data.access_token;
     useAuthStore.getState().setAccessToken(newToken);
@@ -57,7 +57,7 @@ const tryRefresh = async (): Promise<string> => {
   } catch (error) {
     clearQueueWithError();
     useAuthStore.getState().clearAuth();
-    // Only redirect if we are not already on auth page
+    // Redirect to admin login
     if (!window.location.pathname.startsWith("/auth")) {
       window.location.replace("/auth/login");
     }
@@ -74,15 +74,13 @@ const tryRefresh = async (): Promise<string> => {
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const authPaths = [
-      "/auth/login",
-      "/auth/register",
-      "/auth/refresh",
-      "/auth/forgot-password",
-      "/auth/reset-password",
-      "/auth/2fa/verify",
-      "/auth/2fa/backup",
-      "/auth/oauth/google/callback",
-      "/auth/oauth/github/callback",
+      "/auth/admin/login",
+      "/auth/admin/verify",
+      "/auth/admin/refresh",
+      "/auth/admin/forgot-password",
+      "/auth/admin/reset-password",
+      "/auth/admin/forgot-master-key",
+      "/auth/admin/reset-master-key",
     ];
 
     const isAuthEndpoint = authPaths.some((path) => config.url?.includes(path));
@@ -90,7 +88,6 @@ apiClient.interceptors.request.use(
     let token = useAuthStore.getState().accessToken;
 
     // ── Pre-emptive Refresh ─────────────────────────────────────────────────
-    // If no token in memory but we are hitting a private endpoint, try refresh
     if (!token && !isAuthEndpoint) {
       token = await tryRefresh();
     }
