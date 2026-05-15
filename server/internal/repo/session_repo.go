@@ -155,6 +155,15 @@ func (s *SessionRepository) RevokeAllSessions(ctx context.Context, role, userID 
 	return nil
 }
 
+// DeleteSession revokes a session by ID alone, handling the lookup and cleanup.
+func (s *SessionRepository) DeleteSession(ctx context.Context, sessionID string) error {
+	meta, err := s.GetSession(ctx, sessionID)
+	if err != nil {
+		return err
+	}
+	return s.RevokeSession(ctx, meta.Role, meta.UserID, sessionID)
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // LIST + COUNT
 // ─────────────────────────────────────────────────────────────────────────────

@@ -9,6 +9,8 @@ import (
 	"server/internal/security"
 	"server/internal/utils"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type AdminService struct {
@@ -180,4 +182,45 @@ func (s *AdminService) ResetMasterKey(ctx context.Context, req dto.AdminResetMas
 
 	// For master key, we store it plain as per current model/design
 	return s.adminRepo.SetMasterKey(ctx, admin.ID, req.MasterKey)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REFRESH
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (s *AdminService) Refresh(ctx context.Context, sessionID string) (string, error) {
+	// 1. Get session
+	session, err := s.sessionRepo.GetSession(ctx, sessionID)
+	if err != nil {
+		return "", err
+	}
+
+	// 2. Security: Ensure it's an admin session
+	if session.Role != string(security.RoleAdmin) {
+		return "", utils.Forbidden("invalid session role")
+	}
+
+	// 3. Get Admin
+	uid, err := uuid.Parse(session.UserID)
+	if err != nil {
+		return "", utils.Internal(err)
+	}
+
+	admin, err := s.adminRepo.GetByID(ctx, uid)
+	if err != nil {
+		return "", err
+	}
+
+	if !admin.IsActive || admin.IsDeleted() {
+		return "", utils.Forbidden("account is disabled")
+	}
+
+	// 4. Generate NEW access token
+	return s.jwt.GenerateAccessToken(
+		admin.ID,
+		admin.Email,
+		false, // No 2FA for admin
+		security.RoleAdmin,
+		sessionID,
+	)
 }

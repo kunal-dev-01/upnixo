@@ -38,10 +38,11 @@ type Dependencies struct {
 	TokenRepo   *repo.TokenRepository
 
 	// Services
-	EmailSvc    *email.EmailService
-	AccountSvc  *service.AccountService
-	AdminSvc    *service.AdminService
-	PasswordSvc *service.PasswordService
+	EmailSvc          *email.EmailService
+	AccountSvc        *service.AccountService
+	AdminSvc          *service.AdminService
+	AdminSessionSvc   *service.AdminSessionService
+	PasswordSvc       *service.PasswordService
 	TwoFASvc    *service.TwoFAService
 	OAuthSvc    *service.OAuthService
 	LoginSvc    *service.LoginService
@@ -49,9 +50,10 @@ type Dependencies struct {
 	UserSvc     *userService.UserService
 
 	// Handlers
-	AccountHandler  *handler.AccountHandler
-	AdminHandler    *handler.AdminHandler
-	PasswordHandler *handler.PasswordHandler
+	AccountHandler      *handler.AccountHandler
+	AdminHandler        *handler.AdminHandler
+	AdminSessionHandler *handler.AdminSessionHandler
+	PasswordHandler     *handler.PasswordHandler
 	TwoFAHandler    *handler.TwoFAHandler
 	OAuthHandler    *handler.OAuthHandler
 	LoginHandler    *handler.LoginHandler
@@ -85,6 +87,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	// ── Services ──────────────────────────────────────────────────────────────
 	accountSvc := service.NewAccountService(cfg, authRepo, tokenRepo, sessionRepo, jwt, emailSvc)
 	adminSvc := service.NewAdminService(cfg, adminRepo, tokenRepo, sessionRepo, jwt, emailSvc)
+	adminSessionSvc := service.NewAdminSessionService(sessionRepo)
 	passwordSvc := service.NewPasswordService(cfg, authRepo, tokenRepo, emailSvc)
 	twoFASvc := service.NewTwoFAService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
 	oAuthSvc := service.NewOAuthService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
@@ -95,6 +98,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	accountHandler := handler.NewAccountHandler(accountSvc, cfg)
 	adminHandler := handler.NewAdminHandler(adminSvc, cfg)
+	adminSessionHandler := handler.NewAdminSessionHandler(adminSessionSvc, cfg)
 	passwordHandler := handler.NewPasswordHandler(passwordSvc)
 	twoFAHandler := handler.NewTwoFAHandler(twoFASvc, cfg)
 	oAuthHandler := handler.NewOAuthHandler(oAuthSvc, cfg)
@@ -119,17 +123,19 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 		SessionRepo:     sessionRepo,
 		TokenRepo:       tokenRepo,
 		EmailSvc:        emailSvc,
-		AccountSvc:      accountSvc,
-		AdminSvc:        adminSvc,
-		PasswordSvc:     passwordSvc,
+		AccountSvc:        accountSvc,
+		AdminSvc:          adminSvc,
+		AdminSessionSvc:   adminSessionSvc,
+		PasswordSvc:       passwordSvc,
 		TwoFASvc:        twoFASvc,
 		OAuthSvc:        oAuthSvc,
 		LoginSvc:        loginSvc,
 		SessionSvc:      sessionSvc,
 		UserSvc:         userSvc,
-		AccountHandler:  accountHandler,
-		AdminHandler:    adminHandler,
-		PasswordHandler: passwordHandler,
+		AccountHandler:      accountHandler,
+		AdminHandler:        adminHandler,
+		AdminSessionHandler: adminSessionHandler,
+		PasswordHandler:     passwordHandler,
 		TwoFAHandler:    twoFAHandler,
 		OAuthHandler:    oAuthHandler,
 		LoginHandler:    loginHandler,

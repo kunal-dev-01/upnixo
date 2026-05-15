@@ -131,3 +131,24 @@ func (h *AdminHandler) ResetMasterKey(c *fiber.Ctx) error {
 		"message": "Master key has been reset successfully",
 	})
 }
+
+// Refresh POST /auth/admin/refresh
+func (h *AdminHandler) Refresh(c *fiber.Ctx) error {
+	// Read session ID from httpOnly cookie
+	sessionID := c.Cookies("refresh_token")
+	if sessionID == "" {
+		return utils.Unauthorized("missing refresh token cookie")
+	}
+
+	accessToken, err := h.svc.Refresh(c.Context(), sessionID)
+	if err != nil {
+		// If refresh fails, clear the invalid cookie
+		clearRefreshCookie(c, h.cfg)
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"success":      true,
+		"access_token": accessToken,
+	})
+}

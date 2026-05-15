@@ -63,6 +63,19 @@ func registerAuthRoutes(r fiber.Router, d *Dependencies) {
 	auth.Post("/admin/reset-password", d.Limiters.Auth, d.AdminHandler.ResetPassword)
 	auth.Post("/admin/forgot-master-key", d.Limiters.Auth, d.AdminHandler.ForgotMasterKey)
 	auth.Post("/admin/reset-master-key", d.Limiters.Auth, d.AdminHandler.ResetMasterKey)
+	auth.Post("/admin/refresh", d.AdminHandler.Refresh)
+	auth.Post("/admin/logout", d.AdminSessionHandler.Logout)
+
+	// ── Admin Protected ───────────────────────────────────────────────────────
+	adminProtected := auth.Group("/admin",
+		middleware.AuthRequired(d.JWT, d.SessionRepo),
+		middleware.AdminRequired(),
+		d.Limiters.API,
+	)
+
+	adminProtected.Get("/sessions", d.AdminSessionHandler.GetSessions)
+	adminProtected.Delete("/sessions/:id", d.AdminSessionHandler.RevokeSession)
+	adminProtected.Post("/logout-all", d.AdminSessionHandler.RevokeAllSessions)
 
 	// ── Token Refresh & 2FA Verify (Public/Special Auth) ──────────────────
 	auth.Post("/refresh", d.LoginHandler.Refresh)
