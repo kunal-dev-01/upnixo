@@ -47,6 +47,17 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
+type AdminLoginRequest struct {
+	Email           string `json:"email" validate:"required,email"`
+	Password        string `json:"password" validate:"required"`
+	MasterSecretKey string `json:"master_secret_key" validate:"required"`
+}
+
+type AdminVerifyRequest struct {
+	Email string `json:"email" validate:"required,email"`
+	Code  string `json:"code" validate:"required,len=6"`
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // RESPONSE DTOs
 // ─────────────────────────────────────────────────────────────────────────────

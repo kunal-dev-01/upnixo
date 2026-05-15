@@ -56,6 +56,10 @@ func registerAuthRoutes(r fiber.Router, d *Dependencies) {
 		d.OAuthHandler.GithubCallback,
 	)
 
+	// ── Admin Auth ─────────────────────────────────────────────────────────────
+	auth.Post("/admin/login", d.Limiters.Auth, d.AdminHandler.Login)
+	auth.Post("/admin/verify", d.Limiters.Auth, d.AdminHandler.VerifyLogin)
+
 	// ── Token Refresh & 2FA Verify (Public/Special Auth) ──────────────────
 	auth.Post("/refresh", d.LoginHandler.Refresh)
 	auth.Post("/2fa/verify", d.TwoFAHandler.VerifyTOTP)

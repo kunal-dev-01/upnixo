@@ -20,6 +20,7 @@ const (
 	prefixLoginAttempt  = "security:login_attempt:" // security:login_attempt:<email> → count
 	prefixAccountLock   = "security:lock:"          // security:lock:<email>       → "1"
 	prefixOAuthState    = "oauth:state:"            // oauth:state:<state>        → user_id (optional, for linking)
+	prefixAdminLogin    = "token:admin_login:"      // token:admin_login:<email>  → code
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -99,6 +100,30 @@ func (t *TokenRepository) StoreTwoFAPendingToken(ctx context.Context, userID, to
 
 func (t *TokenRepository) ConsumeTwoFAPendingToken(ctx context.Context, token string) (string, error) {
 	return t.consumeToken(ctx, prefixTwoFAPending+token, "2fa pending")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADMIN LOGIN CODE
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (t *TokenRepository) StoreAdminLoginCode(ctx context.Context, email, code string, ttl time.Duration) error {
+	return t.r.Set(ctx, prefixAdminLogin+email, code, ttl)
+}
+
+func (t *TokenRepository) ConsumeAdminLoginCode(ctx context.Context, email string) (string, error) {
+	key := prefixAdminLogin + email
+	code, err := t.r.Get(ctx, key)
+	if err != nil {
+		return "", utils.Internal(err)
+	}
+	if code == "" {
+		return "", utils.Unauthorized("login code expired or not found")
+	}
+
+	// Single use
+	_ = t.r.Del(ctx, key)
+
+	return code, nil
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

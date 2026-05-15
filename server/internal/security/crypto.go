@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"math/big"
 
 	"server/internal/utils"
 
@@ -65,6 +66,16 @@ func GenerateSessionID() (string, error) {
 // GenerateTwoFAPendingToken returns a short-lived token for the 2FA pending state.
 func GenerateTwoFAPendingToken() (string, error) {
 	return GenerateToken(32)
+}
+
+// GenerateOTP returns a random 6-digit numeric code.
+func GenerateOTP() string {
+	max := big.NewInt(1000000)
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		return "123456" // Fallback (should not happen with crypto/rand)
+	}
+	return fmt.Sprintf("%06d", n.Int64())
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
