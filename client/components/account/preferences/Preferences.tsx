@@ -63,12 +63,6 @@ function Preferences() {
         selectedTheme={currentTheme}
         onThemeSelect={handleThemeSelect}
       />
-
-      {isPending && (
-        <p className="text-xs text-zinc-500 animate-pulse text-center">
-          Updating your preferences...
-        </p>
-      )}
     </div>
   );
 }
