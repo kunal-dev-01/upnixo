@@ -75,13 +75,15 @@ async function refresh(): Promise<RefreshResponse> {
 
 // POST /auth/logout → { success, message }
 async function logout(): Promise<MessageResponse> {
-  const res = await apiClient.post<MessageResponse>(`${BASE}/logout`);
+  const res = await apiClient.post<MessageResponse>(`${BASE}/sessions/logout`);
   return res.data;
 }
 
 // POST /auth/logout-all → { success, message }
 async function logoutAll(): Promise<MessageResponse> {
-  const res = await apiClient.post<MessageResponse>(`${BASE}/logout-all`);
+  const res = await apiClient.post<MessageResponse>(
+    `${BASE}/sessions/logout-all`,
+  );
   return res.data;
 }
 
