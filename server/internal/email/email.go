@@ -22,6 +22,7 @@ const (
 
 	TemplateVerifyEmail        = "VerifyEmail"
 	TemplateResetPassword      = "ResetPassword"
+	TemplateAdminLoginCode     = "AdminLoginVerify"
 	TemplateAdminResetPassword = "ResetAdminPassword"
 	TemplateSecretReset        = "ResetAdminSecret"
 )
@@ -97,14 +98,25 @@ func (s *EmailService) SendPasswordResetEmail(name, email, token string) error {
 	})
 }
 
+func (s *EmailService) SendLoginCodeEmail(name, email, code string) error {
+	return s.publish(EmailMessage{
+		To:           email,
+		TemplateName: TemplateAdminLoginCode,
+		TemplateData: map[string]string{
+			"admin_name": name,
+			"login_code": code,
+		},
+	})
+}
+
 // Admin and secret password resets use the same template but different URLs
 func (s *EmailService) SendAdminPasswordResetEmail(name, email, token string) error {
 	return s.publish(EmailMessage{
 		To:           email,
 		TemplateName: TemplateAdminResetPassword,
 		TemplateData: map[string]string{
-			"user_name": name,
-			"reset_url": fmt.Sprintf("%s?token=%s", s.cfg.Frontend.AdminResetPasswordUrl, token),
+			"admin_name": name,
+			"reset_url":  fmt.Sprintf("%s?token=%s", s.cfg.Frontend.AdminResetPasswordUrl, token),
 		},
 	})
 }
@@ -114,8 +126,8 @@ func (s *EmailService) SendSecretResetEmail(name, email, token string) error {
 		To:           email,
 		TemplateName: TemplateSecretReset,
 		TemplateData: map[string]string{
-			"user_name": name,
-			"reset_url": fmt.Sprintf("%s?token=%s", s.cfg.Frontend.SecretResetUrl, token),
+			"admin_name": name,
+			"reset_url":  fmt.Sprintf("%s?token=%s", s.cfg.Frontend.SecretResetUrl, token),
 		},
 	})
 }
