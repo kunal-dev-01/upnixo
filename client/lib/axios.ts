@@ -22,25 +22,8 @@ const apiClient: AxiosInstance = axios.create({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// REQUEST — attach access token
+// REFRESH LOGIC (SHARED)
 // ─────────────────────────────────────────────────────────────────────────────
-
-apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = useAuthStore.getState().accessToken;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// RESPONSE — silent refresh + error mapping
-// ─────────────────────────────────────────────────────────────────────────────
-
-type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 let isRefreshing = false;
 let refreshQueue: Array<(token: string) => void> = [];
@@ -55,59 +38,90 @@ const clearQueueWithError = () => {
   refreshQueue = [];
 };
 
+const tryRefresh = async (): Promise<string> => {
+  if (isRefreshing) {
+    return new Promise((resolve) => {
+      refreshQueue.push((token) => resolve(token));
+    });
+  }
+
+  isRefreshing = true;
+  try {
+    const { data } = await apiClient.post<{ access_token: string }>(
+      "/auth/refresh",
+    );
+    const newToken = data.access_token;
+    useAuthStore.getState().setAccessToken(newToken);
+    flushQueue(newToken);
+    return newToken;
+  } catch (error) {
+    clearQueueWithError();
+    useAuthStore.getState().clearAuth();
+    // Only redirect if we are not already on auth page
+    if (!window.location.pathname.startsWith("/auth")) {
+      window.location.replace("/auth/login");
+    }
+    return "";
+  } finally {
+    isRefreshing = false;
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REQUEST — attach access token + pre-emptive refresh
+// ─────────────────────────────────────────────────────────────────────────────
+
+apiClient.interceptors.request.use(
+  async (config: InternalAxiosRequestConfig) => {
+    const authPaths = [
+      "/auth/login",
+      "/auth/register",
+      "/auth/refresh",
+      "/auth/forgot-password",
+      "/auth/reset-password",
+      "/auth/2fa/verify",
+      "/auth/2fa/backup",
+      "/auth/oauth/google/callback",
+      "/auth/oauth/github/callback",
+    ];
+
+    const isAuthEndpoint = authPaths.some((path) => config.url?.includes(path));
+
+    let token = useAuthStore.getState().accessToken;
+
+    // ── Pre-emptive Refresh ─────────────────────────────────────────────────
+    // If no token in memory but we are hitting a private endpoint, try refresh
+    if (!token && !isAuthEndpoint) {
+      token = await tryRefresh();
+    }
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RESPONSE — silent refresh (as fallback) + error mapping
+// ─────────────────────────────────────────────────────────────────────────────
+
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<BackendErrorResponse>) => {
-    const config = error.config as RetryConfig | undefined;
+    const config = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
     const status = error.response?.status;
 
-    const authPaths = [
-      "/auth/login",
-      "/auth/refresh",
-      "/auth/2fa/verify",
-      "/auth/2fa/backup",
-    ];
-
-    const isAuthEndpoint = authPaths.some((path) => config?.url === path);
-
-    // ── 401 → try silent refresh ────────────────────────────────────────────
-    if (status === 401 && config && !config._retry && !isAuthEndpoint) {
-      if (isRefreshing) {
-        // Queue this request while refresh is in-flight
-        return new Promise((resolve, reject) => {
-          refreshQueue.push((newToken: string) => {
-            if (!newToken) {
-              reject(toApiError(error));
-              return;
-            }
-            config.headers.Authorization = `Bearer ${newToken}`;
-            resolve(apiClient(config));
-          });
-        });
-      }
-
+    // If 401 and not already retried, try one last refresh
+    if (status === 401 && config && !config._retry) {
       config._retry = true;
-      isRefreshing = true;
-
-      try {
-        // Cookie is sent automatically — no body needed
-        const { data } = await apiClient.post<{
-          access_token: string;
-        }>("/auth/refresh");
-        const newToken = data.access_token;
-
-        useAuthStore.getState().setAccessToken(newToken);
-        flushQueue(newToken);
-
+      const newToken = await tryRefresh();
+      if (newToken) {
         config.headers.Authorization = `Bearer ${newToken}`;
         return apiClient(config);
-      } catch {
-        clearQueueWithError();
-        useAuthStore.getState().clearAuth();
-        window.location.replace("/auth/login");
-        return Promise.reject(toApiError(error));
-      } finally {
-        isRefreshing = false;
       }
     }
 
