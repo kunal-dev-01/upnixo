@@ -76,7 +76,9 @@ export default function LoginVerify({
       </motion.div>
 
       <motion.div variants={itemVariants} className="pt-2 space-y-4">
-        <Submit loading={isLoading}>Verify & Login</Submit>
+        <Submit type="submit" loading={isLoading}>
+          Verify & Login
+        </Submit>
 
         <div className="flex justify-center pt-2">
           <BackButton
@@ -84,6 +86,7 @@ export default function LoginVerify({
             type="button"
             onClick={onBack}
             disabled={isLoading}
+            className="w-full flex items-center justify-center"
           />
         </div>
       </motion.div>
