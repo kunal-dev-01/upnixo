@@ -6,7 +6,6 @@ import (
 
 	"server/internal/config"
 	"server/internal/dto"
-	"server/internal/models"
 	"server/internal/repo"
 	"server/internal/security"
 	"server/internal/utils"
@@ -19,11 +18,9 @@ import (
 // ─────────────────────────────────────────────────────────────────────────────
 
 type LoginService struct {
-	cfg         *config.Config
-	authRepo    repo.AuthRepository
-	tokenRepo   *repo.TokenRepository
-	sessionRepo *repo.SessionRepository
-	jwt         *security.JWTManager
+	baseService
+	authRepo  repo.AuthRepository
+	tokenRepo *repo.TokenRepository
 }
 
 func NewLoginService(
@@ -34,11 +31,13 @@ func NewLoginService(
 	jwt *security.JWTManager,
 ) *LoginService {
 	return &LoginService{
-		cfg:         cfg,
-		authRepo:    authRepo,
-		tokenRepo:   tokenRepo,
-		sessionRepo: sessionRepo,
-		jwt:         jwt,
+		baseService: baseService{
+			cfg:         cfg,
+			sessionRepo: sessionRepo,
+			jwt:         jwt,
+		},
+		authRepo:  authRepo,
+		tokenRepo: tokenRepo,
 	}
 }
 
@@ -256,52 +255,6 @@ func (s *LoginService) handleFailedAttempt(
 // ─────────────────────────────────────────────────────────────────────────────
 // SESSION
 // ─────────────────────────────────────────────────────────────────────────────
-
-func (s *LoginService) createSession(
-	ctx context.Context,
-	user *models.User,
-	prefs *models.UserPreferences,
-	info dto.ClientInfo,
-) (*dto.AuthResult, error) {
-
-	sessionID, err := security.GenerateSessionID()
-	if err != nil {
-		return nil, err
-	}
-
-	pair, err := s.jwt.GenerateTokenPair(user, sessionID)
-	if err != nil {
-		return nil, err
-	}
-
-	ttl := s.cfg.JWT.RefreshTokenDuration
-
-	meta := &dto.SessionMetadata{
-		ID:           sessionID,
-		UserID:       user.ID.String(),
-		RefreshToken: pair.RefreshToken,
-		IPAddress:    info.IP,
-		Browser:      info.Browser,
-		OS:           info.OS,
-		DeviceName:   info.DeviceName,
-		City:         info.City,
-		Country:      info.Country,
-		CreatedAt:    time.Now(),
-		ExpiresAt:    time.Now().Add(ttl),
-	}
-
-	if err = s.sessionRepo.StoreSession(ctx, meta, ttl); err != nil {
-		return nil, err
-	}
-
-	safe := user.ToSafe(prefs)
-
-	return &dto.AuthResult{
-		AccessToken: pair.AccessToken,
-		SessionID:   sessionID,
-		User:        &safe,
-	}, nil
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // REFRESH

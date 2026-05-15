@@ -20,11 +20,9 @@ import (
 // ─────────────────────────────────────────────────────────────────────────────
 
 type TwoFAService struct {
-	cfg         *config.Config
-	authRepo    repo.AuthRepository
-	tokenRepo   *repo.TokenRepository
-	sessionRepo *repo.SessionRepository
-	jwt         *security.JWTManager
+	baseService
+	authRepo  repo.AuthRepository
+	tokenRepo *repo.TokenRepository
 }
 
 func NewTwoFAService(
@@ -35,11 +33,13 @@ func NewTwoFAService(
 	jwt *security.JWTManager,
 ) *TwoFAService {
 	return &TwoFAService{
-		cfg:         cfg,
-		authRepo:    authRepo,
-		tokenRepo:   tokenRepo,
-		sessionRepo: sessionRepo,
-		jwt:         jwt,
+		baseService: baseService{
+			cfg:         cfg,
+			sessionRepo: sessionRepo,
+			jwt:         jwt,
+		},
+		authRepo:  authRepo,
+		tokenRepo: tokenRepo,
 	}
 }
 
@@ -132,7 +132,7 @@ func (s *TwoFAService) ConfirmEnable(ctx context.Context, userID uuid.UUID, inpu
 // VERIFY TOTP — during login (2fa_pending token → full JWT pair)
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (s *TwoFAService) VerifyTOTP(ctx context.Context, input dto.Verify2FAInput, clientInfo dto.ClientInfo) (*dto.VerifyEmailResult, error) {
+func (s *TwoFAService) VerifyTOTP(ctx context.Context, input dto.Verify2FAInput, clientInfo dto.ClientInfo) (*dto.AuthResult, error) {
 	if err := utils.ValidateStructToAppError(input); err != nil {
 		return nil, err
 	}
@@ -179,7 +179,7 @@ func (s *TwoFAService) VerifyTOTP(ctx context.Context, input dto.Verify2FAInput,
 // VERIFY BACKUP CODE — fallback when TOTP app unavailable
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (s *TwoFAService) VerifyBackupCode(ctx context.Context, input dto.VerifyBackupInput, clientInfo dto.ClientInfo) (*dto.VerifyEmailResult, error) {
+func (s *TwoFAService) VerifyBackupCode(ctx context.Context, input dto.VerifyBackupInput, clientInfo dto.ClientInfo) (*dto.AuthResult, error) {
 	if err := utils.ValidateStructToAppError(input); err != nil {
 		return nil, err
 	}
@@ -340,41 +340,3 @@ func (s *TwoFAService) recordVerified(userID uuid.UUID, method models.TwoFactorM
 	}
 }
 
-func (s *TwoFAService) createSession(ctx context.Context, user *models.User, prefs *models.UserPreferences, info dto.ClientInfo) (*dto.VerifyEmailResult, error) {
-	sessionID, err := security.GenerateSessionID()
-	if err != nil {
-		return nil, err
-	}
-
-	pair, err := s.jwt.GenerateTokenPair(user, sessionID)
-	if err != nil {
-		return nil, err
-	}
-
-	ttl := s.cfg.JWT.RefreshTokenDuration
-
-	meta := &dto.SessionMetadata{
-		ID:           sessionID,
-		UserID:       user.ID.String(),
-		RefreshToken: pair.RefreshToken,
-		IPAddress:    info.IP,
-		Browser:      info.Browser,
-		OS:           info.OS,
-		DeviceName:   info.DeviceName,
-		City:         info.City,
-		Country:      info.Country,
-		CreatedAt:    time.Now(),
-		ExpiresAt:    time.Now().Add(ttl),
-	}
-
-	if err = s.sessionRepo.StoreSession(ctx, meta, ttl); err != nil {
-		return nil, err
-	}
-
-	safe := user.ToSafe(prefs)
-	return &dto.VerifyEmailResult{
-		User:        &safe,
-		AccessToken: pair.AccessToken,
-		SessionID:   sessionID,
-	}, nil
-}

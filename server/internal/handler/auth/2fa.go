@@ -83,7 +83,7 @@ func (h *TwoFAHandler) VerifyTOTP(c *fiber.Ctx) error {
 		return utils.BadRequest("invalid request body")
 	}
 
-	clientInfo := parseClientInfoDTO(c)
+	clientInfo := parseClientInfo(c)
 
 	result, err := h.svc.VerifyTOTP(c.Context(), input, clientInfo)
 	if err != nil {
@@ -110,7 +110,7 @@ func (h *TwoFAHandler) VerifyBackupCode(c *fiber.Ctx) error {
 		return utils.BadRequest("invalid request body")
 	}
 
-	clientInfo := parseClientInfoDTO(c)
+	clientInfo := parseClientInfo(c)
 
 	result, err := h.svc.VerifyBackupCode(c.Context(), input, clientInfo)
 	if err != nil {
@@ -188,18 +188,3 @@ func (h *TwoFAHandler) RegenerateBackupCodes(c *fiber.Ctx) error {
 	})
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// HELPERS
-// ─────────────────────────────────────────────────────────────────────────────
-
-func parseClientInfoDTO(c *fiber.Ctx) dto.ClientInfo {
-	parsed := utils.ParseClientInfo(c.IP(), c.Get("User-Agent"))
-	return dto.ClientInfo{
-		IP:         c.IP(),
-		Browser:    parsed.Browser,
-		OS:         parsed.OS,
-		DeviceName: parsed.DeviceName,
-		City:       parsed.City,
-		Country:    parsed.Country,
-	}
-}

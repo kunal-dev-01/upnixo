@@ -21,11 +21,10 @@ import (
 // ─────────────────────────────────────────────────────────────────────────────
 
 type AccountService struct {
-	cfg         *config.Config
-	authRepo    repo.AuthRepository
-	tokenRepo   *repo.TokenRepository
-	sessionRepo *repo.SessionRepository
-	emailSvc    *email.EmailService
+	baseService
+	authRepo  repo.AuthRepository
+	tokenRepo *repo.TokenRepository
+	emailSvc  *email.EmailService
 }
 
 func NewAccountService(
@@ -33,14 +32,18 @@ func NewAccountService(
 	authRepo repo.AuthRepository,
 	tokenRepo *repo.TokenRepository,
 	sessionRepo *repo.SessionRepository,
+	jwt *security.JWTManager,
 	emailSvc *email.EmailService,
 ) *AccountService {
 	return &AccountService{
-		cfg:         cfg,
-		authRepo:    authRepo,
-		tokenRepo:   tokenRepo,
-		sessionRepo: sessionRepo,
-		emailSvc:    emailSvc,
+		baseService: baseService{
+			cfg:         cfg,
+			sessionRepo: sessionRepo,
+			jwt:         jwt,
+		},
+		authRepo:  authRepo,
+		tokenRepo: tokenRepo,
+		emailSvc:  emailSvc,
 	}
 }
 
@@ -98,7 +101,7 @@ func (s *AccountService) Register(ctx context.Context, input dto.RegisterRequest
 // VERIFY EMAIL
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (s *AccountService) VerifyEmail(ctx context.Context, token string, clientInfo dto.ClientInfo) (*dto.VerifyEmailResult, error) {
+func (s *AccountService) VerifyEmail(ctx context.Context, token string, clientInfo dto.ClientInfo) (*dto.AuthResult, error) {
 	// 1. Consume token (single-use, deletes from Redis)
 	userIDStr, err := s.tokenRepo.ConsumeEmailVerifyToken(ctx, token)
 	if err != nil {
@@ -186,49 +189,6 @@ func (s *AccountService) sendVerificationEmail(user *models.User) {
 	}
 }
 
-// createSession builds JWT pair + stores session in Redis.
-func (s *AccountService) createSession(ctx context.Context, user *models.User, prefs *models.UserPreferences, info dto.ClientInfo) (*dto.VerifyEmailResult, error) {
-	sessionID, err := security.GenerateSessionID()
-	if err != nil {
-		return nil, err
-	}
-
-	jwt := security.NewJWTManager(&s.cfg.JWT)
-
-	pair, err := jwt.GenerateTokenPair(user, sessionID)
-	if err != nil {
-		return nil, err
-	}
-
-	ttl := s.cfg.JWT.RefreshTokenDuration
-	expiresAt := time.Now().Add(ttl)
-
-	meta := &dto.SessionMetadata{
-		ID:           sessionID,
-		UserID:       user.ID.String(),
-		RefreshToken: pair.RefreshToken,
-		IPAddress:    info.IP,
-		Browser:      info.Browser,
-		OS:           info.OS,
-		DeviceName:   info.DeviceName,
-		City:         info.City,
-		Country:      info.Country,
-		CreatedAt:    time.Now(),
-		ExpiresAt:    expiresAt,
-	}
-
-	if err = s.sessionRepo.StoreSession(ctx, meta, ttl); err != nil {
-		return nil, err
-	}
-
-	safe := user.ToSafe(prefs)
-
-	return &dto.VerifyEmailResult{
-		User:        &safe,
-		AccessToken: pair.AccessToken,
-		SessionID:   sessionID,
-	}, nil
-}
 
 // fetchUserByID is a helper to get user by ID. Used in VerifyEmail after marking email as verified.
 func (s *AccountService) fetchUserByID(ctx context.Context, id uuid.UUID) (*models.User, *models.UserPreferences, error) {

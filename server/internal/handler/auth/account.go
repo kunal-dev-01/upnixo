@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"time"
-
 	"server/internal/config"
 	"server/internal/dto"
 	"server/internal/service/auth"
@@ -98,39 +96,4 @@ func (h *AccountHandler) ResendVerifyEmail(c *fiber.Ctx) error {
 		"success": true,
 		"message": "if this email is registered, a verification link has been sent",
 	})
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// HELPERS
-// ─────────────────────────────────────────────────────────────────────────────
-
-// setRefreshCookie sets the refresh token (session ID) as a secure httpOnly cookie.
-// JS cannot access this cookie — protects against XSS.
-func setRefreshCookie(c *fiber.Ctx, sessionID string, cfg *config.Config) {
-	secure := cfg.App.IsProduction()
-
-	c.Cookie(&fiber.Cookie{
-		Name:     "refresh_token",
-		Value:    sessionID,
-		Path:     "/api/v1/auth", // only sent to auth endpoints
-		MaxAge:   int(cfg.JWT.RefreshTokenDuration.Seconds()),
-		Expires:  time.Now().Add(cfg.JWT.RefreshTokenDuration),
-		HTTPOnly: true,   // JS cannot access
-		Secure:   secure, // HTTPS only in production
-		SameSite: "Lax",  // CSRF protection
-	})
-}
-
-// parseClientInfo extracts device + location metadata from the request.
-func parseClientInfo(c *fiber.Ctx) dto.ClientInfo {
-	parsed := utils.ParseClientInfo(c.IP(), c.Get("User-Agent"))
-
-	return dto.ClientInfo{
-		IP:         c.IP(),
-		Browser:    parsed.Browser,
-		OS:         parsed.OS,
-		DeviceName: parsed.DeviceName,
-		City:       parsed.City,
-		Country:    parsed.Country,
-	}
 }

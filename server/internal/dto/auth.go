@@ -55,12 +55,6 @@ type RegisterResponse struct {
 	Message string `json:"message"`
 }
 
-type VerifyEmailResult struct {
-	User        *models.SafeUser `json:"user"`
-	AccessToken string           `json:"access_token"`
-	SessionID   string           `json:"session_id"`
-}
-
 type AuthResult struct {
 	User        *models.SafeUser `json:"user"`
 	AccessToken string           `json:"access_token"`

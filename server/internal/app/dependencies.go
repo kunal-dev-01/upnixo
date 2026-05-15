@@ -79,7 +79,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	tokenRepo := repo.NewTokenRepository(redisClient)
 
 	// ── Services ──────────────────────────────────────────────────────────────
-	accountSvc := service.NewAccountService(cfg, authRepo, tokenRepo, sessionRepo, emailSvc)
+	accountSvc := service.NewAccountService(cfg, authRepo, tokenRepo, sessionRepo, jwt, emailSvc)
 	passwordSvc := service.NewPasswordService(cfg, authRepo, tokenRepo, emailSvc)
 	twoFASvc := service.NewTwoFAService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
 	oAuthSvc := service.NewOAuthService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
