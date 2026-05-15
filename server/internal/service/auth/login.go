@@ -256,10 +256,6 @@ func (s *LoginService) handleFailedAttempt(
 // SESSION
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ─────────────────────────────────────────────────────────────────────────────
-// REFRESH
-// ─────────────────────────────────────────────────────────────────────────────
-
 func (s *LoginService) Refresh(
 	ctx context.Context,
 	sessionID string,
@@ -292,7 +288,13 @@ func (s *LoginService) Refresh(
 	}
 
 	// 4. Generate only NEW access token (keep same session ID)
-	pair, err := s.jwt.GenerateTokenPair(user, sessionID)
+	accessToken, err := s.jwt.GenerateAccessToken(
+		user.ID,
+		user.Email,
+		user.TwoFactorEnabled,
+		security.UserRole(session.Role),
+		sessionID,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -300,7 +302,7 @@ func (s *LoginService) Refresh(
 	safe := user.ToSafe(prefs)
 
 	return &dto.AuthResult{
-		AccessToken: pair.AccessToken,
+		AccessToken: accessToken,
 		SessionID:   sessionID,
 		User:        &safe,
 	}, nil

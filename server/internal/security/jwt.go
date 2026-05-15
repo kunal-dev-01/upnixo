@@ -26,11 +26,19 @@ const (
 	TokenTwoFAPending TokenType = "2fa_pending" // issued after password OK, before 2FA verify
 )
 
+type UserRole string
+
+const (
+	RoleUser  UserRole = "user"
+	RoleAdmin UserRole = "admin"
+)
+
 // CustomClaims is the JWT payload.
 type CustomClaims struct {
 	UserID           uuid.UUID `json:"uid"`
 	Email            string    `json:"eml"`
 	TwoFactorEnabled bool      `json:"2fa"`
+	Role             UserRole  `json:"rol"`
 	Type             TokenType `json:"typ"`
 	jwt.RegisteredClaims
 }
@@ -62,14 +70,34 @@ func NewJWTManager(cfg *config.JWTConfig) *JWTManager {
 // GENERATION
 // ─────────────────────────────────────────────────────────────────────────────
 
-// GenerateTokenPair creates access + refresh tokens sharing the same session ID (JTI).
+// GenerateTokenPair creates access + refresh tokens for regular Users.
 func (m *JWTManager) GenerateTokenPair(user *models.User, sessionID string) (*TokenPair, error) {
-	accessToken, err := m.generate(user, TokenAccess, m.cfg.AccessTokenDuration, sessionID)
+	accessToken, err := m.generate(user.ID, user.Email, user.TwoFactorEnabled, RoleUser, TokenAccess, m.cfg.AccessTokenDuration, sessionID)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := m.generate(user, TokenRefresh, m.cfg.RefreshTokenDuration, sessionID)
+	refreshToken, err := m.generate(user.ID, user.Email, user.TwoFactorEnabled, RoleUser, TokenRefresh, m.cfg.RefreshTokenDuration, sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TokenPair{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		ExpiresAt:    time.Now().Add(m.cfg.AccessTokenDuration).Unix(),
+	}, nil
+}
+
+// GenerateAdminTokenPair creates tokens for MasterAdmin accounts.
+// Admins do not have 2FA enabled in the current design.
+func (m *JWTManager) GenerateAdminTokenPair(admin *models.MasterAdmin, sessionID string) (*TokenPair, error) {
+	accessToken, err := m.generate(admin.ID, admin.Email, false, RoleAdmin, TokenAccess, m.cfg.AccessTokenDuration, sessionID)
+	if err != nil {
+		return nil, err
+	}
+
+	refreshToken, err := m.generate(admin.ID, admin.Email, false, RoleAdmin, TokenRefresh, m.cfg.RefreshTokenDuration, sessionID)
 	if err != nil {
 		return nil, err
 	}
@@ -84,20 +112,28 @@ func (m *JWTManager) GenerateTokenPair(user *models.User, sessionID string) (*To
 // GenerateTwoFAPendingToken issues a short-lived token after password login
 // succeeds but before 2FA is verified. TTL: 5 minutes.
 func (m *JWTManager) GenerateTwoFAPendingToken(user *models.User, sessionID string) (string, error) {
-	return m.generate(user, TokenTwoFAPending, 5*time.Minute, sessionID)
+	return m.generate(user.ID, user.Email, user.TwoFactorEnabled, RoleUser, TokenTwoFAPending, 5*time.Minute, sessionID)
 }
 
-func (m *JWTManager) generate(user *models.User, tokenType TokenType, duration time.Duration, sessionID string) (string, error) {
+// GenerateAccessToken generates a single access token for an existing session.
+// Used during refresh flows to avoid re-generating refresh tokens.
+func (m *JWTManager) GenerateAccessToken(userID uuid.UUID, email string, twoFactor bool, role UserRole, sessionID string) (string, error) {
+	return m.generate(userID, email, twoFactor, role, TokenAccess, m.cfg.AccessTokenDuration, sessionID)
+}
+
+// generate creates a new JWT token.
+func (m *JWTManager) generate(userID uuid.UUID, email string, twoFactor bool, role UserRole, tokenType TokenType, duration time.Duration, sessionID string) (string, error) {
 	now := time.Now()
 
 	claims := CustomClaims{
-		UserID:           user.ID,
-		Email:            user.Email,
-		TwoFactorEnabled: user.TwoFactorEnabled,
+		UserID:           userID,
+		Email:            email,
+		TwoFactorEnabled: twoFactor,
+		Role:             role,
 		Type:             tokenType,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    m.cfg.Issuer,
-			Subject:   user.ID.String(),
+			Subject:   userID.String(),
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(duration)),
 			NotBefore: jwt.NewNumericDate(now),

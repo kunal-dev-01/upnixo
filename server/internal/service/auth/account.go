@@ -160,8 +160,6 @@ func (s *AccountService) ResendVerifyEmail(ctx context.Context, email string) er
 // INTERNAL
 // ─────────────────────────────────────────────────────────────────────────────
 
-// sendVerificationEmail generates a token and queues the email.
-// Always called in a goroutine — uses a fresh background context.
 func (s *AccountService) sendVerificationEmail(user *models.User) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -189,8 +187,6 @@ func (s *AccountService) sendVerificationEmail(user *models.User) {
 	}
 }
 
-
-// fetchUserByID is a helper to get user by ID. Used in VerifyEmail after marking email as verified.
 func (s *AccountService) fetchUserByID(ctx context.Context, id uuid.UUID) (*models.User, *models.UserPreferences, error) {
 	// Delegate to authRepo — add GetByID to AuthRepository interface if not present
 	user, prefs, err := s.authRepo.GetByID(ctx, id)

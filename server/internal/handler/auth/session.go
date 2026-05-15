@@ -40,8 +40,10 @@ func (h *SessionHandler) GetSessions(c *fiber.Ctx) error {
 	}
 	sessionID := middleware.GetSessionID(c)
 
+	role := middleware.GetRole(c)
 	sessions, err := h.svc.GetActiveSessions(
 		c.Context(),
+		role,
 		userID.String(),
 		sessionID,
 	)
@@ -67,8 +69,10 @@ func (h *SessionHandler) Logout(c *fiber.Ctx) error {
 	}
 	sessionID := middleware.GetSessionID(c)
 
+	role := middleware.GetRole(c)
 	err := h.svc.Logout(
 		c.Context(),
+		role,
 		userID.String(),
 		sessionID,
 	)
@@ -101,8 +105,10 @@ func (h *SessionHandler) RevokeSession(c *fiber.Ctx) error {
 		return utils.BadRequest("session id is required")
 	}
 
+	role := middleware.GetRole(c)
 	err := h.svc.RevokeSession(
 		c.Context(),
+		role,
 		userID.String(),
 		currentSessionID,
 		targetSessionID,
@@ -129,8 +135,10 @@ func (h *SessionHandler) RevokeAllSessions(c *fiber.Ctx) error {
 	}
 	currentSessionID := middleware.GetSessionID(c)
 
+	role := middleware.GetRole(c)
 	err := h.svc.RevokeAllSessions(
 		c.Context(),
+		role,
 		userID.String(),
 		currentSessionID,
 	)

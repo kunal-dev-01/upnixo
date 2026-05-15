@@ -261,7 +261,7 @@ func (s *TwoFAService) Disable(ctx context.Context, userID uuid.UUID, input dto.
 	go func() {
 		bgCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		if rErr := s.sessionRepo.RevokeAllSessions(bgCtx, userID.String()); rErr != nil {
+		if rErr := s.sessionRepo.RevokeAllSessions(bgCtx, string(security.RoleUser), userID.String()); rErr != nil {
 			utils.Error("revoke all sessions after 2fa disable failed", rErr, map[string]any{
 				"user_id": userID,
 			})

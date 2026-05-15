@@ -30,6 +30,7 @@ func NewSessionService(
 
 func (s *SessionService) GetActiveSessions(
 	ctx context.Context,
+	role string,
 	userID string,
 	currentSessionID string,
 ) ([]dto.SafeSession, error) {
@@ -38,7 +39,7 @@ func (s *SessionService) GetActiveSessions(
 		return nil, utils.Unauthorized("missing user id")
 	}
 
-	sessions, err := s.sessionRepo.GetActiveSessions(ctx, userID)
+	sessions, err := s.sessionRepo.GetActiveSessions(ctx, role, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -61,6 +62,7 @@ func (s *SessionService) GetActiveSessions(
 
 func (s *SessionService) Logout(
 	ctx context.Context,
+	role string,
 	userID string,
 	sessionID string,
 ) error {
@@ -71,6 +73,7 @@ func (s *SessionService) Logout(
 
 	err := s.sessionRepo.RevokeSession(
 		ctx,
+		role,
 		userID,
 		sessionID,
 	)
@@ -80,6 +83,7 @@ func (s *SessionService) Logout(
 
 	utils.Info("session revoked", map[string]any{
 		"user_id":    userID,
+		"role":       role,
 		"session_id": sessionID,
 	})
 
@@ -92,6 +96,7 @@ func (s *SessionService) Logout(
 
 func (s *SessionService) RevokeSession(
 	ctx context.Context,
+	role string,
 	userID string,
 	currentSessionID string,
 	targetSessionID string,
@@ -116,12 +121,13 @@ func (s *SessionService) RevokeSession(
 		return err
 	}
 
-	if session.UserID != userID {
+	if session.UserID != userID || session.Role != role {
 		return utils.Forbidden("you cannot revoke this session")
 	}
 
 	err = s.sessionRepo.RevokeSession(
 		ctx,
+		role,
 		userID,
 		targetSessionID,
 	)
@@ -131,6 +137,7 @@ func (s *SessionService) RevokeSession(
 
 	utils.Warn("session revoked by user", map[string]any{
 		"user_id":         userID,
+		"role":            role,
 		"target_session":  targetSessionID,
 		"current_session": currentSessionID,
 	})
@@ -144,12 +151,14 @@ func (s *SessionService) RevokeSession(
 
 func (s *SessionService) RevokeAllSessions(
 	ctx context.Context,
+	role string,
 	userID string,
 	currentSessionID string,
 ) error {
 
 	sessions, err := s.sessionRepo.GetActiveSessions(
 		ctx,
+		role,
 		userID,
 	)
 	if err != nil {
@@ -165,12 +174,14 @@ func (s *SessionService) RevokeAllSessions(
 
 		err = s.sessionRepo.RevokeSession(
 			ctx,
+			role,
 			userID,
 			session.ID,
 		)
 		if err != nil {
 			utils.Error("revoke session failed", err, map[string]any{
 				"user_id":    userID,
+				"role":       role,
 				"session_id": session.ID,
 			})
 		}
@@ -178,6 +189,7 @@ func (s *SessionService) RevokeAllSessions(
 
 	utils.Warn("all other sessions revoked", map[string]any{
 		"user_id":         userID,
+		"role":            role,
 		"current_session": currentSessionID,
 	})
 

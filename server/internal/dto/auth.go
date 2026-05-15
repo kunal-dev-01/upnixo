@@ -67,6 +67,12 @@ type LoginResult struct {
 	TwoFAPendingToken string
 }
 
+type AdminAuthResult struct {
+	Admin       *models.SafeMasterAdmin `json:"admin"`
+	AccessToken string                  `json:"access_token"`
+	SessionID   string                  `json:"session_id"`
+}
+
 type NotificationSettings struct {
 	Email struct {
 		OrderUpdates    bool `json:"order_updates"`
@@ -163,6 +169,7 @@ type ChangePasswordInput struct {
 type SessionMetadata struct {
 	ID           string    `json:"id"`
 	UserID       string    `json:"user_id"`
+	Role         string    `json:"role"`
 	RefreshToken string    `json:"refresh_token"`
 	IPAddress    string    `json:"ip_address"`
 	Browser      string    `json:"browser"`
@@ -177,6 +184,7 @@ type SessionMetadata struct {
 func (s *SessionMetadata) ToSafe(currentSessionID string) SafeSession {
 	return SafeSession{
 		ID:         s.ID,
+		Role:       s.Role,
 		IPAddress:  s.IPAddress,
 		Browser:    s.Browser,
 		OS:         s.OS,
@@ -191,6 +199,7 @@ func (s *SessionMetadata) ToSafe(currentSessionID string) SafeSession {
 
 type SafeSession struct {
 	ID         string    `json:"id"`
+	Role       string    `json:"role"`
 	IPAddress  string    `json:"ip_address"`
 	Browser    string    `json:"browser"`
 	OS         string    `json:"os"`

@@ -15,7 +15,6 @@ import (
 
 // AuthRequired guards protected routes.
 // Two-layer check: stateless JWT validation + stateful Redis session check.
-// If user is blocked or inactive the session check catches it via RevokeAllSessions.
 func AuthRequired(jwt *security.JWTManager, sessions *repo.SessionRepository) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		claims, err := extractAndValidate(c, jwt)
@@ -29,6 +28,18 @@ func AuthRequired(jwt *security.JWTManager, sessions *repo.SessionRepository) fi
 		}
 
 		setLocals(c, claims)
+		return c.Next()
+	}
+}
+
+// AdminRequired ensures the authenticated user is an administrator.
+// Must be used AFTER AuthRequired.
+func AdminRequired() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		role := GetRole(c)
+		if role != string(security.RoleAdmin) {
+			return utils.Forbidden("admin access required")
+		}
 		return c.Next()
 	}
 }
@@ -116,10 +127,11 @@ func extractAndValidate(c *fiber.Ctx, jwt *security.JWTManager) (*security.Custo
 }
 
 func setLocals(c *fiber.Ctx, claims *security.CustomClaims) {
-	c.Locals("user_id", claims.UserID)       // uuid.UUID
+	c.Locals("user_id", claims.UserID) // uuid.UUID
 	c.Locals("email", claims.Email)
 	c.Locals("session_id", claims.ID)
 	c.Locals("2fa_enabled", claims.TwoFactorEnabled)
+	c.Locals("role", string(claims.Role))
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -130,6 +142,12 @@ func setLocals(c *fiber.Ctx, claims *security.CustomClaims) {
 func GetUserID(c *fiber.Ctx) (uuid.UUID, bool) {
 	id, ok := c.Locals("user_id").(uuid.UUID)
 	return id, ok
+}
+
+// GetRole returns the authenticated account's role (user/admin).
+func GetRole(c *fiber.Ctx) string {
+	role, _ := c.Locals("role").(string)
+	return role
 }
 
 // GetSessionID returns the session ID from Fiber locals.

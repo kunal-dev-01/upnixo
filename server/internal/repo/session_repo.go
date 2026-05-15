@@ -43,7 +43,7 @@ func (s *SessionRepository) StoreSession(ctx context.Context, meta *dto.SessionM
 	}
 
 	// Check active session count before storing — stale-safe
-	count, err := s.CountActiveSessions(ctx, meta.UserID)
+	count, err := s.CountActiveSessions(ctx, meta.Role, meta.UserID)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (s *SessionRepository) StoreSession(ctx context.Context, meta *dto.SessionM
 	}
 
 	sessionKey := prefixSession + meta.ID
-	userKey := prefixUserSessions + meta.UserID
+	userKey := s.buildUserKey(meta.Role, meta.UserID)
 	userSetTTL := s.cfg.JWT.RefreshTokenDuration * 3
 
 	pipe := client.Pipeline()
@@ -71,7 +71,7 @@ func (s *SessionRepository) StoreSession(ctx context.Context, meta *dto.SessionM
 	pipe.Expire(ctx, userKey, userSetTTL)
 
 	if _, err = pipe.Exec(ctx); err != nil {
-		utils.Error("store session pipeline failed", err, map[string]any{"user_id": meta.UserID})
+		utils.Error("store session pipeline failed", err, map[string]any{"user_id": meta.UserID, "role": meta.Role})
 		return utils.Internal(err)
 	}
 
@@ -103,7 +103,7 @@ func (s *SessionRepository) GetSession(ctx context.Context, sessionID string) (*
 // REVOKE
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (s *SessionRepository) RevokeSession(ctx context.Context, userID, sessionID string) error {
+func (s *SessionRepository) RevokeSession(ctx context.Context, role, userID, sessionID string) error {
 	client, err := s.r.Client()
 	if err != nil {
 		return utils.Internal(err)
@@ -111,11 +111,12 @@ func (s *SessionRepository) RevokeSession(ctx context.Context, userID, sessionID
 
 	pipe := client.Pipeline()
 	pipe.Del(ctx, prefixSession+sessionID)
-	pipe.SRem(ctx, prefixUserSessions+userID, sessionID)
+	pipe.SRem(ctx, s.buildUserKey(role, userID), sessionID)
 
 	if _, err = pipe.Exec(ctx); err != nil {
 		utils.Error("revoke session failed", err, map[string]any{
 			"user_id":    userID,
+			"role":       role,
 			"session_id": sessionID,
 		})
 		return utils.Internal(err)
@@ -124,13 +125,13 @@ func (s *SessionRepository) RevokeSession(ctx context.Context, userID, sessionID
 	return nil
 }
 
-func (s *SessionRepository) RevokeAllSessions(ctx context.Context, userID string) error {
+func (s *SessionRepository) RevokeAllSessions(ctx context.Context, role, userID string) error {
 	client, err := s.r.Client()
 	if err != nil {
 		return utils.Internal(err)
 	}
 
-	userKey := prefixUserSessions + userID
+	userKey := s.buildUserKey(role, userID)
 
 	sessionIDs, err := client.SMembers(ctx, userKey).Result()
 	if err != nil {
@@ -147,7 +148,7 @@ func (s *SessionRepository) RevokeAllSessions(ctx context.Context, userID string
 	pipe.Del(ctx, userKey)
 
 	if _, err = pipe.Exec(ctx); err != nil {
-		utils.Error("revoke all sessions failed", err, map[string]any{"user_id": userID})
+		utils.Error("revoke all sessions failed", err, map[string]any{"user_id": userID, "role": role})
 		return utils.Internal(err)
 	}
 
@@ -159,13 +160,13 @@ func (s *SessionRepository) RevokeAllSessions(ctx context.Context, userID string
 // ─────────────────────────────────────────────────────────────────────────────
 
 // GetActiveSessions returns live sessions, pruning stale entries in one shot.
-func (s *SessionRepository) GetActiveSessions(ctx context.Context, userID string) ([]*dto.SessionMetadata, error) {
+func (s *SessionRepository) GetActiveSessions(ctx context.Context, role, userID string) ([]*dto.SessionMetadata, error) {
 	client, err := s.r.Client()
 	if err != nil {
 		return nil, utils.Internal(err)
 	}
 
-	userKey := prefixUserSessions + userID
+	userKey := s.buildUserKey(role, userID)
 
 	sessionIDs, err := client.SMembers(ctx, userKey).Result()
 	if err != nil {
@@ -205,6 +206,7 @@ func (s *SessionRepository) GetActiveSessions(ctx context.Context, userID string
 			utils.Error("corrupted session entry — pruning", err, map[string]any{
 				"session_id": sessionIDs[i],
 				"user_id":    userID,
+				"role":       role,
 			})
 			staleIDs = append(staleIDs, sessionIDs[i])
 			continue
@@ -216,7 +218,7 @@ func (s *SessionRepository) GetActiveSessions(ctx context.Context, userID string
 	// Prune stale IDs — non-fatal
 	if len(staleIDs) > 0 {
 		if sremErr := client.SRem(ctx, userKey, staleIDs...).Err(); sremErr != nil {
-			utils.Error("prune stale sessions failed", sremErr, map[string]any{"user_id": userID})
+			utils.Error("prune stale sessions failed", sremErr, map[string]any{"user_id": userID, "role": role})
 		}
 	}
 
@@ -224,11 +226,17 @@ func (s *SessionRepository) GetActiveSessions(ctx context.Context, userID string
 }
 
 // CountActiveSessions returns the number of live sessions.
-// Reuses GetActiveSessions so stale entries are pruned automatically.
-func (s *SessionRepository) CountActiveSessions(ctx context.Context, userID string) (int, error) {
-	sessions, err := s.GetActiveSessions(ctx, userID)
+func (s *SessionRepository) CountActiveSessions(ctx context.Context, role, userID string) (int, error) {
+	sessions, err := s.GetActiveSessions(ctx, role, userID)
 	if err != nil {
 		return 0, err
 	}
 	return len(sessions), nil
+}
+
+func (s *SessionRepository) buildUserKey(role, userID string) string {
+	if role == "" {
+		role = "user"
+	}
+	return prefixUserSessions + role + ":" + userID
 }

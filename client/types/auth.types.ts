@@ -127,6 +127,7 @@ export interface RegenerateBackupCodesResponse {
 // GET /sessions → { success, sessions: SessionView[] }
 export interface SessionView {
   id: string
+  role: string
   ip_address: string
   browser: string
   os: string
