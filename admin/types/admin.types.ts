@@ -1,4 +1,4 @@
-interface MasterAdmin {
+export interface Admin {
   full_name: string;
   email: string;
   phone: string;
