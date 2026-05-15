@@ -85,6 +85,12 @@ export interface AuthResponse {
   user: User
 }
 
+// POST /refresh → { success, access_token }
+export interface RefreshResponse {
+  success: true
+  access_token: string
+}
+
 // POST /login — two possible shapes
 export interface LoginSuccessResponse {
   success: true

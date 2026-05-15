@@ -2,7 +2,7 @@
 // services/auth.service.ts — matches backend routes + response shapes exactly
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { apiClient } from '@/lib/axios'
+import { apiClient } from "@/lib/axios";
 import type {
   RegisterRequest,
   RegisterResponse,
@@ -23,9 +23,10 @@ import type {
   RegenerateBackupCodesResponse,
   SessionsResponse,
   SessionView,
-} from '@/types/auth.types'
+  RefreshResponse,
+} from "@/types/auth.types";
 
-const BASE = '/auth'
+const BASE = "/auth";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ACCOUNT
@@ -33,22 +34,27 @@ const BASE = '/auth'
 
 // POST /auth/register → { success, message }
 async function register(data: RegisterRequest): Promise<RegisterResponse> {
-  const res = await apiClient.post<RegisterResponse>(`${BASE}/register`, data)
-  return res.data
+  const res = await apiClient.post<RegisterResponse>(`${BASE}/register`, data);
+  return res.data;
 }
 
 // GET /auth/verify-email?token=xxx → { success, access_token, user }
 async function verifyEmail(token: string): Promise<AuthResponse> {
   const res = await apiClient.get<AuthResponse>(`${BASE}/verify-email`, {
     params: { token },
-  })
-  return res.data
+  });
+  return res.data;
 }
 
 // POST /auth/resend-verify → { success, message }
-async function resendVerify(data: ResendVerifyRequest): Promise<MessageResponse> {
-  const res = await apiClient.post<MessageResponse>(`${BASE}/resend-verify`, data)
-  return res.data
+async function resendVerify(
+  data: ResendVerifyRequest,
+): Promise<MessageResponse> {
+  const res = await apiClient.post<MessageResponse>(
+    `${BASE}/resend-verify`,
+    data,
+  );
+  return res.data;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -57,26 +63,26 @@ async function resendVerify(data: ResendVerifyRequest): Promise<MessageResponse>
 
 // POST /auth/login → { success, access_token, user } | { success, two_fa_required, two_fa_pending_token }
 async function login(data: LoginRequest): Promise<LoginResponse> {
-  const res = await apiClient.post<LoginResponse>(`${BASE}/login`, data)
-  return res.data
+  const res = await apiClient.post<LoginResponse>(`${BASE}/login`, data);
+  return res.data;
 }
 
-// POST /auth/refresh → { success, access_token, user }
-async function refresh(): Promise<AuthResponse> {
-  const res = await apiClient.post<AuthResponse>(`${BASE}/refresh`)
-  return res.data
+// POST /auth/refresh → { success, access_token }
+async function refresh(): Promise<RefreshResponse> {
+  const res = await apiClient.post<RefreshResponse>(`${BASE}/refresh`);
+  return res.data;
 }
 
 // POST /auth/logout → { success, message }
 async function logout(): Promise<MessageResponse> {
-  const res = await apiClient.post<MessageResponse>(`${BASE}/logout`)
-  return res.data
+  const res = await apiClient.post<MessageResponse>(`${BASE}/logout`);
+  return res.data;
 }
 
 // POST /auth/logout-all → { success, message }
 async function logoutAll(): Promise<MessageResponse> {
-  const res = await apiClient.post<MessageResponse>(`${BASE}/logout-all`)
-  return res.data
+  const res = await apiClient.post<MessageResponse>(`${BASE}/logout-all`);
+  return res.data;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -84,11 +90,11 @@ async function logoutAll(): Promise<MessageResponse> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function redirectToGoogle(): void {
-  window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/oauth/google`
+  window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/oauth/google`;
 }
 
 function redirectToGitHub(): void {
-  window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/oauth/github`
+  window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/oauth/github`;
 }
 
 async function handleOAuthCallback(
@@ -101,8 +107,8 @@ async function handleOAuthCallback(
     {
       params: { code, state },
     },
-  )
-  return res.data
+  );
+  return res.data;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -110,21 +116,36 @@ async function handleOAuthCallback(
 // ─────────────────────────────────────────────────────────────────────────────
 
 // POST /auth/forgot-password → { success, message }
-async function forgotPassword(data: ForgotPasswordRequest): Promise<MessageResponse> {
-  const res = await apiClient.post<MessageResponse>(`${BASE}/forgot-password`, data)
-  return res.data
+async function forgotPassword(
+  data: ForgotPasswordRequest,
+): Promise<MessageResponse> {
+  const res = await apiClient.post<MessageResponse>(
+    `${BASE}/forgot-password`,
+    data,
+  );
+  return res.data;
 }
 
 // POST /auth/reset-password → { success, message }
-async function resetPassword(data: ResetPasswordRequest): Promise<MessageResponse> {
-  const res = await apiClient.post<MessageResponse>(`${BASE}/reset-password`, data)
-  return res.data
+async function resetPassword(
+  data: ResetPasswordRequest,
+): Promise<MessageResponse> {
+  const res = await apiClient.post<MessageResponse>(
+    `${BASE}/reset-password`,
+    data,
+  );
+  return res.data;
 }
 
 // POST /auth/change-password → { success, message }
-async function changePassword(data: ChangePasswordRequest): Promise<MessageResponse> {
-  const res = await apiClient.post<MessageResponse>(`${BASE}/change-password`, data)
-  return res.data
+async function changePassword(
+  data: ChangePasswordRequest,
+): Promise<MessageResponse> {
+  const res = await apiClient.post<MessageResponse>(
+    `${BASE}/change-password`,
+    data,
+  );
+  return res.data;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -133,14 +154,17 @@ async function changePassword(data: ChangePasswordRequest): Promise<MessageRespo
 
 // POST /auth/2fa/setup → { success, data: { qr_code_url, secret, backup_codes }, message }
 async function setup2FA(): Promise<Setup2FAResponse> {
-  const res = await apiClient.post<Setup2FAResponse>(`${BASE}/2fa/setup`)
-  return res.data
+  const res = await apiClient.post<Setup2FAResponse>(`${BASE}/2fa/setup`);
+  return res.data;
 }
 
 // POST /auth/2fa/confirm → { success, message }
 async function confirm2FA(data: Confirm2FARequest): Promise<MessageResponse> {
-  const res = await apiClient.post<MessageResponse>(`${BASE}/2fa/confirm`, data)
-  return res.data
+  const res = await apiClient.post<MessageResponse>(
+    `${BASE}/2fa/confirm`,
+    data,
+  );
+  return res.data;
 }
 
 // POST /auth/2fa/verify → { success, access_token, user }
@@ -149,24 +173,29 @@ async function verify2FA(data: Verify2FARequest): Promise<AuthResponse> {
     headers: {
       Authorization: `Bearer ${data.two_fa_pending_token}`,
     },
-  })
-  return res.data
+  });
+  return res.data;
 }
 
 // POST /auth/2fa/backup → { success, access_token, user }
-async function verifyBackupCode(data: VerifyBackupCodeRequest): Promise<AuthResponse> {
+async function verifyBackupCode(
+  data: VerifyBackupCodeRequest,
+): Promise<AuthResponse> {
   const res = await apiClient.post<AuthResponse>(`${BASE}/2fa/backup`, data, {
     headers: {
       Authorization: `Bearer ${data.two_fa_pending_token}`,
     },
-  })
-  return res.data
+  });
+  return res.data;
 }
 
 // POST /auth/2fa/disable → { success, message }
 async function disable2FA(data: Disable2FARequest): Promise<MessageResponse> {
-  const res = await apiClient.post<MessageResponse>(`${BASE}/2fa/disable`, data)
-  return res.data
+  const res = await apiClient.post<MessageResponse>(
+    `${BASE}/2fa/disable`,
+    data,
+  );
+  return res.data;
 }
 
 // POST /auth/2fa/backup/regenerate → { success, backup_codes, message }
@@ -176,8 +205,8 @@ async function regenerateBackupCodes(
   const res = await apiClient.post<RegenerateBackupCodesResponse>(
     `${BASE}/2fa/backup/regenerate`,
     data,
-  )
-  return res.data
+  );
+  return res.data;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -186,20 +215,22 @@ async function regenerateBackupCodes(
 
 // GET /auth/sessions → { success, sessions: SessionView[] }
 async function getSessions(): Promise<SessionView[]> {
-  const res = await apiClient.get<SessionsResponse>(`${BASE}/sessions`)
-  return res.data.sessions
+  const res = await apiClient.get<SessionsResponse>(`${BASE}/sessions`);
+  return res.data.sessions;
 }
 
 // DELETE /auth/sessions/:id → { success, message }
 async function revokeSession(sessionId: string): Promise<MessageResponse> {
-  const res = await apiClient.delete<MessageResponse>(`${BASE}/sessions/${sessionId}`)
-  return res.data
+  const res = await apiClient.delete<MessageResponse>(
+    `${BASE}/sessions/${sessionId}`,
+  );
+  return res.data;
 }
 
 // POST /auth/logout-all → { success, message }
 async function revokeAllOtherSessions(): Promise<MessageResponse> {
-  const res = await apiClient.post<MessageResponse>(`${BASE}/logout-all`)
-  return res.data
+  const res = await apiClient.post<MessageResponse>(`${BASE}/logout-all`);
+  return res.data;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -229,4 +260,4 @@ export const authService = {
   getSessions,
   revokeSession,
   revokeAllOtherSessions,
-}
+};

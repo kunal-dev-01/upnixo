@@ -259,51 +259,40 @@ func (s *LoginService) handleFailedAttempt(
 func (s *LoginService) Refresh(
 	ctx context.Context,
 	sessionID string,
-) (*dto.AuthResult, error) {
+) (string, error) {
 
 	if sessionID == "" {
-		return nil, utils.Unauthorized("missing refresh session")
+		return "", utils.Unauthorized("missing refresh session")
 	}
 
 	// 1. Get session from Redis
 	session, err := s.sessionRepo.GetSession(ctx, sessionID)
 	if err != nil {
-		return nil, utils.Unauthorized("session expired or invalid")
+		return "", utils.Unauthorized("session expired or invalid")
 	}
 
 	// 2. Get user to ensure account is still valid/active
 	uid, err := uuid.Parse(session.UserID)
 	if err != nil {
-		return nil, utils.Unauthorized("invalid session data")
+		return "", utils.Unauthorized("invalid session data")
 	}
 
-	user, prefs, err := s.authRepo.GetByID(ctx, uid)
+	user, _, err := s.authRepo.GetByID(ctx, uid)
 	if err != nil {
-		return nil, utils.Unauthorized("user no longer exists")
+		return "", utils.Unauthorized("user no longer exists")
 	}
 
 	// 3. Security checks
 	if user.IsBlocked || !user.IsActive || user.IsDeleted() {
-		return nil, utils.Forbidden("account is no longer active")
+		return "", utils.Forbidden("account is no longer active")
 	}
 
 	// 4. Generate only NEW access token (keep same session ID)
-	accessToken, err := s.jwt.GenerateAccessToken(
+	return s.jwt.GenerateAccessToken(
 		user.ID,
 		user.Email,
 		user.TwoFactorEnabled,
 		security.UserRole(session.Role),
 		sessionID,
 	)
-	if err != nil {
-		return nil, err
-	}
-
-	safe := user.ToSafe(prefs)
-
-	return &dto.AuthResult{
-		AccessToken: accessToken,
-		SessionID:   sessionID,
-		User:        &safe,
-	}, nil
 }

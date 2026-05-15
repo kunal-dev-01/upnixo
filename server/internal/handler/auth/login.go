@@ -90,7 +90,7 @@ func (h *LoginHandler) Refresh(c *fiber.Ctx) error {
 		return utils.Unauthorized("missing refresh token cookie")
 	}
 
-	result, err := h.svc.Refresh(c.Context(), sessionID)
+	accessToken, err := h.svc.Refresh(c.Context(), sessionID)
 	if err != nil {
 		// If refresh fails (e.g. session expired), clear the invalid cookie
 		clearRefreshCookie(c, h.cfg)
@@ -99,7 +99,6 @@ func (h *LoginHandler) Refresh(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success":      true,
-		"access_token": result.AccessToken,
-		"user":         result.User,
+		"access_token": accessToken,
 	})
 }

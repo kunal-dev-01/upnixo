@@ -93,7 +93,6 @@ apiClient.interceptors.response.use(
         // Cookie is sent automatically — no body needed
         const { data } = await apiClient.post<{
           access_token: string;
-          user: unknown;
         }>("/auth/refresh");
         const newToken = data.access_token;
 
