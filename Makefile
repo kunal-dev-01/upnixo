@@ -9,7 +9,7 @@ SERVER_COMPOSE = docker compose -f server/docker-compose.dev.yml
 # ==============================================================================
 # PHONY Targets
 # ==============================================================================
-.PHONY: db db-down migrate reset \
+.PHONY: db db-down migrate reset admin-create \
         mongo mongo-down \
         redis redis-down rabbitmq rabbitmq-down \
         server-up server-down \
@@ -34,6 +34,10 @@ reset:
 	$(DB_COMPOSE) up -d db
 	sleep 3
 	$(DB_COMPOSE) --profile migrate up migrate
+
+admin-create:
+	@chmod +x db/scripts/admin-create.sh
+	@./db/scripts/admin-create.sh
 
 # ==============================================================================
 # 🍃 MONGODB (MONGO COMPOSE)
