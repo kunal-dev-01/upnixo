@@ -18,8 +18,8 @@ export default function ForgotSuccess({ email, type }: Props) {
       animate={{ opacity: 1, scale: 1 }}
       className="text-center space-y-8 py-4"
     >
-      <div className="mx-auto w-24 h-24 bg-green-500/10 rounded-3xl flex items-center justify-center text-green-500 mb-6">
-        <Mail className="w-14 h-14" />
+      <div className="mx-auto w-16 h-16 bg-green-500/10 rounded-2xl flex items-center justify-center text-green-500 mb-6">
+        <Mail className="w-10 h-10" />
       </div>
 
       <div className="space-y-3">
