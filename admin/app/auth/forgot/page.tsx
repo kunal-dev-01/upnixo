@@ -13,7 +13,7 @@ export default function ForgotPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [email, setEmail] = useState("");
 
-  if (!isSuccess) {
+  if (isSuccess) {
     return <ForgotSuccess email={email} type={activeTab} />;
   }
 

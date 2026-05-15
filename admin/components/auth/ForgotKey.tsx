@@ -72,7 +72,11 @@ export default function ForgotKeyForm({ onSuccess }: Props) {
           disabled={isPending}
         />
 
-        <Submit loading={isPending}>Verify Identity</Submit>
+        <div className="mt-8">
+          <Submit type="submit" loading={isPending}>
+            Verify Identity
+          </Submit>
+        </div>
       </form>
     </div>
   );

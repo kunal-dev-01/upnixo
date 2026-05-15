@@ -61,7 +61,11 @@ export default function ForgotPasswordForm({ onSuccess }: Props) {
           disabled={isPending}
         />
 
-        <Submit loading={isPending}>Send Reset Link</Submit>
+        <div className="mt-8">
+          <Submit type="submit" loading={isPending}>
+            Send Reset Link
+          </Submit>
+        </div>
       </form>
     </div>
   );
