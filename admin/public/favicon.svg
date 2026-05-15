@@ -1,0 +1,20 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    /* Default (Light mode) ke liye dark color */
+    .logo-path {
+      fill: #1D1D1D;
+    }
+    
+    /* Dark mode aate hi ye apne aap pure white ho jayega */
+    @media (prefers-color-scheme: dark) {
+      .logo-path {
+        fill: #FFFFFF;
+      }
+    }
+  </style>
+
+  <!-- Maine yahan se purana fill="..." hata kar class="logo-path" laga diya hai -->
+  <path class="logo-path" d="M198 106.98C198 72.7494 225.749 45 259.98 45C294.211 45 321.96 72.7494 321.96 106.98V632.279C321.96 654.37 304.051 672.279 281.96 672.279H198V106.98Z" />
+  <path class="logo-path" d="M653.7 131.182C653.7 83.5848 692.285 45 739.882 45C787.479 45 826.064 83.5848 826.064 131.182V672.279H743.7C693.995 672.279 653.7 631.985 653.7 582.279V131.182Z" />
+  <path class="logo-path" d="M512.032 365.558C685.467 365.558 826.063 502.882 826.063 672.279C826.063 841.676 685.467 979 512.032 979C338.597 979 198 841.676 198 672.279C198 502.882 338.597 365.558 512.032 365.558ZM512 504C436.889 504 376 578.992 376 671.5C376 764.008 436.889 839 512 839C587.111 839 648 764.008 648 671.5C648 578.992 587.111 504 512 504Z" />
+</svg>

@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ===============================
+   Fonts (Inter + Satoshi)
+   =============================== */
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* Satoshi */
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Satoshi", sans-serif;
+}
+
+:root {
+  line-height: 1.5;
+  color-scheme: light dark;
+
+  --font-sans: "Inter", sans-serif;
+  --font-heading: "Satoshi", sans-serif;
+
+  /* Default (Dark) */
+  --bg-primary: #000000;
+  --text-primary: #ffffff;
+
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.light {
+  --bg-primary: #ffffff;
+  --text-primary: #09090b;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+
+.dark {
+  --bg-primary: #000000;
+  --text-primary: #ffffff;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* ===============================
+   Sonner Toast Theme (Premium Monochrome)
+   =============================== */
+
+.dark [data-sonner-toast],
+[data-sonner-toast] {
+  background: #09090b !important;
+  color: #fafafa !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 12px !important;
+}
+.light [data-sonner-toast] {
+  background: #ffffff !important;
+  color: #09090b !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+}
+[data-sonner-toast] svg {
+  color: inherit !important;
+}
+[data-sonner-toast] * {
+  border-radius: inherit;
+}
+[data-sonner-toast] [data-close-button] {
+  border: none !important;
+  background: transparent !important;
+}
