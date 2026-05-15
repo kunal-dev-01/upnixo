@@ -102,3 +102,82 @@ func (s *AdminService) VerifyLogin(ctx context.Context, req dto.AdminVerifyReque
 	// 3. Issue session
 	return s.createAdminSession(ctx, admin, clientInfo)
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CREDENTIAL RESET
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (s *AdminService) ForgotPassword(ctx context.Context, email string) error {
+	admin, err := s.adminRepo.GetByEmail(ctx, email)
+	if err != nil {
+		return nil // Silent fail for security
+	}
+
+	token, _ := security.GenerateToken(32)
+	if err := s.tokenRepo.StoreAdminPasswordResetToken(ctx, email, token, 1*time.Hour); err != nil {
+		return err
+	}
+
+	go func() {
+		_ = s.emailSvc.SendAdminPasswordResetEmail(admin.FullName, admin.Email, token)
+	}()
+
+	return nil
+}
+
+func (s *AdminService) ResetPassword(ctx context.Context, req dto.AdminResetPasswordRequest) error {
+	email, err := s.tokenRepo.ConsumeAdminPasswordResetToken(ctx, req.Token)
+	if err != nil {
+		return err
+	}
+
+	admin, err := s.adminRepo.GetByEmail(ctx, email)
+	if err != nil {
+		return utils.NotFound("admin not found")
+	}
+
+	hash, err := security.HashPassword(req.Password)
+	if err != nil {
+		return err
+	}
+
+	return s.adminRepo.SetPassword(ctx, admin.ID, hash)
+}
+
+func (s *AdminService) ForgotMasterKey(ctx context.Context, email, phone string) error {
+	admin, err := s.adminRepo.GetByEmail(ctx, email)
+	if err != nil {
+		return nil // Silent fail
+	}
+
+	// Verify phone matches for master key reset (extra security)
+	if admin.Phone != phone {
+		return nil // Silent fail
+	}
+
+	token, _ := security.GenerateToken(32)
+	if err := s.tokenRepo.StoreAdminMasterKeyResetToken(ctx, email, token, 1*time.Hour); err != nil {
+		return err
+	}
+
+	go func() {
+		_ = s.emailSvc.SendSecretResetEmail(admin.FullName, admin.Email, token)
+	}()
+
+	return nil
+}
+
+func (s *AdminService) ResetMasterKey(ctx context.Context, req dto.AdminResetMasterKeyRequest) error {
+	email, err := s.tokenRepo.ConsumeAdminMasterKeyResetToken(ctx, req.Token)
+	if err != nil {
+		return err
+	}
+
+	admin, err := s.adminRepo.GetByEmail(ctx, email)
+	if err != nil {
+		return utils.NotFound("admin not found")
+	}
+
+	// For master key, we store it plain as per current model/design
+	return s.adminRepo.SetMasterKey(ctx, admin.ID, req.MasterKey)
+}

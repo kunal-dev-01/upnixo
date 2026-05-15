@@ -59,6 +59,10 @@ func registerAuthRoutes(r fiber.Router, d *Dependencies) {
 	// ── Admin Auth ─────────────────────────────────────────────────────────────
 	auth.Post("/admin/login", d.Limiters.Auth, d.AdminHandler.Login)
 	auth.Post("/admin/verify", d.Limiters.Auth, d.AdminHandler.VerifyLogin)
+	auth.Post("/admin/forgot-password", d.Limiters.Auth, d.AdminHandler.ForgotPassword)
+	auth.Post("/admin/reset-password", d.Limiters.Auth, d.AdminHandler.ResetPassword)
+	auth.Post("/admin/forgot-master-key", d.Limiters.Auth, d.AdminHandler.ForgotMasterKey)
+	auth.Post("/admin/reset-master-key", d.Limiters.Auth, d.AdminHandler.ResetMasterKey)
 
 	// ── Token Refresh & 2FA Verify (Public/Special Auth) ──────────────────
 	auth.Post("/refresh", d.LoginHandler.Refresh)

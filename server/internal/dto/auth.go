@@ -58,6 +58,16 @@ type AdminVerifyRequest struct {
 	Code  string `json:"code" validate:"required,len=6"`
 }
 
+type AdminResetPasswordRequest struct {
+	Token    string `json:"token" validate:"required"`
+	Password string `json:"password" validate:"required,secure_password"`
+}
+
+type AdminResetMasterKeyRequest struct {
+	Token     string `json:"token" validate:"required"`
+	MasterKey string `json:"master_key" validate:"required"`
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // RESPONSE DTOs
 // ─────────────────────────────────────────────────────────────────────────────

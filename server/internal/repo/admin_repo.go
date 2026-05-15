@@ -23,6 +23,8 @@ type AdminRepository interface {
 	RecordLogin(ctx context.Context, id uuid.UUID, ip, userAgent string) error
 	Verify(ctx context.Context, id uuid.UUID) error
 	SetStatus(ctx context.Context, id uuid.UUID, isActive bool) error
+	SetPassword(ctx context.Context, id uuid.UUID, hash string) error
+	SetMasterKey(ctx context.Context, id uuid.UUID, key string) error
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -191,5 +193,35 @@ func (r *adminRepo) SetStatus(ctx context.Context, id uuid.UUID, isActive bool) 
 		return utils.NotFound("admin not found")
 	}
 
+	return nil
+}
+
+func (r *adminRepo) SetPassword(ctx context.Context, id uuid.UUID, hash string) error {
+	sql := `
+		UPDATE master_admins
+		SET password_hash = @hash,
+			updated_at    = NOW()
+		WHERE id = @id AND deleted_at IS NULL`
+
+	_, err := db.Pool.Exec(ctx, sql, pgx.NamedArgs{"id": id, "hash": hash})
+	if err != nil {
+		r.log.Error("set admin password: exec failed", err, map[string]any{"id": id})
+		return utils.Internal(err)
+	}
+	return nil
+}
+
+func (r *adminRepo) SetMasterKey(ctx context.Context, id uuid.UUID, key string) error {
+	sql := `
+		UPDATE master_admins
+		SET master_secret_key = @key,
+			updated_at        = NOW()
+		WHERE id = @id AND deleted_at IS NULL`
+
+	_, err := db.Pool.Exec(ctx, sql, pgx.NamedArgs{"id": id, "key": key})
+	if err != nil {
+		r.log.Error("set admin master key: exec failed", err, map[string]any{"id": id})
+		return utils.Internal(err)
+	}
 	return nil
 }

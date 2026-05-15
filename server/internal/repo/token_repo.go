@@ -21,6 +21,8 @@ const (
 	prefixAccountLock   = "security:lock:"          // security:lock:<email>       → "1"
 	prefixOAuthState    = "oauth:state:"            // oauth:state:<state>        → user_id (optional, for linking)
 	prefixAdminLogin    = "token:admin_login:"      // token:admin_login:<email>  → code
+	prefixAdminPwdReset = "token:admin:pwd_reset:"  // token:admin:pwd_reset:<token> → email
+	prefixAdminSecReset = "token:admin:sec_reset:"  // token:admin:sec_reset:<token> → email
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -124,6 +126,30 @@ func (t *TokenRepository) ConsumeAdminLoginCode(ctx context.Context, email strin
 	_ = t.r.Del(ctx, key)
 
 	return code, nil
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADMIN PASSWORD RESET
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (t *TokenRepository) StoreAdminPasswordResetToken(ctx context.Context, email, token string, ttl time.Duration) error {
+	return t.r.Set(ctx, prefixAdminPwdReset+token, email, ttl)
+}
+
+func (t *TokenRepository) ConsumeAdminPasswordResetToken(ctx context.Context, token string) (string, error) {
+	return t.consumeToken(ctx, prefixAdminPwdReset+token, "admin password reset")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADMIN MASTER KEY RESET
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (t *TokenRepository) StoreAdminMasterKeyResetToken(ctx context.Context, email, token string, ttl time.Duration) error {
+	return t.r.Set(ctx, prefixAdminSecReset+token, email, ttl)
+}
+
+func (t *TokenRepository) ConsumeAdminMasterKeyResetToken(ctx context.Context, token string) (string, error) {
+	return t.consumeToken(ctx, prefixAdminSecReset+token, "admin master key reset")
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
