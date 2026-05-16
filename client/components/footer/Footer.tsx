@@ -1,7 +1,6 @@
 import { FOOTER_LINKS, NAV_LINKS } from "@/utils/constants";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
 import BrandingSection from "./BrandSection";
 
 const MotionLink = motion.create(Link);
@@ -51,7 +50,6 @@ export const WavyText = ({ name }: { name: string }) => (
 );
 
 function Footer() {
-
   return (
     <footer className="w-full flex flex-col items-center justify-center border-t border-zinc-100 dark:border-zinc-900 py-12">
       <div className="w-full px-6 max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-10">
