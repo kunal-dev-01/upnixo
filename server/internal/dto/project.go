@@ -71,3 +71,34 @@ func (p *PaginationQuery) GetOffset() int {
 	}
 	return (p.Page - 1) * p.GetLimit()
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MILESTONE REQUESTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+type CreateMilestoneRequest struct {
+	ProjectID   uuid.UUID       `json:"project_id"   validate:"required"`
+	OrderIndex  int16           `json:"order_index"  validate:"i_gte=0"`
+	Title       string          `json:"title"        validate:"required,min=3,max=100"`
+	Description string          `json:"description"  validate:"omitempty"`
+	Amount      decimal.Decimal `json:"amount"       validate:"required,d_gt_zero"`
+	DueDate     *time.Time      `json:"due_date"     validate:"omitempty"`
+}
+
+type UpdateMilestoneRequest struct {
+	OrderIndex  *int16                  `json:"order_index"  validate:"omitempty,i_gte=0"`
+	Title       *string                 `json:"title"        validate:"omitempty,min=3,max=100"`
+	Description *string                 `json:"description"  validate:"omitempty"`
+	Amount      *decimal.Decimal        `json:"amount"       validate:"omitempty,d_gt_zero"`
+	Status      *models.MilestoneStatus `json:"status"       validate:"omitempty"`
+	DueDate     *time.Time              `json:"due_date"     validate:"omitempty"`
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MILESTONE RESPONSES
+// ─────────────────────────────────────────────────────────────────────────────
+
+type MilestoneResponse struct {
+	models.SafeMilestone
+	ProjectID uuid.UUID `json:"project_id"`
+}

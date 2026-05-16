@@ -14,6 +14,10 @@ type ProjectHandler struct {
 	svc *service.ProjectService
 }
 
+func (h *ProjectHandler) NewMilestoneHandler(milestoneSvc *service.MilestoneService) any {
+	panic("unimplemented")
+}
+
 func NewProjectHandler(svc *service.ProjectService) *ProjectHandler {
 	return &ProjectHandler{svc: svc}
 }

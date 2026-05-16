@@ -150,6 +150,11 @@ func GetRole(c *fiber.Ctx) string {
 	return role
 }
 
+// IsAdmin returns true if the authenticated account is an administrator.
+func IsAdmin(c *fiber.Ctx) bool {
+	return GetRole(c) == string(security.RoleAdmin)
+}
+
 // GetSessionID returns the session ID from Fiber locals.
 func GetSessionID(c *fiber.Ctx) string {
 	id, _ := c.Locals("session_id").(string)

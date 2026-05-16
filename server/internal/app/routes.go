@@ -26,6 +26,7 @@ func RegisterRoutes(app *fiber.App, d *Dependencies) {
 	registerAdminRoutes(v1, d)
 	registerUserRoutes(v1, d)
 	registerProjectRoutes(v1, d)
+	registerMilestoneRoutes(v1, d)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -141,4 +142,28 @@ func registerProjectRoutes(r fiber.Router, d *Dependencies) {
 	projects.Get("/slug/:slug", d.ProjectHandler.GetBySlug)
 	projects.Patch("/:id", d.ProjectHandler.Update)
 	projects.Delete("/:id", d.ProjectHandler.Delete)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MILESTONE ROUTES (Protected)
+// ─────────────────────────────────────────────────────────────────────────────
+
+func registerMilestoneRoutes(r fiber.Router, d *Dependencies) {
+	// User routes (Read-only access to their project's milestones)
+	milestones := r.Group("/milestones",
+		middleware.AuthRequired(d.JWT, d.SessionRepo),
+		d.Limiters.API,
+	)
+	milestones.Get("/:id", d.MilestoneHandler.GetByID)
+	milestones.Get("/project/:project_id", d.MilestoneHandler.ListByProject)
+
+	// Admin routes (Full management power)
+	admin := r.Group("/auth/admin/milestones",
+		middleware.AuthRequired(d.JWT, d.SessionRepo),
+		middleware.AdminRequired(),
+		d.Limiters.API,
+	)
+	admin.Post("/", d.MilestoneHandler.Create)
+	admin.Patch("/:id", d.MilestoneHandler.Update)
+	admin.Delete("/:id", d.MilestoneHandler.Delete)
 }
