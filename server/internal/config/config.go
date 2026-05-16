@@ -109,6 +109,8 @@ type RabbitMQConfig struct {
 	RetryDelay  time.Duration
 	EmailQueue  string
 	AvatarQueue string
+	MediaQueue  string
+	ChatQueue   string
 }
 
 // ============================================================================
@@ -287,6 +289,8 @@ func Load() (*Config, error) {
 			RetryDelay:  getEnvAsDuration("RABBITMQ_RETRY_DELAY", 5*time.Second),
 			EmailQueue:  getEnv("RABBITMQ_EMAIL_QUEUE", "email_queue"),
 			AvatarQueue: getEnv("RABBITMQ_AVATAR_QUEUE", "avatar_queue"),
+			MediaQueue:  getEnv("RABBITMQ_MEDIA_QUEUE", "media_optimization"),
+			ChatQueue:   getEnv("RABBITMQ_CHAT_QUEUE", "chat_events"),
 		},
 		JWT: JWTConfig{
 			Secret:               getEnv("JWT_SECRET", ""),

@@ -66,3 +66,18 @@ func (s *R2Service) Delete(ctx context.Context, key string) error {
 
 	return nil
 }
+
+// Download retrieves a file from R2
+func (s *R2Service) Download(ctx context.Context, key string) (io.ReadCloser, error) {
+	out, err := s.client.GetObjectWithContext(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(s.cfg.R2.BucketName),
+		Key:    aws.String(key),
+	})
+
+	if err != nil {
+		utils.Error("r2 download failed", err, map[string]any{"key": key})
+		return nil, err
+	}
+
+	return out.Body, nil
+}

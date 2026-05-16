@@ -14,6 +14,7 @@ import (
 	"server/internal/security"
 	service "server/internal/service/auth"
 	projectService "server/internal/service/project"
+	chatService "server/internal/service/chat"
 	"server/internal/service/storage"
 	userService "server/internal/service/user"
 	"server/internal/utils"
@@ -54,6 +55,7 @@ type Dependencies struct {
 	UserSvc         *userService.UserService
 	ProjectSvc      *projectService.ProjectService
 	MilestoneSvc    *projectService.MilestoneService
+	MediaSvc        *chatService.MediaService
 
 	// Handlers
 	AccountHandler      *handler.AccountHandler
@@ -106,6 +108,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	userSvc := userService.NewUserService(cfg, authRepo, qManager)
 	projectSvc := projectService.NewProjectService(projectRepo, log)
 	milestoneSvc := projectService.NewMilestoneService(milestoneRepo, projectRepo, log)
+	mediaSvc := chatService.NewMediaService(cfg, r2Svc, qManager, log)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	accountHandler := handler.NewAccountHandler(accountSvc, cfg)
@@ -149,6 +152,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 		UserSvc:             userSvc,
 		ProjectSvc:          projectSvc,
 		MilestoneSvc:        milestoneSvc,
+		MediaSvc:            mediaSvc,
 		AccountHandler:      accountHandler,
 		AdminHandler:        adminHandler,
 		AdminSessionHandler: adminSessionHandler,

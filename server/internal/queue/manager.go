@@ -111,5 +111,7 @@ func (m *Manager) allQueues() []string {
 	return []string{
 		m.cfg.RabbitMQ.EmailQueue,  // auth emails — verify, reset, 2fa
 		m.cfg.RabbitMQ.AvatarQueue, // avatar processing — compression, R2 upload
+		m.cfg.RabbitMQ.MediaQueue,  // chat media — background optimization
+		m.cfg.RabbitMQ.ChatQueue,   // chat events — message notifications
 	}
 }

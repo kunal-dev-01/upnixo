@@ -21,4 +21,12 @@ func StartAllWorkers(ctx context.Context, deps *app.Dependencies) {
 			utils.Error("avatar worker stopped with error", err, nil)
 		}
 	}()
+
+	// Media Optimization Worker
+	mediaWorker := NewMediaWorker(deps.Config, deps.Broker, deps.MediaSvc, deps.Logger)
+	go func() {
+		if err := mediaWorker.Start(ctx); err != nil {
+			utils.Error("media worker stopped with error", err, nil)
+		}
+	}()
 }
