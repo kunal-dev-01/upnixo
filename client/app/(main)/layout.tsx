@@ -12,8 +12,8 @@ function MainLayout({ children }: MainLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
   return (
-    <div className="w-full flex flex-col min-h-screen">
-      <header className="w-full sticky top-0 z-50 bg-transparent">
+    <div className="w-full flex flex-col min-h-screen relative">
+      <header className="w-full fixed top-0 z-50 bg-transparent">
         <div className="max-w-7xl mx-auto px-5 lg:px-0 py-4 w-full flex items-center justify-center">
           <Navbar onOpenSidebar={() => setIsSidebarOpen(true)} />
         </div>
@@ -21,12 +21,10 @@ function MainLayout({ children }: MainLayoutProps) {
 
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-      <main className="w-full grow my-20">{children}</main>
+      <main className="w-full grow">{children}</main>
 
       <footer className="w-full">
-        <div className="max-w-7xl mx-auto px-5 lg:px-0">
-          <Footer />
-        </div>
+        <Footer />
       </footer>
     </div>
   );

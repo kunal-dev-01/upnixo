@@ -51,8 +51,8 @@ export const WavyText = ({ name }: { name: string }) => (
 
 function Footer() {
   return (
-    <footer className="w-full flex flex-col items-center justify-center border-t border-zinc-100 dark:border-zinc-900 py-12">
-      <div className="w-full px-6 max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-10">
+    <footer className="w-full flex flex-col items-center justify-center py-12">
+      <div className="w-full lg:px-10 px-5 flex flex-col md:flex-row justify-between gap-10">
         {/* Section 1: Brand */}
         <div className="flex flex-col gap-y-4">
           <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
@@ -65,53 +65,58 @@ function Footer() {
           </p>
         </div>
 
-        {/* Section 2: Navigation (Wavy Effect) */}
-        <div className="flex flex-col gap-y-4">
-          <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
-            Navigation
-          </h3>
-          <ul className="flex flex-col gap-y-1">
-            {NAV_LINKS.map((link) => (
-              <li key={link.name}>
-                <MotionLink
-                  href={link.href}
-                  initial="initial"
-                  whileHover="hover"
-                  className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors py-1 inline-block"
-                >
-                  <WavyText name={link.name} />
-                </MotionLink>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {/* Links Grid */}
+        <div className="grid grid-cols-2 gap-10 md:gap-20">
+          {/* Section 2: Navigation (Wavy Effect) */}
+          <div className="flex flex-col gap-y-4">
+            <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400">
+              Navigation
+            </h3>
+            <ul className="flex flex-col gap-y-1">
+              {NAV_LINKS.map((link) => (
+                <li key={link.name}>
+                  <MotionLink
+                    href={link.href}
+                    initial="initial"
+                    whileHover="hover"
+                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors py-1 inline-block"
+                  >
+                    <WavyText name={link.name} />
+                  </MotionLink>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {/* Section 3: Company (Wavy Effect + Terms added) */}
-        <div className="flex flex-col gap-y-4">
-          <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
-            Company
-          </h3>
-          <ul className="flex flex-col gap-y-1">
-            {FOOTER_LINKS.map((item) => (
-              <li key={item.name}>
-                <MotionLink
-                  href={item.href}
-                  initial="initial"
-                  whileHover="hover"
-                  className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors py-1 inline-block"
-                >
-                  <WavyText name={item.name} />
-                </MotionLink>
-              </li>
-            ))}
-          </ul>
+          {/* Section 3: Company (Wavy Effect + Terms added) */}
+          <div className="flex flex-col gap-y-4">
+            <h3 className="text-sm font-black uppercase tracking-widest text-zinc-400">
+              Company
+            </h3>
+            <ul className="flex flex-col gap-y-1">
+              {FOOTER_LINKS.map((item) => (
+                <li key={item.name}>
+                  <MotionLink
+                    href={item.href}
+                    initial="initial"
+                    whileHover="hover"
+                    className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors py-1 inline-block"
+                  >
+                    <WavyText name={item.name} />
+                  </MotionLink>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
 
-      <BrandingSection />
+      <div className="opacity-[0.04] w-full lg:px-10 px-5">
+        <BrandingSection />
+      </div>
 
       {/* Bottom Section */}
-      <div className="w-full px-6 border-t border-zinc-100 dark:border-zinc-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-y-4">
+      <div className="w-full lg:px-10 px-5 pt-8 flex flex-col md:flex-row justify-between items-center gap-y-4">
         <p className="text-xs text-zinc-500">
           © {new Date().getFullYear()} Pnixo. All rights reserved.
         </p>
