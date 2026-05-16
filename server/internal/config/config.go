@@ -100,11 +100,11 @@ type RedisConfig struct {
 // RabbitMQ Config
 // ============================================================================
 type RabbitMQConfig struct {
-	Host       string
-	Port       int
-	User       string
-	Password   string
-	VHost      string
+	Host        string
+	Port        int
+	User        string
+	Password    string
+	VHost       string
 	MaxRetries  int
 	RetryDelay  time.Duration
 	EmailQueue  string
@@ -278,14 +278,14 @@ func Load() (*Config, error) {
 			RetryDelay:         getEnvAsDuration("REDIS_RETRY_DELAY", 5*time.Second),
 		},
 		RabbitMQ: RabbitMQConfig{
-			Host:       getEnv("RABBITMQ_HOST", "localhost"),
-			Port:       getEnvAsInt("RABBITMQ_PORT", 5672),
-			User:       getEnv("RABBITMQ_USER", "guest"),
-			Password:   getEnv("RABBITMQ_PASSWORD", "guest"),
-			VHost:      getEnv("RABBITMQ_VHOST", ""),
-			MaxRetries: getEnvAsInt("RABBITMQ_MAX_RETRIES", 5),
-			RetryDelay: getEnvAsDuration("RABBITMQ_RETRY_DELAY", 5*time.Second),
-			EmailQueue: getEnv("RABBITMQ_EMAIL_QUEUE", "email_queue"),
+			Host:        getEnv("RABBITMQ_HOST", "localhost"),
+			Port:        getEnvAsInt("RABBITMQ_PORT", 5672),
+			User:        getEnv("RABBITMQ_USER", "guest"),
+			Password:    getEnv("RABBITMQ_PASSWORD", "guest"),
+			VHost:       getEnv("RABBITMQ_VHOST", ""),
+			MaxRetries:  getEnvAsInt("RABBITMQ_MAX_RETRIES", 5),
+			RetryDelay:  getEnvAsDuration("RABBITMQ_RETRY_DELAY", 5*time.Second),
+			EmailQueue:  getEnv("RABBITMQ_EMAIL_QUEUE", "email_queue"),
 			AvatarQueue: getEnv("RABBITMQ_AVATAR_QUEUE", "avatar_queue"),
 		},
 		JWT: JWTConfig{
@@ -293,12 +293,6 @@ func Load() (*Config, error) {
 			AccessTokenDuration:  getEnvAsDuration("ACCESS_TOKEN_DURATION", 15*time.Minute),
 			RefreshTokenDuration: getEnvAsDuration("REFRESH_TOKEN_DURATION", 7*24*time.Hour),
 			Issuer:               getEnv("JWT_ISSUER", "upnixo.com"),
-		},
-		AdminJWT: JWTConfig{
-			Secret:               getEnv("ADMIN_JWT_SECRET", ""),
-			AccessTokenDuration:  getEnvAsDuration("ADMIN_ACCESS_TOKEN_DURATION", 15*time.Minute),
-			RefreshTokenDuration: getEnvAsDuration("ADMIN_REFRESH_TOKEN_DURATION", 7*24*time.Hour),
-			Issuer:               getEnv("ADMIN_JWT_ISSUER", "admin.upnixo.com"),
 		},
 		Security: SecurityConfig{
 			MaxLoginAttempts:  getEnvAsInt("MAX_LOGIN_ATTEMPTS", 5),
@@ -386,10 +380,10 @@ func Load() (*Config, error) {
 			User:           getEnv("MONGO_USER", "admin"),
 			Password:       getEnv("MONGO_PASSWORD", "password"),
 			DBName:         getEnv("MONGO_DB", "upnixo_chat"),
-			ConnectTimeout:  getEnvAsDuration("MONGO_CONNECT_TIMEOUT", 10*time.Second),
-			QueryTimeout:    getEnvAsDuration("MONGO_QUERY_TIMEOUT", 30*time.Second),
-			RetryAttempts:   getEnvAsInt("MONGO_RETRY_ATTEMPTS", 3),
-			RetryDelay:      getEnvAsDuration("MONGO_RETRY_DELAY", 5*time.Second),
+			ConnectTimeout: getEnvAsDuration("MONGO_CONNECT_TIMEOUT", 10*time.Second),
+			QueryTimeout:   getEnvAsDuration("MONGO_QUERY_TIMEOUT", 30*time.Second),
+			RetryAttempts:  getEnvAsInt("MONGO_RETRY_ATTEMPTS", 3),
+			RetryDelay:     getEnvAsDuration("MONGO_RETRY_DELAY", 5*time.Second),
 		},
 	}
 
