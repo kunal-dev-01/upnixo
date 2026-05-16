@@ -82,7 +82,7 @@ const SessionCard = ({
   <div
     className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 ${
       isCurrent
-        ? "border-emerald-500/30 bg-emerald-500/5 shadow-lg shadow-emerald-500/5"
+        ? "border-emerald-500/30 bg-emerald-500/5"
         : "border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800/50 hover:border-zinc-700"
     }`}
   >
