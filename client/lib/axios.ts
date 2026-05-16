@@ -8,7 +8,8 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 import { useAuthStore } from "@/store/auth.store";
-import { ApiError, type BackendErrorResponse } from "@/types/api.types";
+import { ApiError, type BackendErrorResponse, type BackendResponse } from "@/types/api.types";
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CLIENT
@@ -108,7 +109,21 @@ apiClient.interceptors.request.use(
 // ─────────────────────────────────────────────────────────────────────────────
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // ── Handle application-level errors sent with 200 OK ────────────────────
+    const data = response.data as BackendResponse<unknown>;
+    if (data && data.success === false && data.error) {
+      return Promise.reject(
+        new ApiError(
+          data.error.message || "An error occurred",
+          response.status,
+          data.error.code,
+          data.error.fields,
+        ),
+      );
+    }
+    return response;
+  },
   async (error: AxiosError<BackendErrorResponse>) => {
     const config = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
@@ -117,17 +132,34 @@ apiClient.interceptors.response.use(
 
     // If 401 and not already retried, try one last refresh
     if (status === 401 && config && !config._retry) {
-      config._retry = true;
-      const newToken = await tryRefresh();
-      if (newToken) {
-        config.headers.Authorization = `Bearer ${newToken}`;
-        return apiClient(config);
+      const authPaths = [
+        "/auth/login",
+        "/auth/register",
+        "/auth/refresh",
+        "/auth/forgot-password",
+        "/auth/reset-password",
+        "/auth/2fa/verify",
+        "/auth/2fa/backup",
+        "/auth/oauth/google/callback",
+        "/auth/oauth/github/callback",
+      ];
+      const isAuthEndpoint = authPaths.some((path) => config.url?.includes(path));
+
+      // Don't retry refresh for auth endpoints to avoid loops
+      if (!isAuthEndpoint) {
+        config._retry = true;
+        const newToken = await tryRefresh();
+        if (newToken) {
+          config.headers.Authorization = `Bearer ${newToken}`;
+          return apiClient(config);
+        }
       }
     }
 
     return Promise.reject(toApiError(error));
   },
 );
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ERROR MAPPING
