@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -134,12 +135,12 @@ func main() {
 }
 
 func joinStrings(s []string) string {
-	result := ""
+	var result strings.Builder
 	for i, v := range s {
 		if i > 0 {
-			result += ","
+			result.WriteString(",")
 		}
-		result += v
+		result.WriteString(v)
 	}
-	return result
+	return result.String()
 }

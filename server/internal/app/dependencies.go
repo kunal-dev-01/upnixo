@@ -6,6 +6,7 @@ import (
 	"server/internal/email"
 	"server/internal/handler/auth"
 	userHandler "server/internal/handler/user"
+	projectHandler "server/internal/handler/project"
 	"server/internal/middleware"
 	"server/internal/queue"
 	rds "server/internal/redis"
@@ -14,6 +15,7 @@ import (
 	"server/internal/service/auth"
 	"server/internal/service/storage"
 	userService "server/internal/service/user"
+	projectService "server/internal/service/project"
 	"server/internal/utils"
 )
 
@@ -34,6 +36,7 @@ type Dependencies struct {
 	// Repositories
 	AuthRepo    repo.AuthRepository
 	AdminRepo   repo.AdminRepository
+	ProjectRepo repo.ProjectRepository
 	SessionRepo *repo.SessionRepository
 	TokenRepo   *repo.TokenRepository
 
@@ -48,6 +51,7 @@ type Dependencies struct {
 	LoginSvc    *service.LoginService
 	SessionSvc  *service.SessionService
 	UserSvc     *userService.UserService
+	ProjectSvc  *projectService.ProjectService
 
 	// Handlers
 	AccountHandler      *handler.AccountHandler
@@ -59,6 +63,7 @@ type Dependencies struct {
 	LoginHandler    *handler.LoginHandler
 	SessionHandler  *handler.SessionHandler
 	UserHandler     *userHandler.UserHandler
+	ProjectHandler  *projectHandler.ProjectHandler
 
 	// Middleware
 	LoggerMW *middleware.Logger
@@ -81,6 +86,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	// ── Repositories ──────────────────────────────────────────────────────────
 	authRepo := repo.NewAuthRepository(log)
 	adminRepo := repo.NewAdminRepository(log)
+	projectRepo := repo.NewProjectRepository(log)
 	sessionRepo := repo.NewSessionRepository(redisClient, cfg)
 	tokenRepo := repo.NewTokenRepository(redisClient)
 
@@ -94,6 +100,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	loginSvc := service.NewLoginService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
 	sessionSvc := service.NewSessionService(sessionRepo)
 	userSvc := userService.NewUserService(cfg, authRepo, qManager)
+	projectSvc := projectService.NewProjectService(projectRepo, log)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	accountHandler := handler.NewAccountHandler(accountSvc, cfg)
@@ -105,6 +112,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	loginHandler := handler.NewLoginHandler(loginSvc, cfg)
 	sessionHandler := handler.NewSessionHandler(sessionSvc, cfg)
 	userHandler := userHandler.NewUserHandler(userSvc)
+	projectHandler := projectHandler.NewProjectHandler(projectSvc)
 
 	// ── Middleware ─────────────────────────────────────────────────────────────
 	loggerMW := middleware.NewLogger(log, cfg)
@@ -120,6 +128,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 		JWT:             jwt,
 		AuthRepo:        authRepo,
 		AdminRepo:       adminRepo,
+		ProjectRepo:     projectRepo,
 		SessionRepo:     sessionRepo,
 		TokenRepo:       tokenRepo,
 		EmailSvc:        emailSvc,
@@ -132,6 +141,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 		LoginSvc:        loginSvc,
 		SessionSvc:      sessionSvc,
 		UserSvc:         userSvc,
+		ProjectSvc:      projectSvc,
 		AccountHandler:      accountHandler,
 		AdminHandler:        adminHandler,
 		AdminSessionHandler: adminSessionHandler,
@@ -141,6 +151,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 		LoginHandler:    loginHandler,
 		SessionHandler:  sessionHandler,
 		UserHandler:     userHandler,
+		ProjectHandler:  projectHandler,
 		LoggerMW:        loggerMW,
 		Limiters:        limiters,
 	}

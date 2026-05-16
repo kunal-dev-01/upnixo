@@ -86,3 +86,11 @@ func TooManyRequests(message string) *AppError {
 func Internal(err error) *AppError {
 	return Wrap(err, http.StatusInternalServerError, "something went wrong, please try again later")
 }
+
+// IsConflict checks if the error is an AppError with code 409.
+func IsConflict(err error) bool {
+	if e, ok := err.(*AppError); ok {
+		return e.Code == http.StatusConflict
+	}
+	return false
+}

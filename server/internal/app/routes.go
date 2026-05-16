@@ -25,6 +25,7 @@ func RegisterRoutes(app *fiber.App, d *Dependencies) {
 	registerPublicAuthRoutes(v1, d)
 	registerAdminRoutes(v1, d)
 	registerUserRoutes(v1, d)
+	registerProjectRoutes(v1, d)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -121,4 +122,23 @@ func registerUserRoutes(r fiber.Router, d *Dependencies) {
 	user.Patch("/profile", d.UserHandler.UpdateProfile)
 	user.Patch("/preferences", d.UserHandler.UpdatePreferences)
 	user.Post("/avatar", d.UserHandler.UpdateAvatar)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROJECT ROUTES (Protected)
+// ─────────────────────────────────────────────────────────────────────────────
+
+func registerProjectRoutes(r fiber.Router, d *Dependencies) {
+	projects := r.Group("/projects",
+		middleware.AuthRequired(d.JWT, d.SessionRepo),
+		d.Limiters.API,
+	)
+
+	projects.Post("/", d.ProjectHandler.Create)
+	projects.Get("/", d.ProjectHandler.ListByClient)
+	projects.Get("/freelancer", d.ProjectHandler.ListByFreelancer)
+	projects.Get("/:id", d.ProjectHandler.GetByID)
+	projects.Get("/slug/:slug", d.ProjectHandler.GetBySlug)
+	projects.Patch("/:id", d.ProjectHandler.Update)
+	projects.Delete("/:id", d.ProjectHandler.Delete)
 }

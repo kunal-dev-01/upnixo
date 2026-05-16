@@ -25,13 +25,22 @@ type ProjectRepository interface {
 	Update(ctx context.Context, id uuid.UUID, params UpdateProjectParams) error
 	Delete(ctx context.Context, id uuid.UUID) error
 
-	ListByClient(ctx context.Context, clientID uuid.UUID) ([]models.Project, error)
-	ListByFreelancer(ctx context.Context, freelancerID uuid.UUID) ([]models.Project, error)
+	List(ctx context.Context, params ListProjectsParams) ([]models.Project, error)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PARAMS
 // ─────────────────────────────────────────────────────────────────────────────
+
+type ListProjectsParams struct {
+	ClientID     *uuid.UUID
+	FreelancerID *uuid.UUID
+	Status       *models.ProjectStatus
+	Priority     *int16
+	Currency     *string
+	Limit        int
+	Offset       int
+}
 
 type UpdateProjectParams struct {
 	Title              *string
@@ -247,36 +256,51 @@ func (r *projectRepo) Delete(ctx context.Context, id uuid.UUID) error {
 // LISTING
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (r *projectRepo) ListByClient(ctx context.Context, clientID uuid.UUID) ([]models.Project, error) {
-	sql := `SELECT ` + projectColumns + ` FROM projects WHERE client_id = @client_id AND deleted_at IS NULL ORDER BY created_at DESC`
+func (r *projectRepo) List(ctx context.Context, params ListProjectsParams) ([]models.Project, error) {
+	sql := `SELECT ` + projectColumns + ` FROM projects WHERE deleted_at IS NULL`
+	args := pgx.NamedArgs{}
 
-	rows, err := db.Pool.Query(ctx, sql, pgx.NamedArgs{"client_id": clientID})
+	if params.ClientID != nil {
+		sql += ` AND client_id = @client_id`
+		args["client_id"] = *params.ClientID
+	}
+	if params.FreelancerID != nil {
+		sql += ` AND freelancer_id = @freelancer_id`
+		args["freelancer_id"] = *params.FreelancerID
+	}
+	if params.Status != nil {
+		sql += ` AND status = @status`
+		args["status"] = *params.Status
+	}
+	if params.Priority != nil {
+		sql += ` AND priority = @priority`
+		args["priority"] = *params.Priority
+	}
+	if params.Currency != nil {
+		sql += ` AND currency = @currency`
+		args["currency"] = *params.Currency
+	}
+
+	sql += ` ORDER BY created_at DESC`
+
+	if params.Limit > 0 {
+		sql += ` LIMIT @limit`
+		args["limit"] = params.Limit
+	}
+	if params.Offset > 0 {
+		sql += ` OFFSET @offset`
+		args["offset"] = params.Offset
+	}
+
+	rows, err := db.Pool.Query(ctx, sql, args)
 	if err != nil {
-		r.log.Error("list projects by client: query failed", err, map[string]any{"client_id": clientID})
+		r.log.Error("list projects: query failed", err, args)
 		return nil, utils.Internal(err)
 	}
 
 	projects, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Project])
 	if err != nil {
-		r.log.Error("list projects by client: scan failed", err, map[string]any{"client_id": clientID})
-		return nil, utils.Internal(err)
-	}
-
-	return projects, nil
-}
-
-func (r *projectRepo) ListByFreelancer(ctx context.Context, freelancerID uuid.UUID) ([]models.Project, error) {
-	sql := `SELECT ` + projectColumns + ` FROM projects WHERE freelancer_id = @freelancer_id AND deleted_at IS NULL ORDER BY created_at DESC`
-
-	rows, err := db.Pool.Query(ctx, sql, pgx.NamedArgs{"freelancer_id": freelancerID})
-	if err != nil {
-		r.log.Error("list projects by freelancer: query failed", err, map[string]any{"freelancer_id": freelancerID})
-		return nil, utils.Internal(err)
-	}
-
-	projects, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Project])
-	if err != nil {
-		r.log.Error("list projects by freelancer: scan failed", err, map[string]any{"freelancer_id": freelancerID})
+		r.log.Error("list projects: scan failed", err, args)
 		return nil, utils.Internal(err)
 	}
 
