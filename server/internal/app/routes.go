@@ -4,6 +4,7 @@ import (
 	"server/internal/middleware"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/contrib/websocket"
 )
 
 // RegisterRoutes mounts all application routes onto the Fiber app.
@@ -27,6 +28,7 @@ func RegisterRoutes(app *fiber.App, d *Dependencies) {
 	registerUserRoutes(v1, d)
 	registerProjectRoutes(v1, d)
 	registerMilestoneRoutes(v1, d)
+	registerChatRoutes(v1, d)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -166,4 +168,24 @@ func registerMilestoneRoutes(r fiber.Router, d *Dependencies) {
 	admin.Post("/", d.MilestoneHandler.Create)
 	admin.Patch("/:id", d.MilestoneHandler.Update)
 	admin.Delete("/:id", d.MilestoneHandler.Delete)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CHAT ROUTES
+// ─────────────────────────────────────────────────────────────────────────────
+
+func registerChatRoutes(r fiber.Router, d *Dependencies) {
+	chat := r.Group("/projects")
+
+	// WebSocket: /api/v1/projects/:id/ws
+	chat.Get("/:id/ws",
+		middleware.AuthRequired(d.JWT, d.SessionRepo),
+		func(c *fiber.Ctx) error {
+			if websocket.IsWebSocketUpgrade(c) {
+				return c.Next()
+			}
+			return fiber.ErrUpgradeRequired
+		},
+		websocket.New(d.WSHandler.Handle),
+	)
 }

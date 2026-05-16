@@ -6,6 +6,7 @@ import (
 	"server/internal/email"
 	handler "server/internal/handler/auth"
 	projectHandler "server/internal/handler/project"
+	chatHandler "server/internal/handler/chat"
 	userHandler "server/internal/handler/user"
 	"server/internal/middleware"
 	"server/internal/queue"
@@ -39,6 +40,7 @@ type Dependencies struct {
 	AdminRepo     repo.AdminRepository
 	ProjectRepo   repo.ProjectRepository
 	MilestoneRepo repo.MilestoneRepository
+	ChatRepo      repo.ChatRepository
 	SessionRepo   *repo.SessionRepository
 	TokenRepo     *repo.TokenRepository
 
@@ -56,6 +58,8 @@ type Dependencies struct {
 	ProjectSvc      *projectService.ProjectService
 	MilestoneSvc    *projectService.MilestoneService
 	MediaSvc        *chatService.MediaService
+	ChatSvc         *chatService.ChatService
+	WSMgr           *chatService.WSManager
 
 	// Handlers
 	AccountHandler      *handler.AccountHandler
@@ -69,6 +73,7 @@ type Dependencies struct {
 	UserHandler         *userHandler.UserHandler
 	ProjectHandler      *projectHandler.ProjectHandler
 	MilestoneHandler    *projectHandler.MilestoneHandler
+	WSHandler           *chatHandler.WSHandler
 
 	// Middleware
 	LoggerMW *middleware.Logger
@@ -93,6 +98,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	adminRepo := repo.NewAdminRepository(log)
 	projectRepo := repo.NewProjectRepository(log)
 	milestoneRepo := repo.NewMilestoneRepository(log)
+	chatRepo := repo.NewChatRepository(log)
 	sessionRepo := repo.NewSessionRepository(redisClient, cfg)
 	tokenRepo := repo.NewTokenRepository(redisClient)
 
@@ -109,6 +115,8 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	projectSvc := projectService.NewProjectService(projectRepo, log)
 	milestoneSvc := projectService.NewMilestoneService(milestoneRepo, projectRepo, log)
 	mediaSvc := chatService.NewMediaService(cfg, r2Svc, qManager, log)
+	chatSvc := chatService.NewChatService(chatRepo, projectRepo, log)
+	wsMgr := chatService.NewWSManager(log)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	accountHandler := handler.NewAccountHandler(accountSvc, cfg)
@@ -122,6 +130,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	userHdl := userHandler.NewUserHandler(userSvc)
 	projectHdl := projectHandler.NewProjectHandler(projectSvc)
 	milestoneHdl := projectHandler.NewMilestoneHandler(milestoneSvc)
+	wsHandler := chatHandler.NewWSHandler(chatSvc, wsMgr, log)
 
 	// ── Middleware ─────────────────────────────────────────────────────────────
 	loggerMW := middleware.NewLogger(log, cfg)
@@ -153,6 +162,8 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 		ProjectSvc:          projectSvc,
 		MilestoneSvc:        milestoneSvc,
 		MediaSvc:            mediaSvc,
+		ChatSvc:             chatSvc,
+		WSMgr:               wsMgr,
 		AccountHandler:      accountHandler,
 		AdminHandler:        adminHandler,
 		AdminSessionHandler: adminSessionHandler,
@@ -164,6 +175,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 		UserHandler:         userHdl,
 		ProjectHandler:      projectHdl,
 		MilestoneHandler:    milestoneHdl,
+		WSHandler:           wsHandler,
 		LoggerMW:            loggerMW,
 		Limiters:            limiters,
 	}
