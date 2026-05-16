@@ -13,7 +13,7 @@ interface NavbarProps {
 
 function Navbar({ onOpenSidebar }: NavbarProps) {
   return (
-    <div className="w-fit flex items-center justify-center md:gap-x-3 gap-x-5 py-2 h-12 border border-zinc-100 dark:border-zinc-900 rounded-full pl-4 pr-1 backdrop-blur-lg bg-zinc-50/50 dark:bg-zinc-950/50">
+    <div className="w-fit flex items-center justify-center md:gap-x-3 gap-x-5 py-2 h-12 border border-zinc-100 dark:border-zinc-900 rounded-full pl-4 pr-1 backdrop-blur-sm bg-zinc-50/50 dark:bg-zinc-950/50">
       <Logo />
 
       <nav
@@ -45,7 +45,7 @@ function Navbar({ onOpenSidebar }: NavbarProps) {
         </Link>
         <Link
           href="/auth/register"
-          className="text-sm font-semibold px-4 py-2 rounded-full border-2 border-indigo-900 text-white relative group cursor-pointer bg-indigo-600"
+          className="text-sm font-semibold px-4 py-2 rounded-full text-white relative group cursor-pointer bg-indigo-600"
         >
           Start a Project
         </Link>
@@ -57,7 +57,7 @@ function Navbar({ onOpenSidebar }: NavbarProps) {
       >
         <Link
           href="/auth/register"
-          className="text-sm font-semibold  px-4 py-2 rounded-full border-2 border-indigo-600 text-zinc-800 dark:text-white transition-all duration-300 ease-in-out relative group cursor-pointer active:bg-indigo-600"
+          className="text-sm sm:text-base font-semibold px-4 py-2 rounded-full bg-indigo-600 text-white select-none active:scale-95 transition-all duration-300 ease-in-out"
         >
           Start a Project
         </Link>
@@ -65,7 +65,7 @@ function Navbar({ onOpenSidebar }: NavbarProps) {
         <div
           aria-label="sidebar"
           onClick={onOpenSidebar}
-          className="bg-zinc-100 dark:bg-zinc-900 px-4 py-2 rounded-full cursor-pointer"
+          className="select-none bg-zinc-100 dark:bg-zinc-900 px-4 py-2 rounded-full cursor-pointer"
         >
           <Sidebar className="size-6" />
         </div>
