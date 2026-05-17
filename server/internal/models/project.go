@@ -79,32 +79,75 @@ type Project struct {
 func (p *Project) IsDeleted() bool { return p.DeletedAt.Valid }
 
 type SafeProject struct {
-	ID             uuid.UUID       `json:"id"`
-	Slug           string          `json:"slug"`
-	Title          string          `json:"title"`
-	Description    string          `json:"description"`
-	Budget         decimal.Decimal `json:"budget"`
-	Currency       string          `json:"currency"`
-	Status         ProjectStatus   `json:"status"`
-	Priority       int16           `json:"priority"`
-	IsEscrowFunded bool            `json:"is_escrow_funded"`
-	CreatedAt      time.Time       `json:"created_at"`
-	UpdatedAt      time.Time       `json:"updated_at"`
+	ID                 uuid.UUID       `json:"id"`
+	Slug               string          `json:"slug"`
+	Title              string          `json:"title"`
+	Description        string          `json:"description"`
+	Budget             decimal.Decimal `json:"budget"`
+	Currency           string          `json:"currency"`
+	Status             ProjectStatus   `json:"status"`
+	Priority           int16           `json:"priority"`
+	IsEscrowFunded     bool            `json:"is_escrow_funded"`
+	ChatRoomID         *string         `json:"chat_room_id"`
+	RepositoryURL      *string         `json:"repository_url"`
+	DeadlineAt         *time.Time      `json:"deadline_at"`
+	StartedAt          *time.Time      `json:"started_at"`
+	CompletedAt        *time.Time      `json:"completed_at"`
+	LastMessagePreview *string         `json:"last_message_preview"`
+	LastActivityAt     *time.Time      `json:"last_activity_at"`
+	CreatedAt          time.Time       `json:"created_at"`
+	UpdatedAt          time.Time       `json:"updated_at"`
 }
 
 func (p *Project) ToSafe() SafeProject {
+	var chatRoomID *string
+	if p.ChatRoomID.Valid {
+		chatRoomID = &p.ChatRoomID.String
+	}
+	var repoURL *string
+	if p.RepositoryURL.Valid {
+		repoURL = &p.RepositoryURL.String
+	}
+	var deadlineAt *time.Time
+	if p.DeadlineAt.Valid {
+		deadlineAt = &p.DeadlineAt.Time
+	}
+	var startedAt *time.Time
+	if p.StartedAt.Valid {
+		startedAt = &p.StartedAt.Time
+	}
+	var completedAt *time.Time
+	if p.CompletedAt.Valid {
+		completedAt = &p.CompletedAt.Time
+	}
+	var lastMsg *string
+	if p.LastMessagePreview.Valid {
+		lastMsg = &p.LastMessagePreview.String
+	}
+	var lastActivity *time.Time
+	if p.LastActivityAt.Valid {
+		lastActivity = &p.LastActivityAt.Time
+	}
+
 	return SafeProject{
-		ID:             p.ID,
-		Slug:           p.Slug,
-		Title:          p.Title,
-		Description:    p.Description,
-		Budget:         p.Budget,
-		Currency:       p.Currency,
-		Status:         p.Status,
-		Priority:       p.Priority,
-		IsEscrowFunded: p.IsEscrowFunded,
-		CreatedAt:      p.CreatedAt,
-		UpdatedAt:      p.UpdatedAt,
+		ID:                 p.ID,
+		Slug:               p.Slug,
+		Title:              p.Title,
+		Description:        p.Description,
+		Budget:             p.Budget,
+		Currency:           p.Currency,
+		Status:             p.Status,
+		Priority:           p.Priority,
+		IsEscrowFunded:     p.IsEscrowFunded,
+		ChatRoomID:         chatRoomID,
+		RepositoryURL:      repoURL,
+		DeadlineAt:         deadlineAt,
+		StartedAt:          startedAt,
+		CompletedAt:        completedAt,
+		LastMessagePreview: lastMsg,
+		LastActivityAt:     lastActivity,
+		CreatedAt:          p.CreatedAt,
+		UpdatedAt:          p.UpdatedAt,
 	}
 }
 

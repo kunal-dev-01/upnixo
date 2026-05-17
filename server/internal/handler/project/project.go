@@ -34,7 +34,7 @@ func (h *ProjectHandler) Create(c *fiber.Ctx) error {
 
 	var req dto.CreateProjectRequest
 	if err := c.BodyParser(&req); err != nil {
-		return utils.BadRequest("invalid request body")
+		return utils.BadRequest("invalid request body: " + err.Error())
 	}
 
 	if err := utils.ValidateStructToAppError(&req); err != nil {

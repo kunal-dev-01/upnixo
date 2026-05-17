@@ -93,9 +93,9 @@ func NewProjectRepository(log *utils.Logger) ProjectRepository {
 func (r *projectRepo) Create(ctx context.Context, p *models.Project) error {
 	const sql = `
 		INSERT INTO projects (
-			slug, client_id, freelancer_id, title, description, budget, currency, status, priority
+			slug, client_id, freelancer_id, title, description, budget, currency, status, priority, deadline_at
 		) VALUES (
-			@slug, @client_id, @freelancer_id, @title, @description, @budget, @currency, @status, @priority
+			@slug, @client_id, @freelancer_id, @title, @description, @budget, @currency, @status, @priority, @deadline_at
 		)
 		RETURNING ` + projectColumns
 
@@ -109,6 +109,7 @@ func (r *projectRepo) Create(ctx context.Context, p *models.Project) error {
 		"currency":      p.Currency,
 		"status":        p.Status,
 		"priority":      p.Priority,
+		"deadline_at":   p.DeadlineAt,
 	}
 
 	rows, err := db.Pool.Query(ctx, sql, args)

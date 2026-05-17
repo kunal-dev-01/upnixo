@@ -1,5 +1,5 @@
 import { ButtonHTMLAttributes } from "react";
-import { Loader } from "@/common/Loader"; // Tumhara custom loader import kiya hai
+import { Loader } from "@/common/Loader";
 
 interface MonoButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;

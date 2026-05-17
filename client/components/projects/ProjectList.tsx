@@ -3,12 +3,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useClientProjects } from "@/hooks/useProject";
 import type { Project, ProjectStatus } from "@/types/project.types";
 import Dropdown from "@/common/Dropdown";
+import MonoButton from "@/common/MonoButton";
 import { Projects } from "@/svg/More";
 import NoProjects from "./NoProjects";
 import ProjectListSkeleton from "./ProjectListSkeleton";
 import ProjectCard from "./ProjectCard";
 import SubHeading from "@/common/SubHeading";
 import { statusOptions } from "@/utils/constants";
+import { X } from "@/svg/Common";
 
 interface ProjectListProps {
   onCreateClick?: () => void;
@@ -38,15 +40,21 @@ export default function ProjectList({ onCreateClick }: ProjectListProps) {
           iconBgColor="bg-indigo-50 dark:bg-indigo-500/20"
         />
 
-        {/* Dynamic Status Dropdown Filter */}
-        <div className="w-full sm:w-64">
-          <Dropdown
-            label=""
-            options={statusOptions}
-            value={status}
-            onChange={(val) => setStatus(val)}
-            placeholder="Select Status"
-          />
+        {/* Dynamic Status Dropdown Filter & Actions */}
+        <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
+          <div className="w-full sm:w-56">
+            <Dropdown
+              label=""
+              options={statusOptions}
+              value={status}
+              onChange={(val) => setStatus(val)}
+              placeholder="Select Status"
+            />
+          </div>
+          <MonoButton onClick={onCreateClick} className="w-full sm:w-auto">
+            <X className="w-4 h-4 rotate-45" />
+            Create Project
+          </MonoButton>
         </div>
       </div>
 
