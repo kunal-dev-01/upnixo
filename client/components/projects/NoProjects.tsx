@@ -14,11 +14,10 @@ export default function NoProjects({ onClick }: NoProjectsProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.4 }}
-      className="w-full py-16 px-6 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-3xl flex flex-col items-center justify-center text-center shadow-xs"
+      className="w-full py-16 px-6 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-3xl flex flex-col items-center justify-center text-center"
     >
       <div className="relative mb-6">
-        <div className="absolute inset-0 bg-indigo-500/10 rounded-full blur-xl transform scale-150 animate-pulse" />
-        <div className="relative p-6 bg-indigo-500/10 dark:bg-indigo-500/5 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 rounded-full">
+        <div className="relative p-6 bg-indigo-500/10 dark:bg-indigo-500/5 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 rounded-xl md:rounded-4xl">
           <Projects className="w-10 h-10" />
         </div>
       </div>

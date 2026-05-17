@@ -69,7 +69,7 @@ function Account() {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6">
+    <div className="w-full max-w-7xl mx-auto space-y-6 fade-in">
       <Heading
         title="Account & Settings"
         description="Manage your preferences, personal details, and platform experience."

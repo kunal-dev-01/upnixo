@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion, AnimatePresence } from "framer-motion";
-import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { useCreateProject } from "@/hooks/useProject";
 import {
@@ -12,9 +10,11 @@ import {
 import Input from "@/common/Input";
 import Dropdown from "@/common/Dropdown";
 import VariantButton from "@/common/VariantButton";
+import ConfirmModal from "@/common/ConfirmModal";
 import { ArrowLeft } from "@/svg/Common";
 import { Projects, Wallet, Bolt } from "@/svg/More";
 import { AlertCircle } from "@/svg/Extra";
+import { formatCurrency } from "@/utils/formats";
 
 interface CreateProjectProps {
   onBack: () => void;
@@ -39,7 +39,6 @@ export default function CreateProject({
   } = useForm<CreateProjectSchema>({
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
-      freelancer_id: "",
       title: "",
       description: "",
       budget: "",
@@ -52,15 +51,7 @@ export default function CreateProject({
   const selectedCurrency = watch("currency");
   const selectedPriority = watch("priority");
 
-  // Format currency preview helper
-  const formatCurrency = (amount: string, currency: string) => {
-    const numeric = parseFloat(amount) || 0;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency || "USD",
-      minimumFractionDigits: 0,
-    }).format(numeric);
-  };
+
 
   // Triggers review modal on successful validation
   const onSubmit = (data: CreateProjectSchema) => {
@@ -73,7 +64,6 @@ export default function CreateProject({
     if (!formData) return;
     try {
       await createProjectAsync({
-        freelancer_id: formData.freelancer_id,
         title: formData.title,
         description: formData.description,
         budget: formData.budget,
@@ -116,17 +106,6 @@ export default function CreateProject({
         className="w-full p-6 sm:p-8 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-3xl flex flex-col gap-6 shadow-xs"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Freelancer ID */}
-          <div className="md:col-span-2">
-            <Input
-              label="Freelancer ID (UUID)"
-              name="freelancer_id"
-              placeholder="e.g., 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
-              register={register}
-              error={errors.freelancer_id?.message}
-            />
-          </div>
-
           {/* Project Title */}
           <div className="md:col-span-2">
             <Input
@@ -236,144 +215,87 @@ export default function CreateProject({
         </div>
       </form>
 
-      {/* ==================== PORTAL REVIEW MODAL ==================== */}
-      <AnimatePresence>
-        {isReviewOpen &&
-          formData &&
-          createPortal(
-            <div className="fixed inset-0 z-110 flex items-center justify-center p-4">
-              {/* Overlay background */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-zinc-950/70 backdrop-blur-xs cursor-pointer"
-                onClick={() => !isPending && setIsReviewOpen(false)}
-              />
+      <ConfirmModal
+        isOpen={isReviewOpen}
+        onClose={() => setIsReviewOpen(false)}
+        onConfirm={handleConfirmLaunch}
+        title="Confirm Project Launch"
+        confirmLabel="Launch now"
+        cancelLabel="Back to edit"
+        variant="default"
+        isPending={isPending}
+      >
+        {formData && (
+          <>
+            {/* Structured project detail specifications */}
+            <div className="flex flex-col gap-4 border border-zinc-100 dark:border-zinc-900 rounded-2xl p-4 bg-zinc-50/50 dark:bg-zinc-900/10 mb-6 text-sm text-left">
+              {/* Title Preview */}
+              <div className="flex flex-col">
+                <span className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider">
+                  Title
+                </span>
+                <span className="font-bold text-zinc-800 dark:text-zinc-200">
+                  {formData.title}
+                </span>
+              </div>
 
-              {/* Modal Box */}
-              <motion.div
-                initial={{ y: "40%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: "40%", opacity: 0 }}
-                transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="relative z-10 w-full max-w-lg bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden"
-              >
-                {/* Red warning border hint */}
-                <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-indigo-500 to-transparent" />
-
-                <div className="flex flex-col items-center text-center gap-3 mb-6">
-                  <div className="p-3 bg-indigo-500/10 text-indigo-600 rounded-2xl">
-                    <Projects className="w-8 h-8" />
+              {/* Budget & Priority Split row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-indigo-500/10 text-indigo-500 rounded-lg">
+                    <Wallet className="w-3.5 h-3.5" />
                   </div>
-                  <div>
-                    <h3 className="text-xl font-black text-zinc-900 dark:text-white tracking-tight">
-                      Confirm Project Launch
-                    </h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                      Double check workspace details before finalizing setup.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Structured project detail specifications */}
-                <div className="flex flex-col gap-4 border border-zinc-100 dark:border-zinc-900 rounded-2xl p-4 bg-zinc-50/50 dark:bg-zinc-900/10 mb-6 text-sm">
-                  {/* Title Preview */}
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider">
-                      Title
+                    <span className="text-[9px] text-zinc-400 font-extrabold uppercase tracking-wider">
+                      Budget
                     </span>
-                    <span className="font-bold text-zinc-800 dark:text-zinc-200">
-                      {formData.title}
+                    <span className="font-extrabold text-zinc-800 dark:text-zinc-200">
+                      {formatCurrency(formData.budget, formData.currency)}
                     </span>
                   </div>
+                </div>
 
-                  {/* Budget & Priority Split row */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 bg-indigo-500/10 text-indigo-500 rounded-lg">
-                        <Wallet className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[9px] text-zinc-400 font-extrabold uppercase tracking-wider">
-                          Budget
-                        </span>
-                        <span className="font-extrabold text-zinc-800 dark:text-zinc-200">
-                          {formatCurrency(formData.budget, formData.currency)}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 bg-indigo-500/10 text-indigo-500 rounded-lg">
-                        <Bolt className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[9px] text-zinc-400 font-extrabold uppercase tracking-wider">
-                          Priority
-                        </span>
-                        <span className="font-extrabold text-zinc-800 dark:text-zinc-200">
-                          {formData.priority === 2
-                            ? "High"
-                            : formData.priority === 1
-                              ? "Medium"
-                              : "Low"}
-                        </span>
-                      </div>
-                    </div>
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-indigo-500/10 text-indigo-500 rounded-lg">
+                    <Bolt className="w-3.5 h-3.5" />
                   </div>
-
-                  {/* Freelancer ID */}
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider">
-                      Freelancer ID
+                    <span className="text-[9px] text-zinc-400 font-extrabold uppercase tracking-wider">
+                      Priority
                     </span>
-                    <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400 break-all bg-zinc-100 dark:bg-zinc-900 px-2 py-1 rounded-lg border border-zinc-200/50 dark:border-zinc-800">
-                      {formData.freelancer_id}
+                    <span className="font-extrabold text-zinc-800 dark:text-zinc-200">
+                      {formData.priority === 2
+                        ? "High"
+                        : formData.priority === 1
+                          ? "Medium"
+                          : "Low"}
                     </span>
                   </div>
-
-                  {/* Description scope preview */}
-                  <div className="flex flex-col">
-                    <span className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider">
-                      Scope Preview
-                    </span>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-3 leading-relaxed">
-                      {formData.description}
-                    </p>
-                  </div>
                 </div>
+              </div>
 
-                {/* Submitting warnings */}
-                <div className="flex gap-2 p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-200/30 rounded-2xl text-[11px] font-semibold leading-relaxed mb-6">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>
-                    Confirming this setup will register the project workspace
-                    and prepare the escrow contract securely.
-                  </span>
-                </div>
+              {/* Description scope preview */}
+              <div className="flex flex-col">
+                <span className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider">
+                  Scope Preview
+                </span>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-3 leading-relaxed">
+                  {formData.description}
+                </p>
+              </div>
+            </div>
 
-                {/* Actions */}
-                <div className="grid grid-cols-2 gap-3">
-                  <VariantButton
-                    variant="default"
-                    label="Back to edit"
-                    disabled={isPending}
-                    onClick={() => setIsReviewOpen(false)}
-                  />
-                  <VariantButton
-                    variant="save"
-                    label="Launch now"
-                    isLoading={isPending}
-                    disabled={isPending}
-                    onClick={handleConfirmLaunch}
-                  />
-                </div>
-              </motion.div>
-            </div>,
-            document.body,
-          )}
-      </AnimatePresence>
+            {/* Submitting warnings */}
+            <div className="flex gap-2 p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-200/30 rounded-2xl text-[11px] font-semibold leading-relaxed mb-6 text-left">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>
+                Confirming this setup will register the project workspace
+                and prepare the escrow contract securely.
+              </span>
+            </div>
+          </>
+        )}
+      </ConfirmModal>
     </div>
   );
 }

@@ -162,6 +162,8 @@ export default function Sessions() {
         isOpen={!!showConfirmModal}
         onClose={() => setShowConfirmModal(null)}
         onConfirm={handleConfirmAction}
+        variant="danger"
+        isPending={revokeAllOther.isPending}
         {...modalProps}
       />
     </div>

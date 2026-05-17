@@ -10,7 +10,7 @@ function Projects() {
   const [view, setView] = useState<"list" | "create" | "success">("list");
 
   return (
-    <div className="w-full">
+    <div className="w-full fade-in">
       {view === "list" && (
         <>
           <Heading
