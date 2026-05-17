@@ -29,7 +29,7 @@ CREATE TABLE projects (
 
     -- ── Relationships ───────────────────────────────────────────────
     client_id                       UUID            NOT NULL, -- The one paying
-    freelancer_id                   UUID            NOT NULL, -- The one working (You or a Partner)
+    freelancer_id                   UUID,             -- The one working (You or a Partner)
     
     -- ── Real-time & Sync ────────────────────────────────────────────
     chat_room_id                    VARCHAR(128)    UNIQUE,   -- MongoDB/Socket Room Reference
