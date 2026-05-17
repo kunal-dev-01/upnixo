@@ -404,14 +404,6 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("JWT_SECRET must be at least 32 characters")
 	}
 
-	if cfg.AdminJWT.Secret == "" {
-		return nil, fmt.Errorf("ADMIN_JWT_SECRET is required")
-	}
-
-	if len(cfg.AdminJWT.Secret) < 32 {
-		return nil, fmt.Errorf("ADMIN_JWT_SECRET must be at least 32 characters")
-	}
-
 	if cfg.App.Env == "production" && cfg.Redis.Password == "" {
 		return nil, fmt.Errorf("REDIS_PASSWORD is required in production")
 	}
