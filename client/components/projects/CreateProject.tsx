@@ -12,9 +12,10 @@ import Dropdown from "@/common/Dropdown";
 import VariantButton from "@/common/VariantButton";
 import ConfirmModal from "@/common/ConfirmModal";
 import { ArrowLeft } from "@/svg/Common";
-import { Wallet, Bolt } from "@/svg/More";
+import { Wallet, Bolt, Projects } from "@/svg/More";
 import { AlertCircle } from "@/svg/Extra";
 import { formatCurrency } from "@/utils/formats";
+import Heading from "@/common/Heading";
 
 interface CreateProjectProps {
   onBack: () => void;
@@ -78,30 +79,17 @@ export default function CreateProject({
   };
 
   return (
-    <div className="w-full mx-auto p-2 fade-in">
+    <div className="w-full mx-auto fade-in">
       {/* Back navigation & page title */}
-      <div className="flex items-center gap-4 mb-8">
-        <button
-          onClick={onBack}
-          className="p-3 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-2xl transition-all cursor-pointer"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tight">
-            Launch New Project
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Define project scope, budget, and priority levels for your
-            workspace.
-          </p>
-        </div>
-      </div>
+      <Heading
+        title="Launch New Project"
+        description="Define project scope, budget, and priority levels for your workspace."
+      />
 
       {/* Main Creation Form */}
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full p-6 sm:p-8 bg-white dark:bg-zinc-950 border border-zinc-200/90 dark:border-zinc-900 rounded-3xl flex flex-col gap-6"
+        className="w-full p-6 sm:p-8 bg-white dark:bg-zinc-950 border border-zinc-200/90 dark:border-zinc-900 rounded-3xl flex flex-col gap-6 mt-6"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Project Title */}
@@ -170,7 +158,7 @@ export default function CreateProject({
             <input
               type="date"
               {...register("deadline_at")}
-              className="w-full px-5 py-2.5 text-sm font-semibold border-2 border-zinc-200 dark:border-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-4 focus:ring-indigo-600/10 dark:focus:ring-indigo-400/20 rounded-2xl outline-none transition-all duration-300 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 bg-transparent"
+              className="w-full px-5 py-2.5 font-semibold border-2 border-zinc-200 dark:border-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-4 focus:ring-indigo-600/10 dark:focus:ring-indigo-400/20 rounded-2xl outline-none transition-all duration-300 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 bg-transparent"
             />
           </div>
 
@@ -206,18 +194,23 @@ export default function CreateProject({
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full mt-4">
-          <VariantButton
-            label="Cancel"
-            variant="default"
-            type="button"
-            onClick={onBack}
-          />
-          <VariantButton
-            label="Launch Workspace"
-            variant="save"
-            type="submit"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+          <div className="order-2 sm:order-1">
+            <VariantButton
+              label="Back to projects"
+              variant="default"
+              type="button"
+              onClick={onBack}
+            />
+          </div>
+          <div className="order-1 sm:order-2">
+            <VariantButton
+              label="Launch Workspace"
+              variant="save"
+              type="submit"
+              icon={Projects}
+            />
+          </div>
         </div>
       </form>
 
