@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import VariantButton from "@/common/VariantButton";
-import { Check } from "@/svg/Common";
+import { ArrowLeft, Check } from "@/svg/Common";
 
 interface ProjectCreationSuccessProps {
   onComplete: () => void;
@@ -25,79 +25,68 @@ export default function ProjectCreationSuccess({
   }, [countdown, onComplete]);
 
   return (
-    <div className="w-full max-w-lg mx-auto py-16 px-6 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-3xl flex flex-col items-center justify-center text-center shadow-lg">
-      {/* Animated Success Badge with pulsing circles */}
-      <div className="relative mb-8">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1.4, opacity: 0.15 }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
-          className="absolute inset-0 bg-emerald-500 rounded-full"
-        />
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1.8, opacity: 0.05 }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeOut",
-            delay: 0.5,
-          }}
-          className="absolute inset-0 bg-emerald-500 rounded-full"
-        />
+    <div className="relative overflow-hidden w-full mx-auto py-12 px-6 sm:px-10 bg-zinc-50/50 dark:bg-zinc-950/50 border border-zinc-200/50 dark:border-zinc-900 rounded-2xl flex flex-col items-center justify-center text-center">
+      {/* Subtle Top Green Gradient Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-32 bg-emerald-500/10 dark:bg-emerald-500/[0.07] blur-[60px] pointer-events-none rounded-full" />
 
+      {/* Sleek Professional Success Icon */}
+      <div className="relative mb-6">
         <motion.div
-          initial={{ scale: 0, rotate: -45 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: "spring", damping: 15, stiffness: 200 }}
-          className="relative p-6 bg-emerald-500/10 dark:bg-emerald-500/5 text-emerald-500 border border-emerald-500/20 rounded-full shadow-lg shadow-emerald-500/5"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", damping: 20, stiffness: 300 }}
+          className="p-4 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full"
         >
-          <Check className="w-12 h-12 stroke-3" />
+          <Check className="w-8 h-8 stroke-[2.5]" />
         </motion.div>
       </div>
 
-      {/* Celebration heading & descriptive details */}
+      {/* Typography Section */}
       <motion.h2
-        initial={{ y: 10, opacity: 0 }}
+        initial={{ y: 8, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight mb-3"
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="text-xl sm:text-2xl font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight mb-2"
       >
-        Project Launched successfully!
+        Project Launched Successfully!
       </motion.h2>
 
       <motion.p
-        initial={{ y: 10, opacity: 0 }}
+        initial={{ y: 8, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mb-10 leading-relaxed"
+        transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+        className="text-sm text-zinc-500 dark:text-zinc-400 max-w-md mb-8 leading-relaxed font-normal"
       >
-        Apka new project workspace register ho chuka hai aur secure smart escrow
-        channels activate kar diye gaye hain.
+        Your new project workspace is registered, and secure smart escrow
+        channels are now active.
       </motion.p>
 
-      {/* Countdown overlay indicator */}
+      {/* Status & Action Footer */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
         className="flex flex-col items-center gap-4 w-full"
       >
-        <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-          <span>Redirecting to your feed in</span>
-          <span className="font-extrabold text-indigo-500 text-sm w-4 text-center">
-            {countdown}
+        {/* Minimalist Redirect Badge */}
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
           </span>
-          <span>second{countdown !== 1 ? "s" : ""}...</span>
+          <span>Redirecting to feed in</span>
+          <span className="font-bold text-zinc-800 dark:text-zinc-200 tabular-nums">
+            {countdown}s
+          </span>
         </div>
 
-        {/* Fallback instant workspace entry action */}
+        {/* Action Button */}
         <div className="w-full max-w-xs mt-2">
           <VariantButton
             label="Go to Workspaces"
             variant="save"
             onClick={onComplete}
+            icon={ArrowLeft}
           />
         </div>
       </motion.div>

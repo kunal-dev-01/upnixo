@@ -37,6 +37,8 @@ func (h *ProjectHandler) Create(c *fiber.Ctx) error {
 		return utils.BadRequest("invalid request body: " + err.Error())
 	}
 
+	utils.Info("parsed request", map[string]any{"req": req})
+
 	if err := utils.ValidateStructToAppError(&req); err != nil {
 		return err
 	}
@@ -46,10 +48,16 @@ func (h *ProjectHandler) Create(c *fiber.Ctx) error {
 		return err
 	}
 
+	res := dto.ProjectResponse{
+		SafeProject:  project.ToSafe(),
+		FreelancerID: project.FreelancerID,
+		ClientID:     project.ClientID,
+	}
+
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"success": true,
 		"message": "project created successfully",
-		"data":    project,
+		"data":    res,
 	})
 }
 
@@ -203,9 +211,18 @@ func (h *ProjectHandler) ListByClient(c *fiber.Ctx) error {
 		return err
 	}
 
+	var res []dto.ProjectResponse
+	for _, p := range projects {
+		res = append(res, dto.ProjectResponse{
+			SafeProject:  p.ToSafe(),
+			FreelancerID: p.FreelancerID,
+			ClientID:     p.ClientID,
+		})
+	}
+
 	return c.JSON(fiber.Map{
 		"success": true,
-		"data":    projects,
+		"data":    res,
 	})
 }
 
@@ -234,8 +251,17 @@ func (h *ProjectHandler) ListByFreelancer(c *fiber.Ctx) error {
 		return err
 	}
 
+	var res []dto.ProjectResponse
+	for _, p := range projects {
+		res = append(res, dto.ProjectResponse{
+			SafeProject:  p.ToSafe(),
+			FreelancerID: p.FreelancerID,
+			ClientID:     p.ClientID,
+		})
+	}
+
 	return c.JSON(fiber.Map{
 		"success": true,
-		"data":    projects,
+		"data":    res,
 	})
 }
