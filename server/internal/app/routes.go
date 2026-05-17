@@ -142,8 +142,16 @@ func registerProjectRoutes(r fiber.Router, d *Dependencies) {
 	projects.Get("/freelancer", d.ProjectHandler.ListByFreelancer)
 	projects.Get("/:id", d.ProjectHandler.GetByID)
 	projects.Get("/slug/:slug", d.ProjectHandler.GetBySlug)
-	projects.Patch("/:id", d.ProjectHandler.Update)
-	projects.Delete("/:id", d.ProjectHandler.Delete)
+	projects.Patch("/:id", d.ProjectHandler.ClientUpdate)
+
+	// Admin routes
+	admin := r.Group("/auth/admin/projects",
+		middleware.AuthRequired(d.JWT, d.SessionRepo),
+		middleware.AdminRequired(),
+		d.Limiters.API,
+	)
+	admin.Patch("/:id", d.ProjectHandler.AdminUpdate)
+	admin.Delete("/:id", d.ProjectHandler.Delete)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

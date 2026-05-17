@@ -22,7 +22,14 @@ type CreateProjectRequest struct {
 	DeadlineAt   *time.Time      `json:"deadline_at"   validate:"omitempty"`
 }
 
-type UpdateProjectRequest struct {
+type ClientUpdateProjectRequest struct {
+	Title         *string `json:"title"          validate:"omitempty,min=3,max=200"`
+	Description   *string `json:"description"    validate:"omitempty,min=10"`
+	Priority      *int16  `json:"priority"       validate:"omitempty,i_gte=0,i_lte=2"`
+	RepositoryURL *string `json:"repository_url" validate:"omitempty,url"`
+}
+
+type AdminUpdateProjectRequest struct {
 	Title         *string               `json:"title"          validate:"omitempty,min=3,max=200"`
 	Description   *string               `json:"description"    validate:"omitempty,min=10"`
 	Budget        *decimal.Decimal      `json:"budget"         validate:"omitempty,d_gt_zero"`

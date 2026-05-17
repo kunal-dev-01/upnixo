@@ -96,14 +96,19 @@ func (h *ProjectHandler) GetBySlug(c *fiber.Ctx) error {
 // UPDATE
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (h *ProjectHandler) Update(c *fiber.Ctx) error {
+func (h *ProjectHandler) ClientUpdate(c *fiber.Ctx) error {
+	clientID, ok := middleware.GetUserID(c)
+	if !ok {
+		return utils.Unauthorized("authentication required")
+	}
+
 	idStr := c.Params("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
 		return utils.BadRequest("invalid project id")
 	}
 
-	var req dto.UpdateProjectRequest
+	var req dto.ClientUpdateProjectRequest
 	if err := c.BodyParser(&req); err != nil {
 		return utils.BadRequest("invalid request body")
 	}
@@ -112,7 +117,33 @@ func (h *ProjectHandler) Update(c *fiber.Ctx) error {
 		return err
 	}
 
-	if err := h.svc.Update(c.Context(), id, req); err != nil {
+	if err := h.svc.ClientUpdate(c.Context(), id, clientID, req); err != nil {
+		return err
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "project updated successfully",
+	})
+}
+
+func (h *ProjectHandler) AdminUpdate(c *fiber.Ctx) error {
+	idStr := c.Params("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		return utils.BadRequest("invalid project id")
+	}
+
+	var req dto.AdminUpdateProjectRequest
+	if err := c.BodyParser(&req); err != nil {
+		return utils.BadRequest("invalid request body")
+	}
+
+	if err := utils.ValidateStructToAppError(&req); err != nil {
+		return err
+	}
+
+	if err := h.svc.AdminUpdate(c.Context(), id, req); err != nil {
 		return err
 	}
 

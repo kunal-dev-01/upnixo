@@ -73,7 +73,27 @@ func (s *ProjectService) GetBySlug(ctx context.Context, slug string) (*models.Pr
 // UPDATE
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (s *ProjectService) Update(ctx context.Context, id uuid.UUID, req dto.UpdateProjectRequest) error {
+func (s *ProjectService) ClientUpdate(ctx context.Context, id uuid.UUID, clientID uuid.UUID, req dto.ClientUpdateProjectRequest) error {
+	project, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if project.ClientID != clientID {
+		return utils.Forbidden("you do not have permission to update this project")
+	}
+
+	params := repo.UpdateProjectParams{
+		Title:         req.Title,
+		Description:   req.Description,
+		Priority:      req.Priority,
+		RepositoryURL: req.RepositoryURL,
+	}
+
+	return s.repo.Update(ctx, id, params)
+}
+
+func (s *ProjectService) AdminUpdate(ctx context.Context, id uuid.UUID, req dto.AdminUpdateProjectRequest) error {
 	params := repo.UpdateProjectParams{
 		Title:         req.Title,
 		Description:   req.Description,
