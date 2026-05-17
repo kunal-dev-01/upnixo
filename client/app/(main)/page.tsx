@@ -1,7 +1,13 @@
 "use client";
 
+import Hero from "@/components/home/Hero";
+
 function Home() {
-  return <div className="w-full h-50"></div>;
+  return (
+    <>
+      <Hero />
+    </>
+  );
 }
 
 export default Home;
