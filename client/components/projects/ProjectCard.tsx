@@ -2,16 +2,33 @@ import { motion } from "framer-motion";
 import type { Project } from "@/types/project.types";
 import { STATUS_CONFIG } from "@/utils/constants";
 import { Bolt, Wallet, Github } from "@/svg/More";
-import { Check, TriangleAlert } from "@/svg/Common";
+import { Check, TriangleAlert, Edit } from "@/svg/Common";
 import { formatCurrency, formatDate } from "@/utils/formats";
+import MenuDropdown, { type MenuOption } from "@/common/MenuDropdown";
 
 interface ProjectCardProps {
   project: Project;
   idx: number;
+  onUpdate?: (project: Project) => void;
 }
 
-export default function ProjectCard({ project, idx }: ProjectCardProps) {
+export default function ProjectCard({ project, idx, onUpdate }: ProjectCardProps) {
   const config = STATUS_CONFIG[project.status] || STATUS_CONFIG.draft;
+
+  // Context menu options configuration
+  const dropdownOptions: MenuOption[] = [
+    {
+      label: "Update Workspace",
+      icon: Edit,
+      onClick: () => {
+        if (onUpdate) {
+          onUpdate(project);
+        } else {
+          console.log("Update workspace clicked for project:", project.id);
+        }
+      },
+    },
+  ];
 
   return (
     <motion.div
@@ -40,9 +57,13 @@ export default function ProjectCard({ project, idx }: ProjectCardProps) {
             {config.label}
           </span>
 
-          <div className="flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-md bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200/60 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400">
-            <Bolt className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
-            <span>Priority {project.priority}</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-md bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200/60 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400">
+              <Bolt className="w-3 h-3 text-indigo-500 dark:text-indigo-400" />
+              <span>Priority {project.priority}</span>
+            </div>
+
+            <MenuDropdown options={dropdownOptions} />
           </div>
         </div>
 
