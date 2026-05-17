@@ -42,8 +42,8 @@ type Project struct {
 	Slug string    `db:"slug" json:"slug"`
 
 	// Relationships
-	ClientID     uuid.UUID `db:"client_id"     json:"client_id"`
-	FreelancerID uuid.UUID `db:"freelancer_id" json:"freelancer_id"`
+	ClientID     uuid.UUID  `db:"client_id"     json:"client_id"`
+	FreelancerID *uuid.UUID `db:"freelancer_id" json:"freelancer_id"`
 
 	// Real-time & Sync
 	ChatRoomID    pgtype.Text `db:"chat_room_id"    json:"chat_room_id"`

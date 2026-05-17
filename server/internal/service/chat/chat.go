@@ -36,7 +36,7 @@ func (s *ChatService) InitProjectChat(ctx context.Context, projectID uuid.UUID, 
 		return nil, err
 	}
 
-	if project.ClientID != userID && project.FreelancerID != userID {
+	if project.ClientID != userID && (project.FreelancerID == nil || *project.FreelancerID != userID) {
 		return nil, utils.Forbidden("you are not a participant of this project")
 	}
 
@@ -47,13 +47,20 @@ func (s *ChatService) InitProjectChat(ctx context.Context, projectID uuid.UUID, 
 
 	// 3. Create New Room
 	roomID := fmt.Sprintf("room_%s", uuid.New().String())
+	participants := []schemas.Participant{
+		{UserID: project.ClientID.String(), Role: schemas.ParticipantRoleClient},
+	}
+	if project.FreelancerID != nil {
+		participants = append(participants, schemas.Participant{
+			UserID: project.FreelancerID.String(),
+			Role:   schemas.ParticipantRoleFreelancer,
+		})
+	}
+
 	room := schemas.ChatRoom{
-		ID:        roomID,
-		ProjectID: project.ID.String(),
-		Participants: []schemas.Participant{
-			{UserID: project.ClientID.String(), Role: schemas.ParticipantRoleClient},
-			{UserID: project.FreelancerID.String(), Role: schemas.ParticipantRoleFreelancer},
-		},
+		ID:           roomID,
+		ProjectID:    project.ID.String(),
+		Participants: participants,
 	}
 
 	createdRoom, err := s.repo.FindOrCreateRoom(ctx, room)

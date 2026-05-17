@@ -29,12 +29,11 @@ export interface Project {
   last_activity_at: string | null;
   created_at: string;
   updated_at: string;
-  freelancer_id: string;
+  freelancer_id: string | null;
   client_id: string;
 }
 
 export interface CreateProjectPayload {
-  freelancer_id: string;
   title: string;
   description: string;
   budget: string;

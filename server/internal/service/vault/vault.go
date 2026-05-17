@@ -287,7 +287,7 @@ func (s *VaultService) verifyProjectAccess(ctx context.Context, projectID uuid.U
 		return err
 	}
 
-	if project.ClientID != userID && project.FreelancerID != userID {
+	if project.ClientID != userID && (project.FreelancerID == nil || *project.FreelancerID != userID) {
 		return utils.Forbidden("you do not have access to this vault")
 	}
 

@@ -13,7 +13,6 @@ import (
 // ─────────────────────────────────────────────────────────────────────────────
 
 type CreateProjectRequest struct {
-	FreelancerID uuid.UUID       `json:"freelancer_id" validate:"required"`
 	Title        string          `json:"title"         validate:"required,min=3,max=200"`
 	Description  string          `json:"description"   validate:"required,min=10"`
 	Budget       decimal.Decimal `json:"budget"        validate:"required,d_gt_zero"`
@@ -30,6 +29,7 @@ type ClientUpdateProjectRequest struct {
 }
 
 type AdminUpdateProjectRequest struct {
+	FreelancerID  *uuid.UUID            `json:"freelancer_id"  validate:"omitempty"`
 	Title         *string               `json:"title"          validate:"omitempty,min=3,max=200"`
 	Description   *string               `json:"description"    validate:"omitempty,min=10"`
 	Budget        *decimal.Decimal      `json:"budget"         validate:"omitempty,d_gt_zero"`
@@ -46,8 +46,8 @@ type AdminUpdateProjectRequest struct {
 
 type ProjectResponse struct {
 	models.SafeProject
-	FreelancerID uuid.UUID `json:"freelancer_id"`
-	ClientID     uuid.UUID `json:"client_id"`
+	FreelancerID *uuid.UUID `json:"freelancer_id"`
+	ClientID     uuid.UUID  `json:"client_id"`
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

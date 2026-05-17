@@ -43,6 +43,7 @@ type ListProjectsParams struct {
 }
 
 type UpdateProjectParams struct {
+	FreelancerID       *uuid.UUID
 	Title              *string
 	Description        *string
 	RequirementsMeta   []byte
@@ -183,6 +184,7 @@ func (r *projectRepo) Update(ctx context.Context, id uuid.UUID, params UpdatePro
 	sql := `
 		UPDATE projects
 		SET 
+			freelancer_id        = COALESCE(@freelancer_id, freelancer_id),
 			title                = COALESCE(@title, title),
 			description          = COALESCE(@description, description),
 			requirements_meta    = COALESCE(@requirements_meta, requirements_meta),
@@ -203,6 +205,7 @@ func (r *projectRepo) Update(ctx context.Context, id uuid.UUID, params UpdatePro
 
 	args := pgx.NamedArgs{
 		"id":                   id,
+		"freelancer_id":        params.FreelancerID,
 		"title":                params.Title,
 		"description":          params.Description,
 		"requirements_meta":    params.RequirementsMeta,

@@ -26,7 +26,6 @@ func NewProjectService(repo repo.ProjectRepository, log *utils.Logger) *ProjectS
 func (s *ProjectService) Create(ctx context.Context, clientID uuid.UUID, req dto.CreateProjectRequest) (*models.Project, error) {
 	project := &models.Project{
 		ClientID:     clientID,
-		FreelancerID: req.FreelancerID,
 		Title:        req.Title,
 		Description:  req.Description,
 		Budget:       req.Budget,
@@ -95,6 +94,7 @@ func (s *ProjectService) ClientUpdate(ctx context.Context, id uuid.UUID, clientI
 
 func (s *ProjectService) AdminUpdate(ctx context.Context, id uuid.UUID, req dto.AdminUpdateProjectRequest) error {
 	params := repo.UpdateProjectParams{
+		FreelancerID:  req.FreelancerID,
 		Title:         req.Title,
 		Description:   req.Description,
 		Budget:        req.Budget,
