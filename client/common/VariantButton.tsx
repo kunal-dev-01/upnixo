@@ -72,8 +72,8 @@ const VariantButton = ({
               exit={{ opacity: 0, y: -5 }}
               className="flex items-center gap-2 text-zinc-900 dark:text-white"
             >
-              <Loader className="w-4 h-4" />
-              <span className="text-sm">Processing...</span>
+              <Loader className="w-5 h-5" />
+              <span>Processing...</span>
             </motion.div>
           ) : (
             <div className="flex items-center gap-2.5">

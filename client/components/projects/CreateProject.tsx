@@ -11,7 +11,6 @@ import Input from "@/common/Input";
 import Dropdown from "@/common/Dropdown";
 import VariantButton from "@/common/VariantButton";
 import ConfirmModal from "@/common/ConfirmModal";
-import { ArrowLeft } from "@/svg/Common";
 import { Wallet, Bolt, Projects } from "@/svg/More";
 import { AlertCircle } from "@/svg/Extra";
 import { formatCurrency } from "@/utils/formats";
@@ -68,7 +67,9 @@ export default function CreateProject({
         budget: formData.budget,
         currency: formData.currency,
         priority: formData.priority,
-        deadline_at: formData.deadline_at || undefined,
+        deadline_at: formData.deadline_at
+          ? new Date(formData.deadline_at).toISOString()
+          : undefined,
       });
       toast.success("Project launched successfully!");
       setIsReviewOpen(false);
@@ -209,6 +210,7 @@ export default function CreateProject({
               variant="save"
               type="submit"
               icon={Projects}
+              isLoading={isPending}
             />
           </div>
         </div>
@@ -227,7 +229,7 @@ export default function CreateProject({
         {formData && (
           <>
             {/* Structured project detail specifications */}
-            <div className="flex flex-col gap-4 border border-zinc-100 dark:border-zinc-900 rounded-2xl p-4 bg-zinc-50/50 dark:bg-zinc-900/10 mb-6 text-sm text-left">
+            <div className="flex flex-col gap-4 border border-zinc-100 dark:border-zinc-900 rounded-2xl p-4 mb-6 bg-zinc-50/50 dark:bg-zinc-900/10 text-sm text-left">
               {/* Title Preview */}
               <div className="flex flex-col">
                 <span className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider">
