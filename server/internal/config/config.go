@@ -132,6 +132,7 @@ type SecurityConfig struct {
 	RateLimitMax      int
 	MaxSessions       int
 	TOTPEncryptionKey string
+	VaultSecretKey    string
 }
 
 // ============================================================================
@@ -304,6 +305,7 @@ func Load() (*Config, error) {
 			RateLimitMax:      getEnvAsInt("RATE_LIMIT_MAX", 100),
 			MaxSessions:       getEnvAsInt("MAX_SESSIONS", 5),
 			TOTPEncryptionKey: getEnv("TOTP_ENCRYPTION_KEY", "default_totp_encryption_key"),
+			VaultSecretKey:    getEnv("VAULT_SECRET_KEY", "default_32_byte_vault_secret_key_"),
 		},
 		Frontend: FrontendConfig{
 			FrontendUrl:           getEnv("FRONTEND_URL", "http://localhost:3000"),

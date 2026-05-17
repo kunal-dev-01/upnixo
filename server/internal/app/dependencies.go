@@ -5,19 +5,21 @@ import (
 	"server/internal/config"
 	"server/internal/email"
 	handler "server/internal/handler/auth"
-	projectHandler "server/internal/handler/project"
 	chatHandler "server/internal/handler/chat"
+	projectHandler "server/internal/handler/project"
 	userHandler "server/internal/handler/user"
+	vaultHandler "server/internal/handler/vault"
 	"server/internal/middleware"
 	"server/internal/queue"
 	rds "server/internal/redis"
 	"server/internal/repo"
 	"server/internal/security"
 	service "server/internal/service/auth"
-	projectService "server/internal/service/project"
 	chatService "server/internal/service/chat"
+	projectService "server/internal/service/project"
 	"server/internal/service/storage"
 	userService "server/internal/service/user"
+	vaultService "server/internal/service/vault"
 	"server/internal/utils"
 )
 
@@ -41,6 +43,7 @@ type Dependencies struct {
 	ProjectRepo   repo.ProjectRepository
 	MilestoneRepo repo.MilestoneRepository
 	ChatRepo      repo.ChatRepository
+	VaultRepo     repo.VaultRepository
 	SessionRepo   *repo.SessionRepository
 	TokenRepo     *repo.TokenRepository
 
@@ -60,6 +63,7 @@ type Dependencies struct {
 	MediaSvc        *chatService.MediaService
 	ChatSvc         *chatService.ChatService
 	WSMgr           *chatService.WSManager
+	VaultSvc        *vaultService.VaultService
 
 	// Handlers
 	AccountHandler      *handler.AccountHandler
@@ -74,6 +78,7 @@ type Dependencies struct {
 	ProjectHandler      *projectHandler.ProjectHandler
 	MilestoneHandler    *projectHandler.MilestoneHandler
 	WSHandler           *chatHandler.WSHandler
+	VaultHandler        *vaultHandler.VaultHandler
 
 	// Middleware
 	LoggerMW *middleware.Logger
@@ -99,6 +104,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	projectRepo := repo.NewProjectRepository(log)
 	milestoneRepo := repo.NewMilestoneRepository(log)
 	chatRepo := repo.NewChatRepository(log)
+	vaultRepo := repo.NewVaultRepository(log)
 	sessionRepo := repo.NewSessionRepository(redisClient, cfg)
 	tokenRepo := repo.NewTokenRepository(redisClient)
 
@@ -117,6 +123,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	mediaSvc := chatService.NewMediaService(cfg, r2Svc, qManager, log)
 	chatSvc := chatService.NewChatService(chatRepo, projectRepo, log)
 	wsMgr := chatService.NewWSManager(log)
+	vaultSvc := vaultService.NewVaultService(vaultRepo, projectRepo, cfg, log)
 
 	// ── Handlers ──────────────────────────────────────────────────────────────
 	accountHandler := handler.NewAccountHandler(accountSvc, cfg)
@@ -131,6 +138,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	projectHdl := projectHandler.NewProjectHandler(projectSvc)
 	milestoneHdl := projectHandler.NewMilestoneHandler(milestoneSvc)
 	wsHandler := chatHandler.NewWSHandler(chatSvc, wsMgr, log)
+	vaultHdl := vaultHandler.NewVaultHandler(vaultSvc)
 
 	// ── Middleware ─────────────────────────────────────────────────────────────
 	loggerMW := middleware.NewLogger(log, cfg)
@@ -147,6 +155,9 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 		AuthRepo:            authRepo,
 		AdminRepo:           adminRepo,
 		ProjectRepo:         projectRepo,
+		MilestoneRepo:       milestoneRepo,
+		ChatRepo:            chatRepo,
+		VaultRepo:           vaultRepo,
 		SessionRepo:         sessionRepo,
 		TokenRepo:           tokenRepo,
 		EmailSvc:            emailSvc,
@@ -164,6 +175,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 		MediaSvc:            mediaSvc,
 		ChatSvc:             chatSvc,
 		WSMgr:               wsMgr,
+		VaultSvc:            vaultSvc,
 		AccountHandler:      accountHandler,
 		AdminHandler:        adminHandler,
 		AdminSessionHandler: adminSessionHandler,
@@ -176,6 +188,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 		ProjectHandler:      projectHdl,
 		MilestoneHandler:    milestoneHdl,
 		WSHandler:           wsHandler,
+		VaultHandler:        vaultHdl,
 		LoggerMW:            loggerMW,
 		Limiters:            limiters,
 	}

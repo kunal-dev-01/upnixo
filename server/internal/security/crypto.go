@@ -1,9 +1,13 @@
 package security
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"math/big"
 
 	"server/internal/utils"
@@ -94,4 +98,70 @@ func NewID() uuid.UUID {
 // FormatKey builds a namespaced Redis key: prefix + value.
 func FormatKey(prefix, value string) string {
 	return fmt.Sprintf("%s%s", prefix, value)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VAULT ENCRYPTION (AES-256-GCM)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// EncryptVaultValue encrypts a plain string into base64 encoded ciphertext and IV.
+func EncryptVaultValue(plainText, secretKey string) (cipherBase64, ivBase64 string, err error) {
+	keyBytes := []byte(secretKey)
+	if len(keyBytes) != 32 {
+		return "", "", fmt.Errorf("invalid vault secret key length, must be 32 bytes")
+	}
+
+	block, err := aes.NewCipher(keyBytes)
+	if err != nil {
+		return "", "", err
+	}
+
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", "", err
+	}
+
+	iv := make([]byte, gcm.NonceSize())
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return "", "", err
+	}
+
+	ciphertext := gcm.Seal(nil, iv, []byte(plainText), nil)
+
+	return base64.StdEncoding.EncodeToString(ciphertext), base64.StdEncoding.EncodeToString(iv), nil
+}
+
+// DecryptVaultValue decrypts base64 encoded ciphertext and IV back to plain text.
+func DecryptVaultValue(cipherBase64, ivBase64, secretKey string) (plainText string, err error) {
+	keyBytes := []byte(secretKey)
+	if len(keyBytes) != 32 {
+		return "", fmt.Errorf("invalid vault secret key length, must be 32 bytes")
+	}
+
+	ciphertext, err := base64.StdEncoding.DecodeString(cipherBase64)
+	if err != nil {
+		return "", err
+	}
+
+	iv, err := base64.StdEncoding.DecodeString(ivBase64)
+	if err != nil {
+		return "", err
+	}
+
+	block, err := aes.NewCipher(keyBytes)
+	if err != nil {
+		return "", err
+	}
+
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return "", err
+	}
+
+	plaintext, err := gcm.Open(nil, iv, ciphertext, nil)
+	if err != nil {
+		return "", err
+	}
+
+	return string(plaintext), nil
 }

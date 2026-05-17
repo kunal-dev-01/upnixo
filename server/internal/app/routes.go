@@ -29,6 +29,7 @@ func RegisterRoutes(app *fiber.App, d *Dependencies) {
 	registerProjectRoutes(v1, d)
 	registerMilestoneRoutes(v1, d)
 	registerChatRoutes(v1, d)
+	registerVaultRoutes(v1, d)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -196,4 +197,51 @@ func registerChatRoutes(r fiber.Router, d *Dependencies) {
 		},
 		websocket.New(d.WSHandler.Handle),
 	)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VAULT ROUTES (Protected)
+// ─────────────────────────────────────────────────────────────────────────────
+
+func registerVaultRoutes(r fiber.Router, d *Dependencies) {
+	// User routes (Read/Write access based on project participants)
+	vault := r.Group("/vault",
+		middleware.AuthRequired(d.JWT, d.SessionRepo),
+		d.Limiters.API,
+	)
+	
+	// Collections
+	vault.Post("/collections", d.VaultHandler.CreateCollection)
+	vault.Get("/collections/:id", d.VaultHandler.GetCollection)
+	vault.Get("/collections/project/:project_id", d.VaultHandler.ListCollectionsByProject)
+	vault.Patch("/collections/:id", d.VaultHandler.UpdateCollection)
+	vault.Delete("/collections/:id", d.VaultHandler.DeleteCollection)
+
+	// Items
+	vault.Post("/items", d.VaultHandler.CreateItem)
+	vault.Get("/items/:id", d.VaultHandler.GetItem)
+	vault.Get("/items/collection/:collection_id", d.VaultHandler.ListItemsByCollection)
+	vault.Patch("/items/:id", d.VaultHandler.UpdateItem)
+	vault.Delete("/items/:id", d.VaultHandler.DeleteItem)
+
+	// Admin routes (Full management power)
+	admin := r.Group("/auth/admin/vault",
+		middleware.AuthRequired(d.JWT, d.SessionRepo),
+		middleware.AdminRequired(),
+		d.Limiters.API,
+	)
+	
+	// Admin Collections
+	admin.Post("/collections", d.VaultHandler.CreateCollection)
+	admin.Get("/collections/:id", d.VaultHandler.GetCollection)
+	admin.Get("/collections/project/:project_id", d.VaultHandler.ListCollectionsByProject)
+	admin.Patch("/collections/:id", d.VaultHandler.UpdateCollection)
+	admin.Delete("/collections/:id", d.VaultHandler.DeleteCollection)
+
+	// Admin Items
+	admin.Post("/items", d.VaultHandler.CreateItem)
+	admin.Get("/items/:id", d.VaultHandler.GetItem)
+	admin.Get("/items/collection/:collection_id", d.VaultHandler.ListItemsByCollection)
+	admin.Patch("/items/:id", d.VaultHandler.UpdateItem)
+	admin.Delete("/items/:id", d.VaultHandler.DeleteItem)
 }
