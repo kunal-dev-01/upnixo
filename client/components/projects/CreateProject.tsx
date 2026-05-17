@@ -158,9 +158,19 @@ export default function CreateProject({
             </label>
             <input
               type="date"
+              min={new Date().toISOString().split("T")[0]}
               {...register("deadline_at")}
-              className="w-full px-5 py-2.5 font-semibold border-2 border-zinc-200 dark:border-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-4 focus:ring-indigo-600/10 dark:focus:ring-indigo-400/20 rounded-2xl outline-none transition-all duration-300 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 bg-transparent"
+              className={`w-full px-5 py-2.5 font-semibold border-2 outline-none transition-all duration-300 rounded-2xl bg-transparent ${
+                errors.deadline_at
+                  ? "border-red-500 focus:ring-red-500/10 focus:border-red-500 text-zinc-900 dark:text-zinc-100"
+                  : "border-zinc-200 dark:border-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-4 focus:ring-indigo-600/10 dark:focus:ring-indigo-400/20 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400"
+              }`}
             />
+            {errors.deadline_at && (
+              <span className="text-[13px] text-red-500 mt-0.5 ml-1 font-medium">
+                {errors.deadline_at.message}
+              </span>
+            )}
           </div>
 
           {/* Project Description Scope */}

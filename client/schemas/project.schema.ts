@@ -19,7 +19,17 @@ export const createProjectSchema = z.object({
     .int()
     .min(0, "Priority must be at least 0")
     .max(2, "Priority can be at most 2"),
-  deadline_at: z.string().optional().or(z.literal("")),
+  deadline_at: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine((val) => {
+      if (!val) return true;
+      const date = new Date(val);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return date >= today;
+    }, "Deadline cannot be in the past"),
 });
 
 export type CreateProjectSchema = z.infer<typeof createProjectSchema>;
