@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Check } from "@/svg/Common";
-import { Loader } from "@/common/Loader";
 
 interface Theme {
   id: string;
@@ -94,7 +93,6 @@ function ThemeCard({
           className={`
             absolute inset-0 
             ${theme.overlayColor} 
-            backdrop-blur-xs will-change-transform transform-gpu
             flex items-center justify-center
             transition-all duration-300 ease-out
             ${
@@ -106,9 +104,9 @@ function ThemeCard({
         >
           <div
             className={`
-              p-2 rounded-full bg-white dark:bg-zinc-900 shadow-xl border border-zinc-200 dark:border-zinc-800
-              transition-transform duration-500
-              ${isHovered || isSelected ? "rotate-0 scale-100" : "-rotate-12 scale-50"}
+              p-2 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800
+              transition-transform duration-200 ease-in-out
+              ${isHovered || isSelected ? "scale-100" : "scale-90"}
             `}
           >
             <Check
