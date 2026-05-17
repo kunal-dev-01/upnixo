@@ -41,19 +41,22 @@ export default function ConfirmModal({
 
   const variantConfig = {
     danger: {
-      borderLine: "bg-linear-to-r from-transparent via-red-500/50 to-transparent",
+      borderLine:
+        "bg-linear-to-r from-transparent via-red-500/50 to-transparent",
       iconBg: "bg-red-50 dark:bg-red-500/10 text-red-600",
       icon: <AlertCircle className="w-8 h-8" />,
       btnVariant: "delete" as const,
     },
     success: {
-      borderLine: "bg-linear-to-r from-transparent via-emerald-500/50 to-transparent",
+      borderLine:
+        "bg-linear-to-r from-transparent via-emerald-500/50 to-transparent",
       iconBg: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600",
       icon: <CircleCheck className="w-8 h-8" />,
       btnVariant: "save" as const,
     },
     default: {
-      borderLine: "bg-linear-to-r from-transparent via-indigo-500/50 to-transparent",
+      borderLine:
+        "bg-linear-to-r from-transparent via-indigo-500/50 to-transparent",
       iconBg: "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600",
       icon: <Projects className="w-8 h-8" />,
       btnVariant: "save" as const,
@@ -72,7 +75,7 @@ export default function ConfirmModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 dark:bg-zinc-950/80 bg-zinc-50/50 cursor-pointer backdrop-blur-xs"
+            className="absolute -inset-10 dark:bg-zinc-950/90 bg-zinc-50/70 cursor-pointer"
             onClick={() => !isPending && onClose()}
           />
 
@@ -85,7 +88,9 @@ export default function ConfirmModal({
             className={`relative z-10 w-full ${maxWidthClass} bg-white dark:bg-zinc-950 rounded-3xl border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8 shadow-2xl overflow-hidden transform-gpu will-change-transform max-h-[90vh] overflow-y-auto`}
           >
             {/* Top Border Glow Accent */}
-            <div className={`absolute top-0 left-0 w-full h-1 ${config.borderLine}`} />
+            <div
+              className={`absolute top-0 left-0 w-full h-1 ${config.borderLine}`}
+            />
 
             {/* Header Content */}
             <div className="flex flex-col items-center text-center space-y-4 mb-6">
