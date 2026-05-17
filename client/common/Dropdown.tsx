@@ -58,7 +58,7 @@ const Dropdown = ({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={`
-          w-full flex items-center justify-between p-3 border rounded-2xl 
+          w-full flex items-center justify-between px-5 py-2.5 border-2 rounded-2xl 
           transition-all duration-300 outline-none group
           ${
             isOpen

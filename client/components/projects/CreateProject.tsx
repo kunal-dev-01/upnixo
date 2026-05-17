@@ -12,7 +12,7 @@ import Dropdown from "@/common/Dropdown";
 import VariantButton from "@/common/VariantButton";
 import ConfirmModal from "@/common/ConfirmModal";
 import { ArrowLeft } from "@/svg/Common";
-import { Projects, Wallet, Bolt } from "@/svg/More";
+import { Wallet, Bolt } from "@/svg/More";
 import { AlertCircle } from "@/svg/Extra";
 import { formatCurrency } from "@/utils/formats";
 
@@ -51,8 +51,6 @@ export default function CreateProject({
   const selectedCurrency = watch("currency");
   const selectedPriority = watch("priority");
 
-
-
   // Triggers review modal on successful validation
   const onSubmit = (data: CreateProjectSchema) => {
     setFormData(data);
@@ -80,7 +78,7 @@ export default function CreateProject({
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-2">
+    <div className="w-full mx-auto p-2 fade-in">
       {/* Back navigation & page title */}
       <div className="flex items-center gap-4 mb-8">
         <button
@@ -103,7 +101,7 @@ export default function CreateProject({
       {/* Main Creation Form */}
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full p-6 sm:p-8 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-3xl flex flex-col gap-6 shadow-xs"
+        className="w-full p-6 sm:p-8 bg-white dark:bg-zinc-950 border border-zinc-200/90 dark:border-zinc-900 rounded-3xl flex flex-col gap-6"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Project Title */}
@@ -114,6 +112,7 @@ export default function CreateProject({
               placeholder="e.g., Build Cryptographic Key Vault UI"
               register={register}
               error={errors.title?.message}
+              rounded="rounded-2xl"
             />
           </div>
 
@@ -126,6 +125,7 @@ export default function CreateProject({
               placeholder="e.g., 2500"
               register={register}
               error={errors.budget?.message}
+              rounded="rounded-2xl"
             />
           </div>
 
@@ -170,7 +170,7 @@ export default function CreateProject({
             <input
               type="date"
               {...register("deadline_at")}
-              className="w-full px-5 py-2.5 text-sm font-semibold border-2 border-zinc-200 dark:border-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-zinc-800 dark:focus:border-white focus:ring-4 focus:ring-zinc-800/5 dark:focus:ring-white/10 rounded-full outline-none transition-all duration-300 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 bg-transparent"
+              className="w-full px-5 py-2.5 text-sm font-semibold border-2 border-zinc-200 dark:border-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-4 focus:ring-indigo-600/10 dark:focus:ring-indigo-400/20 rounded-2xl outline-none transition-all duration-300 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 bg-transparent"
             />
           </div>
 
@@ -188,11 +188,11 @@ export default function CreateProject({
               {...register("description")}
               rows={4}
               className={`
-                w-full px-5 py-3.5 text-sm font-semibold border-2 outline-none transition-all duration-300 focus:ring-4 rounded-3xl
+                w-full px-5 py-3.5 text-sm font-semibold border-2 outline-none transition-all duration-300 focus:ring-4 rounded-2xl resize-none
                 ${
                   errors.description
                     ? "border-red-500 focus:ring-red-500/10 focus:border-red-500"
-                    : "border-zinc-200 dark:border-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-zinc-800 dark:focus:border-white focus:ring-zinc-800/5 dark:focus:ring-white/10"
+                    : "border-zinc-200 dark:border-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-indigo-600 dark:focus:border-indigo-400 focus:ring-indigo-600/10 dark:focus:ring-indigo-400/20"
                 }
                 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 bg-transparent
               `}
@@ -205,8 +205,14 @@ export default function CreateProject({
           </div>
         </div>
 
-        {/* Action Button */}
-        <div className="w-full mt-4">
+        {/* Action Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full mt-4">
+          <VariantButton
+            label="Cancel"
+            variant="default"
+            type="button"
+            onClick={onBack}
+          />
           <VariantButton
             label="Launch Workspace"
             variant="save"
@@ -289,8 +295,8 @@ export default function CreateProject({
             <div className="flex gap-2 p-3 bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border border-amber-200/30 rounded-2xl text-[11px] font-semibold leading-relaxed mb-6 text-left">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>
-                Confirming this setup will register the project workspace
-                and prepare the escrow contract securely.
+                Confirming this setup will register the project workspace and
+                prepare the escrow contract securely.
               </span>
             </div>
           </>

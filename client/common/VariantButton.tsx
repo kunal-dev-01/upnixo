@@ -52,7 +52,7 @@ const VariantButton = ({
         whileTap={!isDisabled ? { scale: 0.98 } : {}}
         disabled={isDisabled}
         className={`
-          relative px-6 py-2 rounded-2xl border border-zinc-300/40 dark:border-zinc-700/40 w-full
+          relative px-6 py-2 rounded-2xl border border-zinc-300 dark:border-zinc-700/40 w-full
           bg-white dark:bg-zinc-950 font-bold text-base tracking-tight
           flex items-center justify-center overflow-hidden z-20
           transition-all duration-300

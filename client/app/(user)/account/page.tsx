@@ -79,7 +79,7 @@ function Account() {
         {/* LEFT COLUMN: Profile, Personal Details, Security */}
         <div className="space-y-4 lg:space-y-6">
           {/* Profile Card */}
-          <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 space-y-4">
+          <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800  space-y-4">
             <SubHeading
               title="Profile"
               description="View and edit your profile"
@@ -91,7 +91,7 @@ function Account() {
           </div>
 
           {/* Personal Details Card */}
-          <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 space-y-4">
+          <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800  space-y-4">
             <SubHeading
               title="Personal Details"
               description="Manage your personal information and contact details"
@@ -103,7 +103,7 @@ function Account() {
           </div>
 
           {/* Security Card */}
-          <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 space-y-4">
+          <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800  space-y-4">
             <SubHeading
               title="Security & Auth"
               description="Manage your password and two-factor authentication"
@@ -118,7 +118,7 @@ function Account() {
         {/* RIGHT COLUMN: Notifications, Preferences, Sessions */}
         <div className="lg:col-span-2 space-y-4 lg:space-y-6">
           {/* Notifications Card */}
-          <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 space-y-4">
+          <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800  space-y-4">
             <SubHeading
               title="Notifications"
               description="Manage your notification preferences"
@@ -130,7 +130,7 @@ function Account() {
           </div>
 
           {/* Preferences Card */}
-          <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 space-y-4">
+          <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800  space-y-4">
             <SubHeading
               title="Preferences"
               description="Manage your themes and platform experience"
@@ -142,7 +142,7 @@ function Account() {
           </div>
 
           {/* Sessions Card */}
-          <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 space-y-4">
+          <div className="p-6 rounded-3xl border border-zinc-200 dark:border-zinc-800 space-y-4">
             <SubHeading
               title="Active Sessions"
               description="Manage and track your logged-in devices"
