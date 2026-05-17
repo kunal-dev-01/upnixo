@@ -2,6 +2,8 @@
 # Description: Upnixo Docker Compose Development Configuration
 # ===================================================================
 
+name: upnixo-db
+
 services:
   db:
     image: postgres:16

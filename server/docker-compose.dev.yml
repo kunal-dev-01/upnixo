@@ -1,3 +1,5 @@
+name: upnixo-server
+
 services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
