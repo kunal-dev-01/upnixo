@@ -73,7 +73,8 @@ export default function ProjectList({ onCreateClick }: ProjectListProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            transition={{ duration: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-5"
           >
             {projects.map((project: Project, idx: number) => (
               <ProjectCard key={project.id} project={project} idx={idx} />
