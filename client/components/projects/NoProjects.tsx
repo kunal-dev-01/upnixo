@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import VariantButton from "@/common/VariantButton";
 import { Projects } from "@/svg/More";
+import { Plus } from "@/svg/Extra";
+import MonoButton from "@/common/MonoButton";
 
 interface NoProjectsProps {
   onClick?: () => void;
@@ -31,12 +32,11 @@ export default function NoProjects({ onClick }: NoProjectsProps) {
         diye gaye button se pehla project create karein!
       </p>
 
-      <div className="w-full max-w-xs">
-        <VariantButton
-          label="Create Project"
-          variant="save"
-          onClick={onClick}
-        />
+      <div className="w-full md:w-fit">
+        <MonoButton onClick={onClick}>
+          <Plus className="w-5 h-5" />
+          Create Project
+        </MonoButton>
       </div>
     </motion.div>
   );

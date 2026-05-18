@@ -41,21 +41,23 @@ export default function ProjectList({ onCreateClick }: ProjectListProps) {
         />
 
         {/* Dynamic Status Dropdown Filter & Actions */}
-        <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
-          <div className="w-full sm:w-56">
-            <Dropdown
-              label=""
-              options={statusOptions}
-              value={status}
-              onChange={(val) => setStatus(val)}
-              placeholder="Select Status"
-            />
+        {projects.length > 0 && (
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
+            <div className="w-full sm:w-56">
+              <Dropdown
+                label=""
+                options={statusOptions}
+                value={status}
+                onChange={(val) => setStatus(val)}
+                placeholder="Select Status"
+              />
+            </div>
+            <MonoButton onClick={onCreateClick} className="w-full sm:w-auto">
+              <X className="w-4 h-4 rotate-45" />
+              Create Project
+            </MonoButton>
           </div>
-          <MonoButton onClick={onCreateClick} className="w-full sm:w-auto">
-            <X className="w-4 h-4 rotate-45" />
-            Create Project
-          </MonoButton>
-        </div>
+        )}
       </div>
 
       {/* Main Content Area */}
