@@ -9,7 +9,7 @@ import { STATUS_CONFIG } from "@/utils/constants";
 import { Credits, Pen } from "@/svg/Auth";
 import { Bolt, Github, Projects } from "@/svg/More";
 import { Calendar } from "@/svg/Extra";
-import IconButton from "@/common/IconButton";
+import { useRouter } from "next/navigation";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COMPONENT
@@ -17,19 +17,13 @@ import IconButton from "@/common/IconButton";
 interface ProjectCardProps {
   project: Project;
   onStatusChangeTrigger: (project: Project) => void;
-  onUpdateTrigger: (project: Project) => void;
   onDeleteTrigger: (project: Project) => void;
-  onSeeTrigger: (project: Project) => void;
 }
 
 const ProjectCard = memo(
-  ({
-    project,
-    onStatusChangeTrigger,
-    onUpdateTrigger,
-    onDeleteTrigger,
-    onSeeTrigger,
-  }: ProjectCardProps) => {
+  ({ project, onStatusChangeTrigger, onDeleteTrigger }: ProjectCardProps) => {
+    const router = useRouter();
+
     const handleCopySlug = () => {
       navigator.clipboard.writeText(project.slug);
       toast.success("Project slug copied!");
@@ -39,7 +33,7 @@ const ProjectCard = memo(
       {
         label: "See Project",
         icon: EyeOpen,
-        onClick: () => onSeeTrigger(project),
+        onClick: () => router.push(`/projects/${project.slug}`),
         variant: "default",
       },
       ...(project.repository_url
@@ -56,7 +50,7 @@ const ProjectCard = memo(
       {
         label: "Update Details",
         icon: Pen,
-        onClick: () => onUpdateTrigger(project),
+        onClick: () => router.push(`/projects/${project.slug}`),
         variant: "default",
       },
       {

@@ -92,7 +92,6 @@ export const STATUS_CONFIG: Record<
 };
 
 export const statusOptions = [
-  { label: "All Statuses", value: "" },
   { label: "Draft", value: "draft" },
   { label: "Active", value: "active" },
   { label: "In Review", value: "in_review" },
