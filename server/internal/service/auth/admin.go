@@ -59,9 +59,9 @@ func (s *AdminService) Login(ctx context.Context, req dto.AdminLoginRequest) err
 	}
 
 	// 4. Verify Master Secret Key
-	// Assuming master key is stored as a hash or plain text? 
+	// Assuming master key is stored as a hash or plain text?
 	// User said "email password and master key se ye hnn".
-	// Models show MasterSecretKey field. Let's assume it's a plain string comparison for now 
+	// Models show MasterSecretKey field. Let's assume it's a plain string comparison for now
 	// or another bcrypt hash. Given the context, let's treat it as a secondary password.
 	if admin.MasterSecretKey != req.MasterSecretKey {
 		return utils.Unauthorized("invalid master secret key")
@@ -116,7 +116,7 @@ func (s *AdminService) ForgotPassword(ctx context.Context, email string) error {
 	}
 
 	token, _ := security.GenerateToken(32)
-	if err := s.tokenRepo.StoreAdminPasswordResetToken(ctx, email, token, 1*time.Hour); err != nil {
+	if err := s.tokenRepo.StoreAdminPasswordResetToken(ctx, email, token, 5*time.Minute); err != nil {
 		return err
 	}
 
@@ -158,7 +158,7 @@ func (s *AdminService) ForgotMasterKey(ctx context.Context, email, phone string)
 	}
 
 	token, _ := security.GenerateToken(32)
-	if err := s.tokenRepo.StoreAdminMasterKeyResetToken(ctx, email, token, 1*time.Hour); err != nil {
+	if err := s.tokenRepo.StoreAdminMasterKeyResetToken(ctx, email, token, 3*time.Minute); err != nil {
 		return err
 	}
 
