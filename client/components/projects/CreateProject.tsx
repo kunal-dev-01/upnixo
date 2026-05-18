@@ -65,7 +65,7 @@ export default function CreateProject({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto fade-in pb-10">
+    <div className="w-full fade-in pb-10 relative">
       {/* Page Heading */}
       <Heading
         title="Launch New Project"
@@ -75,7 +75,7 @@ export default function CreateProject({
       {/* Timeline/Stepper Form */}
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="relative mt-10 ml-2 md:ml-4"
+        className="relative mt-10 ml-2 md:ml-4 max-w-4xl"
       >
         {/* Left connecting line */}
         <div className="absolute left-[11px] top-2 bottom-8 w-[2px] bg-zinc-200 dark:bg-zinc-800 rounded-full" />
@@ -103,7 +103,7 @@ export default function CreateProject({
                 placeholder="e.g., Build Cryptographic Key Vault UI"
                 register={register}
                 error={errors.title?.message}
-                rounded="rounded-xl"
+                rounded="rounded-2xl"
               />
             </div>
 
@@ -116,7 +116,7 @@ export default function CreateProject({
                 placeholder="e.g., 2500"
                 register={register}
                 error={errors.budget?.message}
-                rounded="rounded-xl"
+                rounded="rounded-2xl"
               />
             </div>
 
@@ -162,10 +162,10 @@ export default function CreateProject({
                 type="date"
                 min={new Date().toISOString().split("T")[0]}
                 {...register("deadline_at")}
-                className={`w-full px-4 py-2.5 text-sm font-semibold border outline-none transition-all duration-200 rounded-xl bg-transparent ${
+                className={`w-full px-4 py-2.5 text-sm font-semibold border-2 outline-none transition-all duration-200 rounded-2xl bg-transparent ${
                   errors.deadline_at
                     ? "border-red-500 focus:ring-4 focus:ring-red-500/10 focus:border-red-500 text-zinc-900 dark:text-zinc-100"
-                    : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-indigo-600 dark:focus:border-indigo-500 focus:ring-4 focus:ring-indigo-600/10 dark:focus:ring-indigo-500/20 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400"
+                    : "border-zinc-200 dark:border-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-indigo-600 dark:focus:border-indigo-500 focus:ring-4 focus:ring-indigo-600/10 dark:focus:ring-indigo-500/20 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400"
                 }`}
               />
               {errors.deadline_at && (
@@ -198,11 +198,11 @@ export default function CreateProject({
               {...register("description")}
               rows={5}
               className={`
-                w-full px-4 py-3.5 text-sm font-medium border outline-none transition-all duration-200 focus:ring-4 rounded-xl resize-none
+                w-full px-4 py-3.5 text-sm font-medium border-2 outline-none transition-all duration-200 focus:ring-4 rounded-2xl resize-none
                 ${
                   errors.description
                     ? "border-red-500 focus:ring-red-500/10 focus:border-red-500"
-                    : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-indigo-600 dark:focus:border-indigo-500 focus:ring-indigo-600/10 dark:focus:ring-indigo-500/20"
+                    : "border-zinc-200 dark:border-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-indigo-600 dark:focus:border-indigo-500 focus:ring-indigo-600/10 dark:focus:ring-indigo-500/20"
                 }
                 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 bg-transparent
               `}
@@ -247,6 +247,8 @@ export default function CreateProject({
           </div>
         </div>
       </form>
+
+      <div className="absolute inset-0 -z-5 w-full h-full"></div>
     </div>
   );
 }

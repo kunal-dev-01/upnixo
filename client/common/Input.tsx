@@ -71,6 +71,11 @@ const Input = ({
             ${isPassword ? "pr-12" : ""} 
             ${styles.border} 
             ${styles.ring}
+            ${
+              type === "number"
+                ? "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                : ""
+            }
             text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 
             disabled:cursor-not-allowed disabled:bg-zinc-100 dark:disabled:bg-zinc-800 disabled:text-zinc-500 dark:disabled:text-zinc-600
           `}
