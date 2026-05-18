@@ -52,3 +52,12 @@ export interface ProjectFilters {
   page?: number;
   size?: number;
 }
+
+export interface PaginatedProjectsResponse {
+  success: boolean;
+  projects: Project[];
+  total: number;
+  page: number;
+  size: number;
+}
+

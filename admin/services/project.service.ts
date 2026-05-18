@@ -8,9 +8,18 @@ import type {
   Project,
   AdminUpdateProjectPayload,
   ProjectFilters,
+  PaginatedProjectsResponse,
 } from "@/types/project.types";
 
 export const projectService = {
+  listAll: async (filters?: ProjectFilters): Promise<PaginatedProjectsResponse> => {
+    const { data } = await apiClient.get<PaginatedProjectsResponse>(
+      "/auth/admin/projects",
+      { params: filters }
+    );
+    return data;
+  },
+
   listByClient: async (filters?: ProjectFilters): Promise<Project[]> => {
     const { data } = await apiClient.get<BackendSuccessResponse<Project[]>>(
       "/projects",

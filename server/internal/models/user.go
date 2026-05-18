@@ -105,6 +105,9 @@ type SafeUser struct {
 	Timezone         string           `json:"timezone"`
 	Locale           string           `json:"locale"`
 	IsActive         bool             `json:"is_active"`
+	IsBlocked        bool             `json:"is_blocked"`
+	BlockedAt        *time.Time       `json:"blocked_at,omitempty"`
+	BlockedReason    *string          `json:"blocked_reason,omitempty"`
 	TwoFactorEnabled bool             `json:"two_factor_enabled"`
 	Preferences      *SafePreferences `json:"preferences,omitempty"`
 	LastLoginAt      *time.Time       `json:"last_login_at,omitempty"`
@@ -122,6 +125,7 @@ func (u *User) ToSafe(prefs *UserPreferences) SafeUser {
 		Timezone:         u.Timezone,
 		Locale:           u.Locale,
 		IsActive:         u.IsActive,
+		IsBlocked:        u.IsBlocked,
 		TwoFactorEnabled: u.TwoFactorEnabled,
 		CreatedAt:        u.CreatedAt,
 		UpdatedAt:        u.UpdatedAt,
@@ -143,6 +147,13 @@ func (u *User) ToSafe(prefs *UserPreferences) SafeUser {
 	if u.LastLoginAt.Valid {
 		t := u.LastLoginAt.Time
 		s.LastLoginAt = &t
+	}
+	if u.BlockedAt.Valid {
+		t := u.BlockedAt.Time
+		s.BlockedAt = &t
+	}
+	if u.BlockedReason.Valid {
+		s.BlockedReason = &u.BlockedReason.String
 	}
 
 	return s

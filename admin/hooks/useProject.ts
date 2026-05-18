@@ -17,6 +17,8 @@ export const projectKeys = {
     [...projectKeys.lists(), "client", filters] as const,
   listFreelancer: (filters?: ProjectFilters) =>
     [...projectKeys.lists(), "freelancer", filters] as const,
+  listAdmin: (filters?: ProjectFilters) =>
+    [...projectKeys.lists(), "admin", filters] as const,
   details: () => [...projectKeys.all, "detail"] as const,
   detail: (identifier: string) => [...projectKeys.details(), identifier] as const,
 };
@@ -161,5 +163,27 @@ export function useDeleteProject() {
     isError: mutation.isError,
     error: mutation.error as ApiError | null,
     reset: mutation.reset,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LIST ALL PROJECTS (ADMIN ONLY)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function useAdminProjects(filters?: ProjectFilters) {
+  const query = useQuery({
+    queryKey: projectKeys.listAdmin(filters),
+    queryFn: () => projectService.listAll(filters),
+    placeholderData: (previousData) => previousData,
+    staleTime: 30 * 1000, // 30 seconds
+  });
+
+  return {
+    data: query.data,
+    isPending: query.isPending,
+    isSuccess: query.isSuccess,
+    isError: query.isError,
+    error: query.error as ApiError | null,
+    refetch: query.refetch,
   };
 }
