@@ -55,13 +55,9 @@ function Footer() {
       <div className="w-full lg:px-10 px-5 flex flex-col md:flex-row justify-between gap-10">
         {/* Section 1: Brand */}
         <div className="flex flex-col gap-y-4">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-            Performance Obsessed
-          </h2>
-
           <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-xs">
-            Building fast, scalable, and modern web experiences with
-            precision-crafted engineering.
+            Precision-engineered backends. Zero compromises on performance,
+            security, or scale.
           </p>
         </div>
 
