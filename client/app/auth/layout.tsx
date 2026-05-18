@@ -2,12 +2,7 @@
 
 import React from "react";
 import BackButton from "@/common/BackButton";
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-  useMotionTemplate,
-} from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -15,22 +10,30 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
   const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(200);
+  const mouseY = useMotionValue(0);
 
   const springConfig = { damping: 25, stiffness: 150, mass: 0.5 };
   const smoothX = useSpring(mouseX, springConfig);
   const smoothY = useSpring(mouseY, springConfig);
-
-  const maskImage = useMotionTemplate`radial-gradient(350px circle at ${smoothX}px ${smoothY}px, black, transparent)`;
 
   function handleMouseMove({
     currentTarget,
     clientX,
     clientY,
   }: React.MouseEvent) {
+    if (window.innerWidth < 768) return;
+
     const { left, top } = currentTarget.getBoundingClientRect();
-    mouseX.set(clientX - left);
-    mouseY.set(clientY - top);
+
+    const gradient = currentTarget.querySelector("#gradient-tracker");
+    if (gradient) {
+      const { width: gW, height: gH } = gradient.getBoundingClientRect();
+      mouseX.set(clientX - left - gW / 2);
+      mouseY.set(clientY - top - gH / 2);
+    } else {
+      mouseX.set(clientX - left);
+      mouseY.set(clientY - top);
+    }
   }
 
   return (
@@ -56,54 +59,27 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         onMouseMove={handleMouseMove}
         className="hidden lg:block relative border-l border-zinc-100 dark:border-zinc-900 bg-zinc-50/20 dark:bg-zinc-950/20 overflow-hidden"
       >
-        <svg
-          className="absolute inset-0 h-full w-full stroke-zinc-50 dark:stroke-zinc-900/10"
-          fill="none"
+        <div
+          id="hover-effect"
+          className="absolute inset-0 w-full min-h-screen -z-10 pointer-events-none transition-all duration-500"
         >
-          <defs>
-            <pattern
-              id="grid-base"
-              width="50"
-              height="50"
-              patternUnits="userSpaceOnUse"
-              x="-1"
-              y="-1"
-            >
-              <path d="M50 0H0V50" strokeWidth="1" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid-base)" />
-        </svg>
+          <motion.div
+            id="gradient-tracker"
+            style={{ x: smoothX, y: smoothY }}
+            className="hidden md:block absolute top-0 left-0 w-[300px] h-[300px] rounded-full bg-indigo-600 blur-[50px] -z-20"
+          />
 
-        <motion.div
-          className="absolute inset-0 pointer-events-none opacity-100"
-          style={{
-            maskImage: maskImage,
-            WebkitMaskImage: maskImage,
-          }}
-        >
-          <svg className="h-full w-full stroke-indigo-500" fill="none">
-            <defs>
-              <pattern
-                id="grid-high"
-                width="50"
-                height="50"
-                patternUnits="userSpaceOnUse"
-                x="-1"
-                y="-1"
-              >
-                <path d="M50 0H0V50" strokeWidth="1.5" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid-high)" />
-          </svg>
-          <div className="absolute inset-0 bg-indigo-500/5" />
-        </motion.div>
+          <img
+            src="/pattern.svg"
+            alt="pattern"
+            className="w-full h-full object-cover -z-10"
+          />
+        </div>
 
         {/* Branding Text */}
         <div className="absolute inset-0 flex flex-col items-center justify-end pointer-events-none">
           <div className="-z-10 flex items-center justify-center opacity-[0.03] pb-4">
-            <div className="w-[130px] flex items-cente">
+            <div className="w-[13vh] flex items-cente">
               <svg
                 viewBox="0 0 629 934"
                 fill="none"
@@ -125,7 +101,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               </svg>
             </div>
 
-            <h1 className="text-[210px] leading-none font-black tracking-tighter capitalize">
+            <h1 className="text-[20vh] leading-none font-black tracking-tighter capitalize">
               pnixo
             </h1>
           </div>
