@@ -113,13 +113,14 @@ export default function LoginForm({ isLoading, onBack }: LoginFormProps) {
               </div>
             </div>
 
-            <MonoButton
-              type="button"
-              onClick={() => router.push("/auth/resend-verification-email")}
-              className="px-4 py-2 text-[12px] h-9"
-            >
-              Resend
-            </MonoButton>
+            <div className="w-fit">
+              <MonoButton
+                type="button"
+                onClick={() => router.push("/auth/resend-verification-email")}
+              >
+                Resend
+              </MonoButton>
+            </div>
           </div>
 
           <p className="text-sm text-center text-zinc-500 dark:text-zinc-400">

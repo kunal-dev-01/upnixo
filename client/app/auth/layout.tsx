@@ -24,62 +24,58 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
     if (window.innerWidth < 768) return;
 
     const { left, top } = currentTarget.getBoundingClientRect();
-
-    const gradient = currentTarget.querySelector("#gradient-tracker");
-    if (gradient) {
-      const { width: gW, height: gH } = gradient.getBoundingClientRect();
-      mouseX.set(clientX - left - gW / 2);
-      mouseY.set(clientY - top - gH / 2);
-    } else {
-      mouseX.set(clientX - left);
-      mouseY.set(clientY - top);
-    }
+    mouseX.set(clientX - left - 150);
+    mouseY.set(clientY - top - 150);
   }
 
   return (
     <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-2">
       {/* --- Left Side: Content --- */}
-      <div className="flex flex-col p-6 sm:p-12 relative z-10">
+      <div className="relative z-10 flex flex-col p-6 sm:p-12">
+        {/* Back Button Wrapper */}
         <div className="w-full">
           <div className="relative group inline-block">
             <div className="relative z-10 transition-transform duration-400 group-hover:-translate-y-1">
               <BackButton />
             </div>
+            {/* Hover Glow Effect */}
             <div className="hidden lg:block absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-indigo-600 rounded-full opacity-0 blur-xl transition-all duration-700 ease-out group-hover:opacity-100 group-hover:scale-[15] -z-10 pointer-events-none" />
           </div>
         </div>
 
+        {/* Dynamic Form Content */}
         <div className="flex-1 flex items-center justify-center py-10">
           <div className="w-full max-w-md">{children}</div>
         </div>
       </div>
 
-      {/* --- Right Side --- */}
+      {/* --- Right Side: Visuals --- */}
       <div
         onMouseMove={handleMouseMove}
-        className="hidden lg:block relative border-l border-zinc-100 dark:border-zinc-900 bg-zinc-50/20 dark:bg-zinc-950/20 overflow-hidden"
+        className="hidden lg:block relative overflow-hidden border-l border-zinc-100 dark:border-zinc-900 bg-zinc-50/20 dark:bg-zinc-950/20"
       >
         <div
           id="hover-effect"
-          className="absolute inset-0 w-full min-h-screen -z-10 pointer-events-none transition-all duration-500"
+          className="absolute inset-0 w-full min-h-screen pointer-events-none transition-all duration-500"
         >
+          {/* Interactive Gradient Tracker */}
           <motion.div
-            id="gradient-tracker"
             style={{ x: smoothX, y: smoothY }}
-            className="hidden md:block absolute top-0 left-0 w-[300px] h-[300px] rounded-full bg-indigo-600 blur-[50px] -z-20"
+            className="hidden md:block absolute top-0 left-0 w-[300px] h-[300px] rounded-full bg-indigo-600 blur-[50px] opacity-80"
           />
 
+          {/* Background SVG Pattern */}
           <img
             src="/pattern.svg"
             alt="pattern"
-            className="w-full h-full object-cover -z-10"
+            className="absolute inset-0 w-full h-full object-cover opacity-100 mix-blend-normal"
           />
         </div>
 
-        {/* Branding Text */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end pointer-events-none">
-          <div className="-z-10 flex items-center justify-center opacity-[0.03] pb-4">
-            <div className="w-[13vh] flex items-cente">
+        {/* Branding Typography & Logo */}
+        <div className="absolute inset-0 flex flex-col items-center justify-end pointer-events-none pb-4 opacity-[0.03]">
+          <div className="flex items-center justify-center gap-4">
+            <div className="w-[13vh] flex items-center">
               <svg
                 viewBox="0 0 629 934"
                 fill="none"
@@ -101,7 +97,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
               </svg>
             </div>
 
-            <h1 className="text-[20vh] leading-none font-black tracking-tighter capitalize">
+            <h1 className="text-[20vh] leading-none font-black tracking-tighter capitalize text-zinc-900 dark:text-white">
               pnixo
             </h1>
           </div>

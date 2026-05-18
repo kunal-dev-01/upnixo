@@ -12,7 +12,6 @@ import {
   useGoogleLogin,
   useGitHubLogin,
 } from "@/hooks/useAuth";
-import { motion } from "framer-motion";
 
 // Components
 import WithMail from "@/common/WithMail";
@@ -91,42 +90,20 @@ export default function RegisterPage() {
     );
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 },
-  };
-
   return (
     <div className="w-full max-w-md mx-auto">
       {step === "initial" && (
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
-          className="space-y-6"
-        >
-          <motion.div variants={itemVariants} className="space-y-2 text-center">
+        <div className="space-y-6 fade-in">
+          <div className="space-y-2 text-center">
             <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight">
               Get Started
             </h1>
             <p className="text-zinc-500 dark:text-zinc-400">
               Choose your preferred way to register
             </p>
-          </motion.div>
+          </div>
 
-          <motion.div variants={itemVariants} className="space-y-4 pt-4">
+          <div className="space-y-4 pt-4">
             <WithMail onClick={() => setStep("form")} />
             <IconButton
               Icon={User}
@@ -154,8 +131,8 @@ export default function RegisterPage() {
                 onClick={() => githubLogin()}
               />
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
 
       {step === "form" && (
