@@ -33,3 +33,24 @@ export const createProjectSchema = z.object({
 });
 
 export type CreateProjectSchema = z.infer<typeof createProjectSchema>;
+
+export const updateProjectSchema = z.object({
+  title: z
+    .string()
+    .min(3, "Title must be at least 3 characters")
+    .max(200, "Title must be at most 200 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  priority: z
+    .number()
+    .int()
+    .min(0, "Priority must be at least 0")
+    .max(2, "Priority can be at most 2"),
+  repository_url: z
+    .string()
+    .url("Repository URL must be a valid URL")
+    .optional()
+    .or(z.literal("")),
+});
+
+export type UpdateProjectSchema = z.infer<typeof updateProjectSchema>;
+

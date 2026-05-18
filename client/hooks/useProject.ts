@@ -94,7 +94,7 @@ export function useProjectBySlug(slug: string) {
 // UPDATE PROJECT
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function useUpdateProject(slug: string) {
+export function useUpdateProject(slug?: string) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -106,7 +106,10 @@ export function useUpdateProject(slug: string) {
       payload: ClientUpdateProjectPayload;
     }) => projectService.update(id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: projectKeys.detail(slug) });
+      if (slug) {
+        queryClient.invalidateQueries({ queryKey: projectKeys.detail(slug) });
+      }
+      queryClient.invalidateQueries({ queryKey: projectKeys.details() });
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
     },
   });

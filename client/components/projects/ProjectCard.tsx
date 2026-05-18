@@ -26,7 +26,7 @@ export default function ProjectCard({
       label: "Update Project",
       icon: Edit,
       onClick: () => {
-        router.push(`/projects/update?id=${project.id}`);
+        router.push(`/projects/update?slug=${project.slug}`);
       },
     },
     {
