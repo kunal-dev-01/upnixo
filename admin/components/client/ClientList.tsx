@@ -12,7 +12,7 @@ import Input from "@/common/Input";
 import Dropdown from "@/common/Dropdown";
 import SubHeading from "@/common/SubHeading";
 import { blockUserSchema, BlockUserSchema } from "@/schemas/user.schema";
-import { ArrowLeft } from "@/svg/Common";
+import { ArrowLeft, Error } from "@/svg/Common";
 import { UserPlus } from "@/svg/Auth";
 import MonoButton from "@/common/MonoButton";
 
@@ -150,21 +150,9 @@ function ClientList() {
           ))}
         </div>
       ) : isError ? (
-        <div className="w-full py-16 flex flex-col items-center justify-center text-center space-y-4 border border-zinc-900 rounded-2xl bg-zinc-950/50 shadow-none">
-          <div className="p-4 rounded-full bg-red-500/10 text-red-500 border border-red-500/20">
-            <svg
-              className="w-8 h-8"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
+        <div className="w-full py-16 flex flex-col items-center justify-center text-center space-y-4 border border-zinc-900 rounded-2xl bg-zinc-950/50">
+          <div className="p-4 rounded-3xl bg-red-500/10 text-red-500 border border-red-500/20">
+            <Error className="w-8 h-8" />
           </div>
           <div>
             <h4 className="text-lg font-extrabold text-white">
@@ -186,7 +174,7 @@ function ClientList() {
           className="w-full py-20 flex flex-col items-center justify-center text-center space-y-4 bg-zinc-900/10 border border-dashed border-zinc-800 rounded-3xl"
         >
           <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-2xl">
-            <UserPlus />
+            <UserPlus className="w-8 h-8" />
           </div>
           <div className="space-y-1.5 px-6">
             <h4 className="text-lg font-extrabold text-white">
