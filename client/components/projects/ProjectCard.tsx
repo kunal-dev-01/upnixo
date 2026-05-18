@@ -2,9 +2,10 @@ import { motion } from "framer-motion";
 import type { Project } from "@/types/project.types";
 import { STATUS_CONFIG } from "@/utils/constants";
 import { Bolt, Wallet, Github } from "@/svg/More";
-import { Check, TriangleAlert, Edit } from "@/svg/Common";
+import { Check, TriangleAlert, Edit, EyeOpen } from "@/svg/Common";
 import { formatCurrency, formatDate } from "@/utils/formats";
 import MenuDropdown, { type MenuOption } from "@/common/MenuDropdown";
+import { useRouter } from "next/navigation";
 
 interface ProjectCardProps {
   project: Project;
@@ -12,20 +13,27 @@ interface ProjectCardProps {
   onUpdate?: (project: Project) => void;
 }
 
-export default function ProjectCard({ project, idx, onUpdate }: ProjectCardProps) {
+export default function ProjectCard({
+  project,
+  idx,
+  onUpdate,
+}: ProjectCardProps) {
+  const router = useRouter();
   const config = STATUS_CONFIG[project.status] || STATUS_CONFIG.draft;
 
-  // Context menu options configuration
   const dropdownOptions: MenuOption[] = [
     {
-      label: "Update Workspace",
+      label: "Update Project",
       icon: Edit,
       onClick: () => {
-        if (onUpdate) {
-          onUpdate(project);
-        } else {
-          console.log("Update workspace clicked for project:", project.id);
-        }
+        router.push(`/projects/update?id=${project.id}`);
+      },
+    },
+    {
+      label: "View Details",
+      icon: EyeOpen,
+      onClick: () => {
+        router.push(`/projects/details?slug=${project.slug}`);
       },
     },
   ];
@@ -43,10 +51,10 @@ export default function ProjectCard({ project, idx, onUpdate }: ProjectCardProps
         },
       }}
       transition={{ duration: 0.2, ease: "easeInOut" }}
-      className="relative p-6 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-3xl flex flex-col justify-between hover:border-zinc-200/80 dark:hover:border-zinc-800 transition-colors cursor-default group overflow-hidden"
+      className="relative p-6 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-3xl flex flex-col justify-between hover:border-zinc-200/80 dark:hover:border-zinc-800 transition-colors duration-500 ease-in-out cursor-default group overflow-hidden"
     >
       {/* Premium Top Subtle Accent Line on Hover */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-indigo-500/0 via-indigo-500/40 to-indigo-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-indigo-500/0 via-indigo-500/40 to-indigo-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out" />
 
       <div>
         {/* Header Row */}
