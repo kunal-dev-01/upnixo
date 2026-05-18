@@ -154,6 +154,7 @@ func registerProjectRoutes(r fiber.Router, d *Dependencies) {
 		middleware.AdminRequired(),
 		d.Limiters.API,
 	)
+	admin.Get("/", d.ProjectHandler.ListAll)
 	admin.Patch("/:id", d.ProjectHandler.AdminUpdate)
 	admin.Delete("/:id", d.ProjectHandler.Delete)
 }

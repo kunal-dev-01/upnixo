@@ -263,3 +263,54 @@ func (h *ProjectHandler) ListByFreelancer(c *fiber.Ctx) error {
 		"data":    res,
 	})
 }
+
+// ListAll returns a paginated list of all projects with status and priority filtering (admin only)
+// GET /api/v1/auth/admin/projects
+func (h *ProjectHandler) ListAll(c *fiber.Ctx) error {
+	var filter dto.ProjectFilter
+	var pag dto.PaginationQuery
+
+	if err := c.QueryParser(&filter); err != nil {
+		return utils.BadRequest("invalid filter parameters")
+	}
+	if err := c.QueryParser(&pag); err != nil {
+		return utils.BadRequest("invalid pagination parameters")
+	}
+
+	if err := utils.ValidateStructToAppError(&pag); err != nil {
+		return err
+	}
+
+	// Set default page/size if not specified or invalid
+	if pag.Page <= 0 {
+		pag.Page = 1
+	}
+	if pag.Size <= 0 {
+		pag.Size = 10
+	} else if pag.Size > 100 {
+		pag.Size = 100
+	}
+
+	projects, total, err := h.svc.ListAll(c.Context(), filter, pag)
+	if err != nil {
+		return err
+	}
+
+	var res []dto.ProjectResponse
+	for _, p := range projects {
+		res = append(res, dto.ProjectResponse{
+			SafeProject:  p.ToSafe(),
+			FreelancerID: p.FreelancerID,
+			ClientID:     p.ClientID,
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success":  true,
+		"projects": res,
+		"total":    total,
+		"page":     pag.Page,
+		"size":     pag.Size,
+	})
+}
+

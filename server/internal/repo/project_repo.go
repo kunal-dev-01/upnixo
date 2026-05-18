@@ -26,6 +26,7 @@ type ProjectRepository interface {
 	Delete(ctx context.Context, id uuid.UUID) error
 
 	List(ctx context.Context, params ListProjectsParams) ([]models.Project, error)
+	ListAll(ctx context.Context, params ListProjectsParams) ([]models.Project, int64, error)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -309,4 +310,72 @@ func (r *projectRepo) List(ctx context.Context, params ListProjectsParams) ([]mo
 	}
 
 	return projects, nil
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LIST ALL PROJECTS (ADMIN ONLY)
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (r *projectRepo) ListAll(ctx context.Context, params ListProjectsParams) ([]models.Project, int64, error) {
+	// Base query
+	selectSQL := `SELECT ` + projectColumns + ` FROM projects WHERE deleted_at IS NULL`
+	countSQL := `SELECT COUNT(*) FROM projects WHERE deleted_at IS NULL`
+
+	whereClause := ""
+	args := pgx.NamedArgs{}
+
+	if params.ClientID != nil {
+		whereClause += ` AND client_id = @client_id`
+		args["client_id"] = *params.ClientID
+	}
+	if params.FreelancerID != nil {
+		whereClause += ` AND freelancer_id = @freelancer_id`
+		args["freelancer_id"] = *params.FreelancerID
+	}
+	if params.Status != nil {
+		whereClause += ` AND status = @status`
+		args["status"] = *params.Status
+	}
+	if params.Priority != nil {
+		whereClause += ` AND priority = @priority`
+		args["priority"] = *params.Priority
+	}
+	if params.Currency != nil {
+		whereClause += ` AND currency = @currency`
+		args["currency"] = *params.Currency
+	}
+
+	// 1. Get total count
+	var total int64
+	err := db.Pool.QueryRow(ctx, countSQL+whereClause, args).Scan(&total)
+	if err != nil {
+		r.log.Error("list all projects count: query failed", err, args)
+		return nil, 0, utils.Internal(err)
+	}
+
+	// 2. Fetch records
+	finalSQL := selectSQL + whereClause + ` ORDER BY created_at DESC`
+	if params.Limit > 0 {
+		finalSQL += ` LIMIT @limit`
+		args["limit"] = params.Limit
+	}
+	if params.Offset > 0 {
+		finalSQL += ` OFFSET @offset`
+		args["offset"] = params.Offset
+	}
+
+	rows, err := db.Pool.Query(ctx, finalSQL, args)
+	if err != nil {
+		r.log.Error("list all projects: query failed", err, args)
+		return nil, 0, utils.Internal(err)
+	}
+	defer rows.Close()
+
+	projects, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Project])
+	if err != nil {
+		r.log.Error("list all projects: scan failed", err, args)
+		return nil, 0, utils.Internal(err)
+	}
+
+	return projects, total, nil
 }

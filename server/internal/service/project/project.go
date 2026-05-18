@@ -143,3 +143,16 @@ func (s *ProjectService) ListByFreelancer(ctx context.Context, freelancerID uuid
 	}
 	return s.repo.List(ctx, params)
 }
+
+// ListAll returns a filtered and paginated list of all projects and the total count (admin only)
+func (s *ProjectService) ListAll(ctx context.Context, filter dto.ProjectFilter, pag dto.PaginationQuery) ([]models.Project, int64, error) {
+	params := repo.ListProjectsParams{
+		Status:   filter.Status,
+		Priority: filter.Priority,
+		Currency: filter.Currency,
+		Limit:    pag.GetLimit(),
+		Offset:   pag.GetOffset(),
+	}
+	return s.repo.ListAll(ctx, params)
+}
+
