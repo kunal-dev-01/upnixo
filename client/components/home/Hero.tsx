@@ -1,5 +1,7 @@
 "use client";
 
+import { Shader, Blob, CursorRipples } from "shaders/react";
+
 export default function Hero() {
   const desktoplines = ["Your Codebase.Your Data.", "My Accountability."];
   const mobileLines = ["Your Codebase.", "Your Data.", "My Accountability."];
@@ -8,6 +10,8 @@ export default function Hero() {
 
   return (
     <div className="w-full lg:min-h-screen min-h-[70vh] relative overflow-hidden fade-in">
+      <Shader id="shader-background" width={512} height={512} shader={{}} />
+
       <div className="w-full lg:min-h-screen min-h-[70vh] flex flex-col items-center justify-center py-20 lg:px-10 px-5 relative z-10">
         <div className="text-center">
           {desktoplines.map((line) => (
@@ -43,8 +47,6 @@ export default function Hero() {
           <div className=""></div>
         </div>
       </div>
-
-      <div className="md:block lg:block hidden absolute bottom-0 w-full h-40 bg-linear-to-b from-transparent to-white dark:to-black" />
     </div>
   );
 }
