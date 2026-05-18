@@ -117,7 +117,7 @@ func Wire(cfg *config.Config, log *utils.Logger, redisClient *rds.Redis, brk *br
 	oAuthSvc := service.NewOAuthService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
 	loginSvc := service.NewLoginService(cfg, authRepo, tokenRepo, sessionRepo, jwt)
 	sessionSvc := service.NewSessionService(sessionRepo)
-	userSvc := userService.NewUserService(cfg, authRepo, qManager)
+	userSvc := userService.NewUserService(cfg, authRepo, sessionRepo, qManager)
 	projectSvc := projectService.NewProjectService(projectRepo, log)
 	milestoneSvc := projectService.NewMilestoneService(milestoneRepo, projectRepo, log)
 	mediaSvc := chatService.NewMediaService(cfg, r2Svc, qManager, log)

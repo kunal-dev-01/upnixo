@@ -47,6 +47,8 @@ type AuthRepository interface {
 
 	UpdateUser(ctx context.Context, id uuid.UUID, params UpdateUserParams) error
 	UpdatePreferences(ctx context.Context, userID uuid.UUID, params UpdatePreferencesParams) error
+	ListUsers(ctx context.Context, params ListUsersParams) ([]models.UserWithPrefs, int64, error)
+	BlockUser(ctx context.Context, id uuid.UUID, blocked bool, reason *string) error
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -101,6 +103,16 @@ type UpdatePreferencesParams struct {
 	Notifications    []byte
 	DefaultCurrency  *string
 	Language         *string
+}
+
+type ListUsersParams struct {
+	Search        string
+	Status        string
+	IsActive      *bool
+	IsBlocked     *bool
+	EmailVerified *bool
+	Limit         int
+	Offset        int
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -766,4 +778,134 @@ func (r *authRepo) GetOAuthAccountsByUserID(ctx context.Context, userID uuid.UUI
 	}
 
 	return accounts, nil
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LIST USERS (ADMIN ONLY)
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (r *authRepo) ListUsers(ctx context.Context, params ListUsersParams) ([]models.UserWithPrefs, int64, error) {
+	selectSQL := `SELECT ` + userWithPrefsColumns + userJoinPrefs + ` WHERE u.deleted_at IS NULL`
+	countSQL := `SELECT COUNT(*) FROM users u LEFT JOIN user_preferences p ON p.user_id = u.id WHERE u.deleted_at IS NULL`
+
+	whereClause := ""
+	args := pgx.NamedArgs{}
+
+	if params.Search != "" {
+		whereClause += ` AND (u.email ILIKE @search OR u.full_name ILIKE @search)`
+		args["search"] = "%" + params.Search + "%"
+	}
+
+	if params.IsActive != nil {
+		whereClause += ` AND u.is_active = @is_active`
+		args["is_active"] = *params.IsActive
+	}
+
+	if params.IsBlocked != nil {
+		whereClause += ` AND u.is_blocked = @is_blocked`
+		args["is_blocked"] = *params.IsBlocked
+	}
+
+	if params.EmailVerified != nil {
+		whereClause += ` AND u.email_verified = @email_verified`
+		args["email_verified"] = *params.EmailVerified
+	}
+
+	if params.Status != "" {
+		switch params.Status {
+		case "active":
+			whereClause += ` AND u.is_active = TRUE AND u.is_blocked = FALSE`
+		case "blocked":
+			whereClause += ` AND u.is_blocked = TRUE`
+		case "inactive":
+			whereClause += ` AND u.is_active = FALSE`
+		case "unverified":
+			whereClause += ` AND u.email_verified = FALSE`
+		}
+	}
+
+	// Calculate count first
+	var total int64
+	err := db.Pool.QueryRow(ctx, countSQL+whereClause, args).Scan(&total)
+	if err != nil {
+		r.log.Error("list users count: query failed", err, args)
+		return nil, 0, utils.Internal(err)
+	}
+
+	// Order, Limit, Offset
+	finalSQL := selectSQL + whereClause + ` ORDER BY u.created_at DESC`
+	if params.Limit > 0 {
+		finalSQL += ` LIMIT @limit`
+		args["limit"] = params.Limit
+	}
+	if params.Offset > 0 {
+		finalSQL += ` OFFSET @offset`
+		args["offset"] = params.Offset
+	}
+
+	rows, err := db.Pool.Query(ctx, finalSQL, args)
+	if err != nil {
+		r.log.Error("list users: query failed", err, args)
+		return nil, 0, utils.Internal(err)
+	}
+	defer rows.Close()
+
+	res, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.UserWithPrefs])
+	if err != nil {
+		r.log.Error("list users: scan failed", err, args)
+		return nil, 0, utils.Internal(err)
+	}
+
+	return res, total, nil
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BLOCK / UNBLOCK USER (ADMIN ONLY)
+// ─────────────────────────────────────────────────────────────────────────────
+
+func (r *authRepo) BlockUser(ctx context.Context, id uuid.UUID, blocked bool, reason *string) error {
+	var sql string
+	var args pgx.NamedArgs
+
+	if blocked {
+		sql = `
+			UPDATE users
+			SET is_blocked = TRUE,
+				blocked_at = NOW(),
+				blocked_reason = @reason,
+				updated_at = NOW()
+			WHERE id = @id AND deleted_at IS NULL`
+		
+		var reasonVal *string
+		if reason != nil && *reason != "" {
+			reasonVal = reason
+		}
+		args = pgx.NamedArgs{
+			"id":     id,
+			"reason": reasonVal,
+		}
+	} else {
+		sql = `
+			UPDATE users
+			SET is_blocked = FALSE,
+				blocked_at = NULL,
+				blocked_reason = NULL,
+				updated_at = NOW()
+			WHERE id = @id AND deleted_at IS NULL`
+		args = pgx.NamedArgs{
+			"id": id,
+		}
+	}
+
+	tag, err := db.Pool.Exec(ctx, sql, args)
+	if err != nil {
+		r.log.Error("block/unblock user: exec failed", err, map[string]any{"id": id, "blocked": blocked})
+		return utils.Internal(err)
+	}
+
+	if tag.RowsAffected() == 0 {
+		return utils.NotFound("user not found")
+	}
+
+	return nil
 }

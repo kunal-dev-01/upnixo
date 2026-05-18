@@ -88,6 +88,9 @@ func registerAdminRoutes(r fiber.Router, d *Dependencies) {
 	protected.Get("/sessions", d.AdminSessionHandler.GetSessions)
 	protected.Delete("/sessions/:id", d.AdminSessionHandler.RevokeSession)
 	protected.Post("/logout-all", d.AdminSessionHandler.RevokeAllSessions)
+	protected.Get("/users", d.UserHandler.ListUsers)
+	protected.Post("/users/:id/block", d.UserHandler.BlockUser)
+	protected.Post("/users/:id/unblock", d.UserHandler.UnblockUser)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

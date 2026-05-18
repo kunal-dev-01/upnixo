@@ -263,13 +263,14 @@ function Session() {
             </div>
           </div>
 
-          <VariantButton
-            variant="delete"
-            className="w-full sm:w-auto"
-            onClick={() => setShowConfirmModal("all")}
-            isLoading={logoutAll.isPending}
-            label="Logout All Devices"
-          />
+          <div className="w-fit">
+            <VariantButton
+              variant="delete"
+              onClick={() => setShowConfirmModal("all")}
+              isLoading={logoutAll.isPending}
+              label="Logout All Devices"
+            />
+          </div>
         </div>
       )}
 
